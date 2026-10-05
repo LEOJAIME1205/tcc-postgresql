@@ -1,0 +1,31 @@
+# Dados brutos volumosos — versionar apenas os processados
+resultados/brutos/**/*.csv
+resultados/brutos/**/*.jsonl
+resultados/brutos/**/*.parquet
+!resultados/brutos/**/.gitkeep
+
+# Corpus e embeddings — regenerados por script
+eixo-a-busca/dados/*
+!eixo-a-busca/dados/.gitkeep
+!eixo-a-busca/dados/README.md
+*.npy
+*.bin
+
+# Volumes de container
+**/volumes/
+**/pgdata/
+**/esdata/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Node
+node_modules/
+
+# Sistema
+.DS_Store
+*.log
