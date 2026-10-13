@@ -28,7 +28,7 @@ Todo benchmark comparativo conduzido por uma única pessoa carrega risco de otim
 
 Este trabalho trata esse risco de três formas:
 
-1. Toda escolha de configuração está registrada, com justificativa, em [`docs/decisoes-arquiteturais.md`](tcc-postgresql/docs/decisoes-arquiteturais.md).
+1. Toda escolha de configuração está registrada, com justificativa, em [`docs/decisoes-arquiteturais.md`](docs/decisoes-arquiteturais.md).
 2. Nenhum sistema recebe tuning customizado. Todos seguem as recomendações oficiais de seus próprios mantenedores, e os desvios estão documentados.
 3. O desenho experimental inclui deliberadamente os cenários em que a arquitetura consolidada é estruturalmente mais fraca — escrita sustentada, degradação temporal e interferência entre cargas.
 
@@ -50,7 +50,7 @@ resultados/        Dados brutos e processados das execuções
 
 O ambiente é orquestrado por Docker Compose, com limites fixos de CPU e memória e versões de imagem fixadas por digest. Os procedimentos de reprodução de cada eixo estão no README do respectivo diretório.
 
-Os resultados são sensíveis ao hardware. A máquina utilizada está especificada em [`ambiente/README.md`](tcc-postgresql/ambiente/README.md), e a reprodução em hardware distinto produzirá valores absolutos diferentes — as comparações relativas entre arquiteturas é que devem se sustentar.
+Os resultados são sensíveis ao hardware. A máquina utilizada está especificada em [`ambiente/README.md`](ambiente/README.md), e a reprodução em hardware distinto produzirá valores absolutos diferentes — as comparações relativas entre arquiteturas é que devem se sustentar.
 
 ## Licença
 
