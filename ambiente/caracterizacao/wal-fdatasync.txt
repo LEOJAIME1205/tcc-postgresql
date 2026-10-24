@@ -1,0 +1,39 @@
+wal: (g=0): rw=write, bs=(R) 8192B-8192B, (W) 8192B-8192B, (T) 8192B-8192B, ioengine=psync, iodepth=1
+fio-3.41
+Starting 1 process
+wal: Laying out IO file (1 file / 8192MiB)
+
+wal: (groupid=0, jobs=1): err= 0: pid=39989: Sat Oct 24 15:17:02 2026
+  write: IOPS=1406, BW=11.0MiB/s (11.5MB/s)(3297MiB/300001msec); 0 zone resets
+    clat (nsec): min=1400, max=152828, avg=2519.33, stdev=1016.08
+     lat (nsec): min=1420, max=152968, avg=2546.83, stdev=1029.72
+    clat percentiles (nsec):
+     |  1.00th=[ 1784],  5.00th=[ 1864], 10.00th=[ 1928], 20.00th=[ 2064],
+     | 30.00th=[ 2256], 40.00th=[ 2352], 50.00th=[ 2384], 60.00th=[ 2448],
+     | 70.00th=[ 2512], 80.00th=[ 2640], 90.00th=[ 2960], 95.00th=[ 3408],
+     | 99.00th=[ 6560], 99.50th=[ 9024], 99.90th=[14272], 99.95th=[16768],
+     | 99.99th=[22144]
+   bw (  KiB/s): min= 9248, max=11872, per=100.00%, avg=11254.71, stdev=571.77, samples=600
+   iops        : min= 1156, max= 1484, avg=1406.78, stdev=71.45, samples=600
+  lat (usec)   : 2=15.84%, 4=81.25%, 10=2.54%, 20=0.35%, 50=0.02%
+  lat (usec)   : 100=0.01%, 250=0.01%
+  fsync/fdatasync/sync_file_range:
+    sync (usec): min=528, max=4686, avg=708.17, stdev=79.65
+    sync percentiles (usec):
+     |  1.00th=[  644],  5.00th=[  660], 10.00th=[  660], 20.00th=[  668],
+     | 30.00th=[  676], 40.00th=[  676], 50.00th=[  685], 60.00th=[  693],
+     | 70.00th=[  709], 80.00th=[  742], 90.00th=[  775], 95.00th=[  873],
+     | 99.00th=[  947], 99.50th=[ 1020], 99.90th=[ 1188], 99.95th=[ 1369],
+     | 99.99th=[ 3064]
+  cpu          : usr=0.10%, sys=0.88%, ctx=844257, majf=0, minf=37
+  IO depths    : 1=200.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued rwts: total=0,421992,0,0 short=421992,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=1
+
+Run status group 0 (all jobs):
+  WRITE: bw=11.0MiB/s (11.5MB/s), 11.0MiB/s-11.0MiB/s (11.5MB/s-11.5MB/s), io=3297MiB (3457MB), run=300001-300001msec
+
+Disk stats (read/write):
+  nvme0n1: ios=0/1367714, sectors=0/21909200, merge=0/912597, ticks=0/322347, in_queue=491880, util=97.80%

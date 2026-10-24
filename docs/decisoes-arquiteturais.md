@@ -192,8 +192,31 @@ O Eixo C consiste precisamente em escrita sustentada por horas. Uma queda de vaz
 
 ---
 
+## ADR-014 — Plataforma de medição em Linux nativo
+
+**Contexto.** O ambiente de desenvolvimento habitual era WSL2, que introduz três
+fatores de confusão concentrados no Eixo C e no teste de longa duração:
+crescimento do disco virtual durante escrita sustentada, memória reivindicada
+dinamicamente pelo hospedeiro e ausência de acesso à telemetria do NVMe.
+
+**Decisão.** Todas as medições são executadas em Ubuntu 26.04 LTS instalado
+nativamente em SSD NVMe dedicado, em dual boot com o Windows 11, cada sistema
+em seu próprio dispositivo.
+
+**Justificativa.** A contribuição central do trabalho é a evidência sobre
+degradação ao longo do tempo. No WSL2, a queda de vazão causada pela expansão
+do disco virtual seria indistinguível da degradação do banco de dados.
+
+**Efeito sobre a comparação.** Elimina três ameaças à validade interna e
+habilita o controle de governador de CPU, escalonador de I/O e opções de
+montagem, impossíveis sob virtualização.
+
+**Estado.** Aceita.
+
+---
+
 ## Registro de alterações
 
 | Data | Alteração |
 |---|---|
-| 25/09/2026 | Criação do documento com ADR-001 a ADR-013 |
+| 25/09/2026 | Criação do documento com ADR-001 a ADR-014 |

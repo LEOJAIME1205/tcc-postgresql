@@ -18,7 +18,7 @@ A versão 2 incorporou os eixos de escrita apontados pelo orientador. Esta vers�
 1. **Outbox confirmado.** O Eixo B passa a ter três configurações: fila consolidada, fila poliglota ingênua e fila poliglota com *transactional outbox*. A comparação principal ocorre entre a primeira e a terceira, que têm garantias transacionais equivalentes.
 2. **Eixo C reduzido a duas vias.** O particionamento declarativo nativo sai do escopo. A comparação passa a ser PostgreSQL com TimescaleDB contra InfluxDB.
 3. **Ambiente de medição especificado**, com tratamento explícito dos fatores de confusão que a máquina única introduz (seção 9).
-4. **Cronograma refeito** a partir de 28/09/2026, com a revisão multivocal em paralelo à construção do ambiente.
+4. A revisão multivocal em paralelo à construção do ambiente.
 
 ### Consequência de enunciado do Eixo C
 
@@ -175,33 +175,12 @@ A máquina é adequada à faixa de escala investigada, que é explicitamente a d
 
 **Uso da GPU.** Os embeddings do Eixo A são gerados uma única vez, offline, e persistidos. Nenhum modelo é executado durante as medições, de modo que carga de GPU e transferência PCIe não entram como ruído.
 
-## 10. Cronograma
 
-Base: 28/09/2026 a 13/12/2026, onze semanas. As fases de revisão e de construção correm em paralelo.
-
-| Semana | Período | Atividade |
-|---|---|---|
-| 1 | 28/09–04/10 | Proposta v3, criação do repositório, caracterização do armazenamento |
-| 2 | 05–11/10 | Protocolo de MLR; harness comum e instrumentação |
-| 3 | 12–18/10 | Busca e triagem da literatura; Eixo A implementado |
-| 4 | 19–25/10 | Extração e síntese; Eixo B — configurações consolidada e ingênua |
-| 5 | 26/10–01/11 | Redação da fundamentação; Eixo B — outbox e verificação de equivalência |
-| 6 | 02–08/11 | Conclusão da fundamentação; Eixo C sobre TSBS |
-| 7 | 09–15/11 | Integração, piloto e calibração de todos os eixos |
-| 8 | 16–22/11 | Execuções curtas, todos os eixos |
-| 9 | 23–29/11 | Carga mista e teste de longa duração. **Banca definida até 25/11** |
-| 10 | 30/11–06/12 | Análise estatística, figuras e redação de resultados |
-| 11 | 07–13/12 | Discussão e conclusão, revisão do orientador, slides e defesa |
-
-**Marco inegociável.** O encaminhamento da composição da banca com quinze dias de antecedência (Art. 7º, IV) torna 25 de novembro data de corte. A partir dela, escopo congelado.
-
-**Contingências, em ordem de acionamento.** (1) Encurtar o teste de longa duração, nunca eliminá-lo, por ser a resposta à crítica central do orientador. (2) Reduzir o número de repetições das execuções curtas, declarando a limitação estatística. (3) Em último caso, o Eixo A perde o componente léxico e torna-se busca puramente vetorial. A ordem preserva as cargas de escrita.
-
-## 11. Recursos necessários
+## 10. Recursos necessários
 
 Máquina especificada na seção 9. Docker e Docker Compose; k6 ou Locust para os eixos A e B; TSBS para o Eixo C; `fio` para caracterização de armazenamento. PostgreSQL 17 ou superior com `pgvector`, `pg_trgm` e TimescaleDB. OpenSearch, Qdrant, RabbitMQ e InfluxDB em versões estáveis correntes, fixadas por digest. Coleta via `pg_stat_*`, `pgstattuple` e `pg_stat_statements`. Modelo de embedding de código aberto executado localmente. Repositório público no GitHub.
 
-## 12. Aderência aos critérios de avaliação (Art. 12)
+## 11. Aderência aos critérios de avaliação (Art. 12)
 
 | Critério | Peso | Como a proposta atende |
 |---|---|---|
@@ -211,7 +190,7 @@ Máquina especificada na seção 9. Docker e Docker Compose; k6 ou Locust para o
 | Adequação da bibliografia | 1,5 | Literatura clássica e atual, com literatura cinzenta sob protocolo reconhecido |
 | Adequação aos objetivos do TCC | 1,5 | Trabalho individual, artefatos verificáveis, limitações declaradas e desenho que expõe as próprias fraquezas |
 
-## 13. Referências preliminares
+## 12. Referências preliminares
 
 - STONEBRAKER, M.; ÇETINTEMEL, U. One Size Fits All: An Idea Whose Time Has Come and Gone. In: *ICDE*, 2005.
 - STONEBRAKER, M. et al. The End of an Architectural Era (It's Time for a Complete Rewrite). In: *VLDB*, 2007.
