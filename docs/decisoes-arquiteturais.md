@@ -60,9 +60,17 @@ O Eixo C consiste precisamente em escrita sustentada por horas. Uma queda de vaz
 
 **Justificativa.** É a diferença entre medir o banco e medir o disco. Sem essa caracterização, a principal contribuição do trabalho — a evidência sobre degradação temporal — ficaria sem sustentação.
 
-**Efeito sobre a comparação.** Afeta ambas as arquiteturas do Eixo C de forma semelhante, mas precisa ser distinguido do efeito de banco de dados. O dimensionamento do conjunto de dados será escolhido de modo que a comparação principal ocorra em regime permanente, fora da faixa de cache.
+**Efeito sobre a comparação.** Afeta ambas as arquiteturas do Eixo C de forma semelhante, mas precisa ser distinguido do efeito de banco de dados. O critério de atribuição da revisão de 24/10/2026 não favorece nenhuma arquitetura a priori, mas penaliza a que gravar mais bytes em disco por métrica ingerida: se esse volume levar o dispositivo para além do cache, a queda é reportada como custo daquela arquitetura neste hardware, e não descontada como efeito do SSD. Qual arquitetura é essa só se saberá medindo. A restauração dos volumes também grava mais para a arquitetura de volume maior; o repouso entre restauração e execução existe para que isso não contamine a medição.
 
-**Estado.** Aceita.
+**Estado.** Aceita. Revisada em 24/10/2026.
+
+**Revisão de 24/10/2026.** A caracterização (resultados em `ambiente/README.md`) mostrou que o cache pSLC é dinâmico, com ≈ 62 GiB com o disco 3% ocupado, e que depois dele a vazão sequencial não tem um regime único: fica entre 0,5 e 1,1 GiB/s enquanto o controlador esvazia o cache e sobe para 2,0 GiB/s em seguida. A premissa de executar fora da faixa de cache não se sustenta, porque, a taxas de escrita abaixo da capacidade de esvaziamento, o dispositivo nunca sai do cache. O controle passa a ser:
+
+1. Taxa de escrita e latência do dispositivo, e bytes gravados por container, amostradas a cada segundo em todas as execuções do Eixo C e no teste de longa duração.
+2. Execução de controle com `fio` limitado à maior taxa de escrita observada no piloto, pelo mesmo tempo do teste de longa duração.
+3. Critério de atribuição, fixado antes da coleta: uma queda de vazão do banco só é atribuída ao dispositivo se coincidir com taxa de escrita sustentada próxima do piso medido para aquele padrão de escrita e se a execução de controle também degradar nessa taxa. Fora desses casos, é atribuída ao banco.
+4. Bytes gravados em disco por métrica ingerida reportados como resultado, para cada arquitetura.
+5. Caracterização refeita com o disco no estado de ocupação da Fase 3, com `fstrim` e repouso entre a restauração dos volumes e cada execução, com duração do repouso definida pela medição do tempo de recuperação do cache.
 
 ---
 
@@ -220,3 +228,5 @@ montagem, impossíveis sob virtualização.
 | Data | Alteração |
 |---|---|
 | 25/09/2026 | Criação do documento com ADR-001 a ADR-014 |
+| 24/10/2026 | ADR-004 revisada com o resultado da caracterização do SSD |
+
