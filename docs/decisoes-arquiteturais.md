@@ -70,7 +70,7 @@ O Eixo C consiste precisamente em escrita sustentada por horas. Uma queda de vaz
 2. Execução de controle com `fio` limitado à maior taxa de escrita observada no piloto, pelo mesmo tempo do teste de longa duração.
 3. Critério de atribuição, fixado antes da coleta: uma queda de vazão do banco só é atribuída ao dispositivo se coincidir com taxa de escrita sustentada próxima do piso medido para aquele padrão de escrita e se a execução de controle também degradar nessa taxa. Fora desses casos, é atribuída ao banco.
 4. Bytes gravados em disco por métrica ingerida reportados como resultado, para cada arquitetura.
-5. Caracterização refeita com o disco no estado de ocupação da Fase 3, com `fstrim` e repouso entre a restauração dos volumes e cada execução, com duração do repouso definida pela medição do tempo de recuperação do cache.
+5. Caracterização refeita com o disco no estado de ocupação da Fase 3, com `fstrim` e repouso entre a restauração dos volumes e cada execução, com duração do repouso definida pela medição do tempo de recuperação do cache. Adotado em 25/10/2026: **20 minutos**, contados depois de `sync` e `fstrim -v /`. No teste de recuperação, o cache voltou inteiro após 15 minutos de repouso e de forma parcial após 1 e 5 minutos (`ambiente/README.md`). Os 5 minutos adicionais são margem de precaução, porque houve uma única medição por valor de repouso.
 
 ---
 
@@ -223,10 +223,97 @@ montagem, impossíveis sob virtualização.
 
 ---
 
+## ADR-015 — Governador de CPU em performance, com boost mantido
+
+**Contexto.** O driver de frequência é o `amd-pstate-epp`, em modo ativo, controlado pelo `power-profiles-daemon`. No perfil padrão (`balanced`), o governador fica em `powersave` e a preferência de energia em `balance_performance`: a frequência sobe e desce conforme a carga, e o tempo de reação se soma à medida, sobretudo em cargas de latência curta e intermitente.
+
+**Decisão.** Durante as coletas, perfil `performance` do `power-profiles-daemon`, aplicado com `powerprofilesctl launch -p performance -- <comando>`. O perfil vale só enquanto o comando roda e volta ao `balanced` ao fim. Verificado em 25/10/2026: durante o `launch`, os 16 processadores lógicos ficam com governador e preferência de energia em `performance`. O boost permanece ligado.
+
+**Justificativa.** Remove a rampa de frequência como fonte de ruído. O boost é mantido porque desligá-lo fixaria a frequência na base, condição que não representa o uso real da máquina; a variabilidade que ele introduz é tratada pela ADR-012. Aplicar pelo `power-profiles-daemon`, e não escrevendo direto no sysfs, evita que o daemon reverta a mudança no meio de uma execução.
+
+**Efeito sobre a comparação.** Aplicado igualmente a todas as arquiteturas. Com boost ligado, a frequência alcançada depende de quantos núcleos estão ativos e da temperatura: a arquitetura que mantiver menos núcleos ocupados ao mesmo tempo tende a obter frequências maiores. É um efeito real da arquitetura nesta máquina, não um artefato, e a série de frequência publicada (ADR-012) permite verificá-lo.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-016 — Swap desligado durante as coletas
+
+**Contexto.** O sistema tem um arquivo de swap de 8 GB, ativado pelo `fstab`. Com swap disponível, o Docker permite por padrão que um container com limite de memória use em swap o mesmo tanto que tem de memória. Um container que ultrapasse seu limite seria paginado em vez de encerrado, gerando I/O no mesmo SSD em que os bancos gravam e degradando a latência de forma intermitente.
+
+**Decisão.** Desligar o swap (`swapoff -a`) antes de cada janela de coleta. Ele volta no reinício da máquina, pelo `fstab`.
+
+**Justificativa.** Torna efetivamente rígidos os limites de memória da ADR-003 e elimina a paginação como fator de confusão no dispositivo cuja caracterização sustenta o Eixo C (ADR-004).
+
+**Efeito sobre a comparação.** Um sistema que exceder seu orçamento é encerrado pelo kernel em vez de ficar lento. O encerramento é registrado como falha da execução, não descartado. Penaliza a arquitetura cujo processo mais se aproximar do próprio limite. Como a arquitetura poliglota divide o orçamento entre dois serviços (ADR-003), cada serviço dela tem menos folga, e o risco tende a recair sobre ela.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-017 — fstrim controlado, fora da janela de coleta
+
+**Contexto.** O ext4 está montado sem `discard`; o descarte de blocos livres acontece pelo `fstrim.timer` semanal. Sem descarte, arquivos apagados continuam ocupando blocos do ponto de vista do SSD, o que reduz o cache pSLC dinâmico (ADR-004). Um `fstrim` no meio de uma execução gera atividade no dispositivo e muda esse estado durante a medição.
+
+**Decisão.** `fstrim.timer` parado durante as janelas de coleta. `sync` seguido de `fstrim -v /`, executados manualmente, antes de cada caracterização com `fio` e entre a restauração dos volumes e cada execução, conforme a revisão da ADR-004.
+
+**Justificativa.** Garante que toda execução comece com o mesmo estado de blocos livres e que o descarte nunca coincida com uma medição. O `sync` é necessário porque o ext4 só devolve ao espaço livre os blocos de arquivos apagados no commit seguinte do journal; um `fstrim` logo após o `rm` não os descarta. Verificado em 25/10/2026: com um arquivo de 2 GiB, `rm` seguido de `fstrim` descartou 1,1 MiB; com `sync` no meio, 2 GiB.
+
+**Efeito sobre a comparação.** Neutro. Sem o controle, o descarte semanal cairia sobre uma única execução de uma única arquitetura, a depender do horário.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-018 — Divisão de cpuset por núcleo físico
+
+**Contexto.** O Ryzen 7 9700X tem SMT ativo: o núcleo físico N corresponde aos processadores lógicos N e N+8. Dois threads do mesmo núcleo compartilham unidades de execução e caches L1 e L2. A ADR-002 determina conjuntos disjuntos para sistema sob teste e gerador de carga, mas não diz como dividi-los.
+
+**Decisão.** Dividir por núcleo inteiro: sistema sob teste em `0-5,8-13` (seis núcleos, doze threads); gerador de carga e coleta em `6-7,14-15` (dois núcleos, quatro threads). Mesma divisão em todas as arquiteturas e eixos.
+
+**Justificativa.** Dividir por thread colocaria sistema e gerador em threads irmãos do mesmo núcleo, recriando a contenção que a ADR-002 pretende eliminar.
+
+**Efeito sobre a comparação.** Neutro entre arquiteturas. Reduz o teto do sistema sob teste a seis núcleos. Permanece um compartilhamento que não pode ser isolado: o 9700X tem um único complexo de núcleos, com 32 MB de L3 e controlador de memória comuns a todos; esse resíduo é declarado. O piloto precisa confirmar que o gerador não satura seus dois núcleos, porque nesse caso o teto medido passaria a ser o do gerador.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-019 — Tarefas de manutenção suspensas durante as coletas
+
+**Contexto.** O Ubuntu agenda tarefas que gravam em disco e consomem CPU sem aviso: atualização de pacotes (`apt-daily`, `apt-daily-upgrade` e `unattended-upgrades`), atualização automática de snaps, `fwupd-refresh`, `update-notifier-download`, `man-db`, `anacron`, `logrotate`, `dpkg-db-backup` e `e2scrub_all`. O protocolo exige máquina ociosa durante as coletas.
+
+**Decisão.** Antes de cada janela de coleta, parar os timers dessas tarefas e suspender a atualização automática de snaps (`snap refresh --hold`). Os timers voltam no reinício da máquina, e a suspensão dos snaps vence no prazo indicado. Navegador e clientes de sincronização ficam fechados. O `sysstat-collect` é mantido, porque grava poucos kilobytes a cada 10 minutos e seus dados servem de registro do estado da máquina.
+
+**Justificativa.** Uma atualização de pacotes durante a execução de uma arquitetura grava centenas de megabytes e ocupa CPU, e cairia sobre uma execução só.
+
+**Efeito sobre a comparação.** Neutro. Elimina interferência aleatória que recairia sobre uma única execução. Como contrapartida, atualizações de segurança ficam suspensas durante as janelas, e as versões do sistema permanecem congeladas, o que também favorece a reprodutibilidade.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-020 — Gerência de energia do NVMe desligada durante as coletas
+
+**Contexto.** O P510 tem a transição autônoma de estados de energia (APST) habilitada pelo kernel. Com a configuração padrão, após 100 ms sem I/O o dispositivo passa ao estado PS3, cuja saída leva 2,5 ms, e após mais 2 s passa ao PS4, cuja saída leva 40 ms (inventário em `ambiente/caracterizacao/inventario.txt`). Qualquer pausa acima de 100 ms numa carga faz a operação seguinte pagar esse tempo de despertar, que aparece como latência do banco sem ser.
+
+**Decisão.** Desligar o APST antes de cada janela de coleta e religá-lo ao fim, pelo controle de tolerância de latência do kernel: `echo 0 > /sys/class/nvme/nvme0/power/pm_qos_latency_tolerance_us` para desligar e `echo 100000` no mesmo arquivo para restaurar o padrão. Verificado em 25/10/2026: com 0, o recurso fica desabilitado no dispositivo; com 100000, volta habilitado e com a tabela de transições refeita pelo kernel. O ASPM L1 do link PCIe e os estados ociosos da CPU (até C3, saída em 350 µs) permanecem no padrão.
+
+**Justificativa.** O efeito do APST está na escala de milissegundos, a mesma das latências medidas, e depende do padrão de pausas de cada sistema, não do seu desempenho. É o mesmo raciocínio da ADR-015, aplicado ao armazenamento. O ASPM e os C-states ficam no padrão porque seu efeito está na escala de microssegundos, e desligar os C-states aumentaria o calor e reduziria a margem de boost (ADR-015). O controle do kernel é usado no lugar de `nvme set-feature` porque reconstrói a tabela de transições ao restaurar.
+
+**Efeito sobre a comparação.** Remove um artefato que penalizaria a arquitetura de I/O mais intermitente, que é a que mais deixa o disco ocioso por mais de 100 ms. Qual arquitetura é essa varia por eixo e não foi medido. Os números representam o dispositivo sempre desperto, condição de servidor e não de desktop; o consumo de energia em repouso fica maior durante as janelas.
+
+**Estado.** Aceita.
+
+---
+
 ## Registro de alterações
 
 | Data | Alteração |
 |---|---|
 | 25/09/2026 | Criação do documento com ADR-001 a ADR-014 |
 | 24/10/2026 | ADR-004 revisada com o resultado da caracterização do SSD |
+| 25/10/2026 | ADR-015 a ADR-019: governador, swap, fstrim, cpuset por núcleo físico e tarefas de manutenção |
+| 25/10/2026 | ADR-004: repouso de 20 minutos (recuperação completa medida em 15, mais margem de precaução). ADR-017: `fstrim` precedido de `sync` |
+| 25/10/2026 | ADR-020: APST do NVMe desligado durante as coletas |
 
