@@ -1,0 +1,33 @@
+esgota-1800: (g=0): rw=write, bs=(R) 1024KiB-1024KiB, (W) 1024KiB-1024KiB, (T) 1024KiB-1024KiB, ioengine=io_uring, iodepth=32
+fio-3.41
+Starting 1 process
+esgota-1800: Laying out IO file (1 file / 102400MiB)
+
+esgota-1800: (groupid=0, jobs=1): err= 0: pid=19551: Sun Oct 25 18:27:10 2026
+  write: IOPS=1775, BW=1775MiB/s (1861MB/s)(100GiB/57685msec); 0 zone resets
+    slat (usec): min=18, max=81122, avg=24.24, stdev=253.46
+    clat (usec): min=742, max=517233, avg=18001.46, stdev=23204.48
+     lat (usec): min=766, max=517273, avg=18025.69, stdev=23206.38
+    clat percentiles (msec):
+     |  1.00th=[    4],  5.00th=[    4], 10.00th=[    4], 20.00th=[    4],
+     | 30.00th=[    4], 40.00th=[    4], 50.00th=[    4], 60.00th=[    6],
+     | 70.00th=[   27], 80.00th=[   43], 90.00th=[   52], 95.00th=[   60],
+     | 99.00th=[   67], 99.50th=[   69], 99.90th=[  123], 99.95th=[  275],
+     | 99.99th=[  510]
+   bw (  MiB/s): min=  490, max= 9192, per=100.00%, avg=1789.28, stdev=2717.85, samples=57
+   iops        : min=   98, max= 9260, avg=1779.20, stdev=2739.21, samples=115
+  lat (usec)   : 750=0.01%, 1000=0.03%
+  lat (msec)   : 2=0.09%, 4=59.49%, 10=3.90%, 20=0.87%, 50=24.60%
+  lat (msec)   : 100=10.88%, 250=0.04%, 500=0.06%, 750=0.03%
+  cpu          : usr=1.49%, sys=2.86%, ctx=101797, majf=0, minf=10
+  IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.1%, 16=0.1%, 32=100.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.1%, 64=0.0%, >=64=0.0%
+     issued rwts: total=0,102400,0,0 short=0,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=32
+
+Run status group 0 (all jobs):
+  WRITE: bw=1775MiB/s (1861MB/s), 1775MiB/s-1775MiB/s (1861MB/s-1861MB/s), io=100GiB (107GB), run=57685-57685msec
+
+Disk stats (read/write):
+  nvme0n1: ios=0/819130, sectors=0/209656432, merge=0/2285, ticks=0/14451384, in_queue=14451443, util=97.06%

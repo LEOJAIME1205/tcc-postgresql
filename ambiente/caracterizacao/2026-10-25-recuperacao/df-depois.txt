@@ -1,0 +1,2 @@
+Sist. Arq.     Blocos de 1B       Usado   Disponível Uso% Montado em
+/dev/nvme0n1p2 982240026624 20935376896 911334133760   3% /

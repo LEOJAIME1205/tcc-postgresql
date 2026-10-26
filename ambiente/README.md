@@ -9,10 +9,10 @@ relativas entre arquiteturas é que devem se sustentar em outros ambientes.
 | Componente | Especificação |
 |---|---|
 | Processador | AMD Ryzen 7 9700X — 8 núcleos, 16 threads, arquitetura Zen 5 |
-| Memória | 32 GB DDR5 |
+| Memória | 32 GB DDR5-6000 (2 × 16 GB, perfil EXPO) |
 | Armazenamento | SSD NVMe Crucial P510 1 TB, PCIe 5.0 x4, com dissipador |
 | GPU | ASUS GeForce RTX 5070 |
-| Placa-mãe | ASUS, com suporte a PCIe 5.0 |
+| Placa-mãe | ASUS PRIME B650EM-A, BIOS 0221 |
 | Sistema operacional | Ubuntu 26.04.1 LTS, nativo, no próprio P510 |
 | Versão do Docker | Docker CE 29.9.2 |
 | Versão do kernel | 7.0.0-38-generic |
@@ -136,7 +136,8 @@ nem transições de gerenciamento térmico. Não houve throttling.
   foram reconstruídos a partir da saída do próprio fio.
 - Não há registro de quais controles do protocolo de medição estavam aplicados
   (governador de CPU, swap, `fstrim` prévio).
-- Cada teste foi executado uma única vez.
+- Cada teste foi executado uma única vez. O tamanho do cache foi reproduzido
+  na execução de 25/10/2026, descrita adiante.
 - Como o tamanho do cache depende do espaço livre, os valores valem para o
   disco 3% ocupado.
 
@@ -155,6 +156,95 @@ nem transições de gerenciamento térmico. Não houve throttling.
 
 Nos arquivos `_bw`, as colunas são: tempo em ms, vazão em KiB/s e direção
 (1 = escrita).
+
+### Recuperação do cache — execução de 25/10/2026
+
+O objetivo era saber quanto tempo o cache pSLC leva para voltar depois de
+esgotado, para definir o repouso entre a restauração dos volumes e cada
+execução (revisão da ADR-004).
+
+Disco 3% ocupado. Antes do primeiro ciclo, `fstrim` de todo o espaço livre e
+10 minutos de repouso. Controles aplicados: perfil `performance` do
+`power-profiles-daemon` (governador e preferência de energia em `performance`
+nos 16 processadores, boost ligado), swap desligado, `fstrim.timer` e timers de
+manutenção parados.
+
+Para cada repouso T de 60, 300, 900 e 1800 segundos, em sequência, tudo dentro
+de `powerprofilesctl launch -p performance -- ...`:
+
+```bash
+# 1. esgota o cache
+fio --name=esgota-T --filename=/var/tmp/fio-a --size=100g --rw=write --bs=1M \
+    --ioengine=io_uring --iodepth=32 --direct=1 \
+    --write_bw_log=esgota-T --log_avg_msec=1000 --output=esgota-T.txt
+rm /var/tmp/fio-a && sudo fstrim -v /
+
+# 2. repouso de T segundos
+sleep T
+
+# 3. mede o cache recuperado: GiB gravados acima de 8 GiB/s
+fio --name=recupera-T --filename=/var/tmp/fio-b --size=80g --rw=write --bs=1M \
+    --ioengine=io_uring --iodepth=32 --direct=1 \
+    --write_bw_log=recupera-T --log_avg_msec=1000 --output=recupera-T.txt
+rm /var/tmp/fio-b && sudo fstrim -v /
+```
+
+O passo 1 de cada ciclo também mede o cache disponível naquele momento:
+
+| Passo 1 do ciclo | Condição | Cache disponível |
+|---|---|---|
+| 60 s | 10 min de repouso após descarte de todo o espaço livre | 62,2 GiB |
+| 300 s | Segundos após descarte dos 180 GiB do ciclo anterior | 62,3 GiB |
+| 900 s | Idem | 52,6 GiB |
+| 1800 s | Idem | 60,8 GiB |
+
+- **O tamanho do cache se repetiu.** Após repouso e descarte completos, 62,2 GiB,
+  contra 62,4 GiB em 24/10. O teto de todas as medições ficou entre 62,1 e
+  62,3 GiB.
+- **Com 15 e 30 minutos de repouso, o cache voltou inteiro**: 62,1 e 62,2 GiB.
+- **Com 1 e 5 minutos, a recuperação foi parcial e não monotônica**: 53,7 e
+  44,6 GiB, ou seja, 5 minutos recuperaram menos que 1. No ciclo de 300 segundos, os primeiros 4 segundos da
+  medição correram a ~0,8 GiB/s antes de o cache aparecer, sinal de que o
+  controlador ainda trabalhava. Com uma medição por ponto, não é possível traçar
+  a curva de recuperação entre 1 e 15 minutos.
+- **O descarte sozinho não garante cache cheio de imediato**: segundos depois de
+  descartar 180 GiB, o cache disponível variou de 52,6 a 62,3 GiB.
+- **O piso pós-cache se repetiu.** Só no passo 1 do primeiro ciclo, logo após o
+  descarte de todo o espaço livre, a vazão depois do cache ficou em ~1,1 GiB/s
+  até o fim, como na fase 2 de 24/10. No passo 1 do ciclo de 300 segundos, ela
+  alternou trechos de 0,7–0,8 GiB/s com novas rajadas de cache. Em todas as
+  outras medições, inclusive após 15 e 30 minutos de repouso, ficou em
+  ~1,1 GiB/s por cerca de 11 segundos e caiu para 0,4–0,8 GiB/s, a faixa da
+  fase 4 de 24/10. A duração do regime de ~1,1 GiB/s depende do histórico do
+  disco; o piso de ~0,5 GiB/s aparece de forma consistente e é o limite
+  conservador adequado.
+- **A temperatura volta ao repouso no mesmo intervalo.** O máximo foi 56 °C, e o
+  dispositivo voltou a ~38 °C em 10 a 12 minutos. O SMART não registrou eventos
+  térmicos. Foram gravados 720 GiB no total.
+
+**Repouso adotado: 20 minutos**, contados depois de `sync` e `fstrim -v /`, entre
+a restauração dos volumes e o início de cada execução (ADR-004 e ADR-017). A
+recuperação completa foi medida com 15 minutos; os 5 minutos adicionais são
+margem de precaução, porque houve uma única medição por valor de repouso.
+
+Limitações:
+
+- Uma medição por valor de repouso.
+- O pior caso medido foi uma escrita de 100 GiB, acima do tamanho do cache.
+  Restaurações de volumes menores devem exigir menos repouso, mas isso não foi
+  medido.
+- VS Code aberto durante o teste.
+
+Arquivos em `caracterizacao/2026-10-25-recuperacao/`:
+
+| Arquivo | Conteúdo |
+|---|---|
+| `progresso.log` | Etapas com horário, linhas de progresso do fio e resultado de cada ciclo |
+| `esgota-T.txt`, `recupera-T.txt` | Saída do fio de cada passo |
+| `esgota-T_bw.1.log`, `recupera-T_bw.1.log` | Vazão por segundo de cada passo |
+| `nvme-temp.log` | Temperatura do P510 a cada 5 s |
+| `smart-antes.txt`, `smart-depois.txt` | Log SMART antes e depois do teste |
+| `df-antes.txt`, `df-depois.txt` | Ocupação do sistema de arquivos antes e depois |
 
 ## Monitoramento durante as execuções
 

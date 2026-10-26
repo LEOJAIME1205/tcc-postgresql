@@ -1,175 +1,211 @@
-uname -r; cat /etc/os-release | head -3
-7.0.0-38-generic
-PRETTY_NAME="Ubuntu 26.04.1 LTS"
-NAME="Ubuntu"
-VERSION_ID="26.04"
+INVENTÁRIO DO AMBIENTE DE MEDIÇÃO
+=================================
 
-lscpu
-Arquitetura:                  x86_64
-  Modo(s) operacional da CPU: 32-bit, 64-bit
-  Tamanhos de endereço:       48 bits physical, 48 bits virtual
-  Ordem dos bytes:            Little Endian
-CPU(s):                       16
-  Lista de CPU(s) on-line:    0-15
-ID de fornecedor:             AuthenticAMD
-  Nome do modelo:             AMD Ryzen 7 9700X 8-Core Processor
-    Família da CPU:           26
-    Modelo:                   68
-    Thread(s) per núcleo:     2
-    Núcleo(s) por soquete:    8
-    Soquete(s):               1
-    Step:                     0
-    Aumento de frequência:    habilitado
-    CPU(s) MHz de escala:     59%
-    CPU MHz máx.:             5582,3008
-    CPU MHz mín.:             605,3100
-    BogoMIPS:                 7599,35
-    Opções:                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht 
-                              syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good amd_lbr_v2 nopl xtopology nonstop_
-                              tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt
-                               aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefe
-                              tch osvw ibs skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpuid_fault cpb 
-                              cat_l3 cdp_l3 hw_pstate ssbd mba perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust
-                               bmi1 avx2 smep bmi2 erms invpcid cqm rdt_a avx512f avx512dq adx smap avx512ifma clflushopt clwb avx5
-                              12cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_
-                              mbm_local user_shstk avx_vnni avx512_bf16 clzero irperf xsaveerptr rdpru wbnoinvd cppc arat npt lbrv 
-                              svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsa
-                              ve_vmload vgif x2avic v_spec_ctrl vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq av
-                              x512_vnni avx512_bitalg avx512_vpopcntdq rdpid bus_lock_detect movdiri movdir64b overflow_recov succo
-                              r smca fsrm avx512_vp2intersect flush_l1d amd_lbr_pmc_freeze
-Recursos de virtualização:    
-  Virtualização:              AMD-V
-Caches (soma de todos):       
-  L1d:                        384 KiB (8 instâncias)
-  L1i:                        256 KiB (8 instâncias)
-  L2:                         8 MiB (8 instâncias)
-  L3:                         32 MiB (1 instância)
-NUMA:                         
-  Nó(s) de NUMA:              1
-  CPU(s) de nó0 NUMA:         0-15
-Vulnerabilidades:             
-  Gather data sampling:       Not affected
-  Ghostwrite:                 Not affected
-  Indirect target selection:  Not affected
-  Itlb multihit:              Not affected
-  L1tf:                       Not affected
-  Mds:                        Not affected
-  Meltdown:                   Not affected
-  Mmio stale data:            Not affected
-  Old microcode:              Not affected
-  Reg file data sampling:     Not affected
-  Retbleed:                   Not affected
-  Spec rstack overflow:       Mitigation; IBPB on VMEXIT only
-  Spec store bypass:          Mitigation; Speculative Store Bypass disabled via prctl
-  Spectre v1:                 Mitigation; usercopy/swapgs barriers and __user pointer sanitization
-  Spectre v2:                 Mitigation; Enhanced / Automatic IBRS; IBPB conditional; STIBP always-on; PBRSB-eIBRS Not affected; B
-                              HI Not affected
-  Srbds:                      Not affected
-  Tsa:                        Not affected
-  Tsx async abort:            Not affected
-  Vmscape:                    Mitigation; IBPB on VMEXIT
 
-lscpu -e
-CPU NODE SOCKET CORE L1d:L1i:L2:L3 ONLINE    MAXMHZ   MINMHZ       MHZ
-  0    0      0    0 0:0:0:0          sim 5582,3008 605,3100 4265,2310
-  1    0      0    1 1:1:1:0          sim 5582,3008 605,3100 2992,9209
-  2    0      0    2 2:2:2:0          sim 5582,3008 605,3100 3620,8679
-  3    0      0    3 3:3:3:0          sim 5582,3008 605,3100 3622,2649
-  4    0      0    4 4:4:4:0          sim 5582,3008 605,3100 2992,9209
-  5    0      0    5 5:5:5:0          sim 5582,3008 605,3100 3794,8601
-  6    0      0    6 6:6:6:0          sim 5582,3008 605,3100 2992,9209
-  7    0      0    7 7:7:7:0          sim 5582,3008 605,3100 4274,7778
-  8    0      0    0 0:0:0:0          sim 5582,3008 605,3100 2992,9209
-  9    0      0    1 1:1:1:0          sim 5582,3008 605,3100 2992,9209
- 10    0      0    2 2:2:2:0          sim 5582,3008 605,3100 2992,9209
- 11    0      0    3 3:3:3:0          sim 5582,3008 605,3100 2992,9209
- 12    0      0    4 4:4:4:0          sim 5582,3008 605,3100 4263,2451
- 13    0      0    5 5:5:5:0          sim 5582,3008 605,3100 3470,2939
- 14    0      0    6 6:6:6:0          sim 5582,3008 605,3100 2137,5759
- 15    0      0    7 7:7:7:0          sim 5582,3008 605,3100 2992,9209
+Estado registrado: o padrão da máquina, fora de janela de coleta. Durante as
+coletas aplicam-se as ADR-015 a ADR-019 (docs/decisoes-arquiteturais.md).
+Os comandos usados estão na seção 10. Números de série e UUIDs foram omitidos.
 
-cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_driver
-amd-pstate-epp
 
-cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-powersave
+1. SISTEMA
+----------
+Sistema operacional ......... Ubuntu 26.04.1 LTS, instalação nativa no P510
+Kernel ...................... 7.0.0-38-generic
+Parâmetros do kernel ........ quiet splash crashkernel=... (padrão do Ubuntu;
+                              reserva 512 MiB para o kernel de despejo nesta
+                              faixa de memória). Nenhum parâmetro de
+                              desempenho alterado.
 
-free -h
-               total       usada       livre    compart.  buff/cache  disponível
-Mem.:           30Gi       4,0Gi        22Gi       148Mi       3,8Gi        26Gi
-Swap:          8,0Gi          0B       8,0Gi
 
-swapon --show
-NAME      TYPE SIZE USED PRIO
-/swap.img file   8G   0B   -1
+2. PLACA-MÃE E FIRMWARE
+-----------------------
+Placa-mãe ................... ASUS PRIME B650EM-A, Rev 1.xx
+BIOS/UEFI ................... American Megatrends, versão 0221, de 07/04/2025
 
-leojaime@leojaime:/$ cat /sys/kernel/mm/transparent_hugepage/enabled
-always [madvise] never
-leojaime@leojaime:/$ lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINT,MODEL
-NAME          SIZE TYPE FSTYPE   MOUNTPOINT                          MODEL
-loop0           4K loop squashfs /snap/bare/5                        
-loop1       514.4M loop squashfs /snap/code/271                      
-loop2        66.8M loop squashfs /snap/core24/2124                   
-loop3        63.8M loop squashfs /snap/core20/2922                   
-loop4        66.8M loop squashfs /snap/core24/1643                   
-loop5       260.3M loop squashfs /snap/firefox/8763                  
-loop6          20M loop squashfs /snap/desktop-security-center/151   
-loop7        14.2M loop squashfs /snap/desktop-security-center/206   
-loop8       283.8M loop squashfs /snap/firefox/9057                  
-loop9        16.5M loop squashfs /snap/firmware-updater/226          
-loop10       12.7M loop squashfs /snap/firmware-updater/262          
-loop11      614.5M loop squashfs /snap/gnome-46-2404/164             
-loop12        616M loop squashfs /snap/gnome-46-2404/177             
-loop13       91.7M loop squashfs /snap/gtk-common-themes/1535        
-loop14        1.5M loop squashfs /snap/hwctl/123                     
-loop15        1.5M loop squashfs /snap/hwctl/131                     
-loop16        402M loop squashfs /snap/mesa-2404/1839                
-loop17       18.8M loop squashfs /snap/prompting-client/222          
-loop18       18.4M loop squashfs /snap/prompting-client/228          
-loop19       11.8M loop squashfs /snap/snap-store/1390               
-loop20       50.1M loop squashfs /snap/snapd/27710                   
-loop21       44.7M loop squashfs /snap/snapd/28254                   
-loop22        828K loop squashfs /snap/snapd-desktop-integration/391 
-nvme0n1     931.5G disk                                              CT1000P510SSD5
-|-nvme0n1p1     1G part vfat     /boot/efi                           
-`-nvme0n1p2 930.5G part ext4     /                                   
-nvme1n1     931.5G disk                                              KINGSTON SNV3S1000G
-|-nvme1n1p1   100M part vfat                                         
-|-nvme1n1p2    16M part                                              
-|-nvme1n1p3 930.5G part ntfs                                         
-`-nvme1n1p4   933M part ntfs                                         
-leojaime@leojaime:/$ findmnt -o TARGET,SOURCE,FSTYPE,OPTIONS /
-TARGET SOURCE         FSTYPE OPTIONS
-/      /dev/nvme0n1p2 ext4   rw,relatime
-leojaime@leojaime:/$ df -ht /
-df: nenhum sistema de arquivos foi processado
-leojaime@leojaime:/$ df -hT /
-Sist. Arq.     Tipo  Tam. Usado Disp. Uso% Montado em
-/dev/nvme0n1p2 ext4  915G   19G  851G   3% /
-leojaime@leojaime:/$ cat /sys/block/nvme0n1/queue/scheduler
-[none] mq-deadline 
-leojaime@leojaime:/$ docker --version && docker compose version
-Comando 'docker' não encontrado, mas poder ser instalado com:
-sudo apt install podman-docker  # version 5.7.0+ds2-3build1, or
-sudo apt install docker.io      # version 29.1.3-0ubuntu4.1
-leojaime@leojaime:/$ docker info 2>/dev/null | grep -Ei "storage driver|cgroup version|docker root"
 
-leojaime@leojaime:/$ sudo nvme list
-Node                  Generic               SN                   Model                                    Namespace  Usage                      Format           FW Rev  
---------------------- --------------------- -------------------- ---------------------------------------- ---------- -------------------------- ---------------- --------
-/dev/nvme0n1          /dev/ng0n1            2537E9CAF7D7         CT1000P510SSD5                           0x1          1.00  TB /   1.00  TB    512   B +  0 B   K1CR5102
-/dev/nvme1n1          /dev/ng1n1            50026B7283AAF5F7     KINGSTON SNV3S1000G                      0x1          1.00  TB /   1.00  TB    512   B +  0 B   SDQ00103
-leojaime@leojaime:/$ sudo nvme smart-log /dev/nvme0 | grep -Ei "temperature|percentage_used|data_units_written|critical_warning"
-critical_warning                        : 0
-temperature                             : 37 °C (310 K, 98 °F)
-percentage_used                         : 0%
-Warning Temperature Time                : 0
-Critical Composite Temperature Time     : 0
-Temperature Sensor 1                    : 37 °C (310 K, 98 °F)
-leojaime@leojaime:/$ sudo nvme smart-log /dev/nvme1 | grep -Ei "temperature|percentage_used|data_units_written|critical_warning"
-critical_warning                        : 0
-temperature                             : 34 °C (307 K, 93 °F)
-percentage_used                         : 4%
-Warning Temperature Time                : 0
-Critical Composite Temperature Time     : 0
-Temperature Sensor 2                    : 63 °C (336 K, 145 °F)
+3. PROCESSADOR
+--------------
+Modelo ...................... AMD Ryzen 7 9700X (Zen 5, família 26, modelo 68)
+Núcleos / threads ........... 8 / 16, SMT ativo
+Topologia SMT ............... núcleo físico N = processadores lógicos N e N+8
+                              (núcleo 0 = CPUs 0 e 8 ... núcleo 7 = CPUs 7 e 15)
+Frequência .................. 605 MHz (mínima) a 5582 MHz (máxima com boost)
+Boost ....................... habilitado
+Microcódigo ................. 0xb404023
+Caches ...................... L1d 48 KiB e L1i 32 KiB por núcleo
+                              L2 1 MiB por núcleo
+                              L3 32 MiB, um único bloco compartilhado pelos
+                              8 núcleos
+NUMA ........................ 1 nó
+Extensões relevantes ........ AVX2, AVX-512 (inclui VNNI e BF16)
+Driver de frequência ........ amd-pstate-epp, modo ativo, prefcore habilitado
+Perfil de energia padrão .... power-profiles-daemon em "balanced": governador
+                              powersave, EPP balance_performance
+Durante as coletas .......... perfil "performance": governador e EPP em
+                              performance nos 16 processadores (ADR-015)
+Estados ociosos (C-states) .. POLL; C1 (saída em 1 µs); C2 (18 µs);
+                              C3 (350 µs). Todos habilitados.
+Mitigações de CPU ........... padrão do kernel. Com mitigação ativa: Spectre v1,
+                              Spectre v2 (IBRS automático), Speculative Store
+                              Bypass, SRSO e VMSCAPE. Demais: não afetado.
+
+
+4. MEMÓRIA
+----------
+Total ....................... 32 GB físicos (2 x 16 GB); 30 GiB visíveis ao
+                              sistema
+Módulos ..................... A-DATA AX5U6000C4816G, DDR5, 1 rank, 16 GB cada
+Velocidade .................. 6000 MT/s configurados, acima do padrão JEDEC de
+                              4800 MT/s: perfil EXPO ativo no firmware
+Swap padrão ................. arquivo /swap.img de 8 GB, ativado pelo fstab;
+                              desligado durante as coletas (ADR-016)
+Transparent Huge Pages ...... enabled = madvise; defrag = madvise
+Huge pages estáticas ........ 0
+vm.swappiness ............... 60
+vm.dirty_ratio .............. 20
+vm.dirty_background_ratio ... 10
+vm.dirty_expire_centisecs ... 3000
+vm.overcommit_memory ........ 0
+kernel.numa_balancing ....... 0
+
+
+5. ARMAZENAMENTO
+----------------
+
+5.1 Dispositivo de medição: nvme0, Crucial P510
+
+Modelo ...................... Crucial P510 1 TB (CT1000P510SSD5), sem DRAM
+Firmware .................... K1CR5102
+Interface ................... PCIe 5.0 x4, link negociado em 32 GT/s x4
+                              (endereço PCI 02:00.0)
+Capacidade .................. 1.000.204.886.016 bytes
+Formato de setor ............ 512 B, único formato oferecido pelo firmware
+Cache de escrita volátil .... habilitado (kernel: write back)
+Transferência máxima ........ 256 KiB pelo controlador (MDTS = 6); o kernel
+                              divide requisições em até 128 KiB
+                              (max_sectors_kb)
+Gerência de energia (APST) .. habilitada. O kernel aceita estados com latência
+                              de até 100 ms (nvme_core.default_ps_max_latency_us
+                              = 100000), o que inclui PS3 e PS4
+Estados de energia .......... PS0 7,5 W | PS1 2,4 W | PS2 1,5 W (operacionais)
+                              PS3 0,03 W, entrada 5 ms, saída 2,5 ms
+                              PS4 0,003 W, entrada 10 ms, saída 40 ms
+Dica de carga (feature 0x02)  2, "escrita sequencial intensa". Valor encontrado
+                              no dispositivo, não alterado por este trabalho.
+PCIe ASPM ................... L1 habilitado no link; política do kernel
+                              "default" (definida pelo firmware)
+Temperaturas-limite ......... aviso 83 °C; crítica 85 °C
+Sensor de temperatura ....... /sys/class/nvme/nvme0/hwmon*/temp1_input,
+                              legível sem root
+Escalonador de I/O .......... none
+Fila do kernel .............. nr_requests 1023; read_ahead 128 KiB
+SMART (25/10/2026, 20:05) ... 0% de desgaste, 46 h ligado, 2,99 TB gravados
+                              (inclui os testes de caracterização de 24 e
+                              25/10), 0 erros de mídia, 0 desligamentos
+                              inseguros, 37 °C em repouso
+
+5.2 Partições e sistema de arquivos
+
+nvme0n1p1 ................... 1 GB, vfat, /boot/efi
+nvme0n1p2 ................... 930,5 GB, ext4, /
+Opções de montagem .......... rw,relatime. Sem discard. Journal em modo ordered
+                              e commit a cada 5 s (padrões do ext4)
+Bloco / inode ............... 4096 B / 256 B
+Recursos do ext4 ............ has_journal, extent, 64bit, flex_bg,
+                              metadata_csum, orphan_file, dir_index, huge_file,
+                              large_file, sparse_super
+Criado em ................... 19/10/2026
+Ocupação .................... 20 GiB de 915 GiB (3%); 849 GiB disponíveis
+Reserva para root ........... 5% (46,5 GiB)
+Descarte (TRIM) ............. padrão: fstrim.timer semanal. Durante as coletas:
+                              sync seguido de fstrim manual (ADR-017)
+
+5.3 Outro dispositivo: nvme1, não participa das medições
+
+Kingston NV3 1 TB (SNV3S1000G), sem DRAM, firmware SDQ00103, PCIe 0c:00.0.
+Contém o Windows 11 (partições NTFS). Nenhuma partição montada no Ubuntu.
+4% de desgaste em 24/10/2026.
+
+
+6. CONTAINERS
+-------------
+Docker ...................... Docker CE 29.9.2, do repositório oficial da Docker
+Docker Compose .............. v5.6.1
+containerd / runc ........... 2.4.2 / 1.5.2
+Driver de armazenamento ..... overlayfs (snapshotter do containerd)
+cgroup ...................... v2, driver systemd
+Diretório raiz .............. /var/lib/docker, no P510
+Driver de log ............... json-file, padrão, sem rotação configurada
+                              (não existe /etc/docker/daemon.json)
+Estado ...................... nenhum container, nenhuma imagem
+
+
+7. OUTROS COMPONENTES
+---------------------
+GPU dedicada ................ NVIDIA GeForce RTX 5070, driver 595.99.02. Ociosa
+                              (P8, ~10 W); não usada nas medições (ADR-005)
+GPU integrada ............... AMD Radeon do processador (Granite Ridge)
+Rede ........................ eno1, Realtek (r8169)
+Sensores (hwmon) ............ hwmon0 = nvme0 (P510); hwmon1 = nvme1 (Kingston);
+                              hwmon2 = k10temp (CPU); hwmon5 e hwmon6 = spd5118
+                              (módulos de memória); hwmon7 = amdgpu.
+                              A numeração pode mudar entre inicializações; ler
+                              pelo caminho do dispositivo.
+
+
+8. FERRAMENTAS DE MEDIÇÃO
+-------------------------
+fio ......................... 3.41
+nvme-cli .................... 2.16
+sysstat (iostat, sar) ....... 12.7.7
+lm-sensors .................. 3.6.2
+power-profiles-daemon ....... 0.30
+linux-tools-common .......... 7.0.0-38 (cpupower)
+
+
+9. SERVIÇOS EM SEGUNDO PLANO (estado padrão)
+--------------------------------------------
+Ativos ...................... power-profiles-daemon, unattended-upgrades,
+                              snapd, sysstat-collect (a cada 10 min)
+Suspensos nas coletas ....... timers apt-daily, apt-daily-upgrade,
+                              fwupd-refresh, update-notifier-download, man-db,
+                              anacron, logrotate, dpkg-db-backup, e2scrub_all
+                              e fstrim; atualização automática de snaps
+                              (ADR-017 e ADR-019)
+Inativos .................... thermald (específico de Intel); irqbalance não
+                              instalado
+
+
+10. COMANDOS DE COLETA
+----------------------
+cat /etc/os-release; uname -r; cat /proc/cmdline
+cat /sys/class/dmi/id/{board_vendor,board_name,board_version}
+cat /sys/class/dmi/id/{bios_vendor,bios_version,bios_date}
+lscpu; lscpu -e; grep -m1 microcode /proc/cpuinfo
+cat /sys/devices/system/cpu/amd_pstate/{status,prefcore}
+cat /sys/devices/system/cpu/cpu0/cpufreq/{scaling_driver,scaling_governor}
+cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference
+cat /sys/devices/system/cpu/cpu0/cpuidle/state*/{name,latency,disable}
+powerprofilesctl get
+sudo dmidecode -t memory
+free -h; swapon --show
+sysctl vm.swappiness vm.dirty_ratio vm.dirty_background_ratio \
+       vm.dirty_expire_centisecs vm.overcommit_memory vm.nr_hugepages \
+       kernel.numa_balancing
+cat /sys/kernel/mm/transparent_hugepage/{enabled,defrag}
+sudo nvme list
+sudo nvme id-ctrl /dev/nvme0
+sudo nvme id-ns /dev/nvme0n1
+sudo nvme get-feature /dev/nvme0 -f 0x0c -H     # APST
+sudo nvme get-feature /dev/nvme0 -f 0x02 -H     # gerência de energia
+sudo nvme get-feature /dev/nvme0 -f 0x06 -H     # cache de escrita volátil
+sudo nvme smart-log /dev/nvme0
+sudo lspci -vv -s 02:00.0                       # link PCIe e ASPM
+cat /sys/module/nvme_core/parameters/default_ps_max_latency_us
+cat /sys/module/pcie_aspm/parameters/policy
+cat /sys/block/nvme0n1/queue/{scheduler,nr_requests,read_ahead_kb}
+cat /sys/block/nvme0n1/queue/{write_cache,max_sectors_kb}
+findmnt /; sudo tune2fs -l /dev/nvme0n1p2; df -h /
+docker version; docker compose version; docker info
+nvidia-smi --query-gpu=name,driver_version,pstate,power.draw --format=csv
+systemctl list-timers --all

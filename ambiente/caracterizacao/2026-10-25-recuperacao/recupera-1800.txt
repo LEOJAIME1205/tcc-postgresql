@@ -1,0 +1,33 @@
+recupera-1800: (g=0): rw=write, bs=(R) 1024KiB-1024KiB, (W) 1024KiB-1024KiB, (T) 1024KiB-1024KiB, ioengine=io_uring, iodepth=32
+fio-3.41
+Starting 1 process
+recupera-1800: Laying out IO file (1 file / 81920MiB)
+
+recupera-1800: (groupid=0, jobs=1): err= 0: pid=23773: Sun Oct 25 18:57:42 2026
+  write: IOPS=3356, BW=3357MiB/s (3520MB/s)(80.0GiB/24406msec); 0 zone resets
+    slat (usec): min=18, max=35473, avg=25.42, stdev=161.37
+    clat (usec): min=815, max=88145, avg=9507.01, stdev=13188.67
+     lat (usec): min=840, max=88175, avg=9532.43, stdev=13190.21
+    clat percentiles (usec):
+     |  1.00th=[ 3097],  5.00th=[ 3130], 10.00th=[ 3130], 20.00th=[ 3130],
+     | 30.00th=[ 3130], 40.00th=[ 3130], 50.00th=[ 3130], 60.00th=[ 3228],
+     | 70.00th=[ 3523], 80.00th=[10945], 90.00th=[29492], 95.00th=[36963],
+     | 99.00th=[60031], 99.50th=[65799], 99.90th=[72877], 99.95th=[76022],
+     | 99.99th=[80217]
+   bw (  MiB/s): min=  491, max= 9175, per=100.00%, avg=3401.87, stdev=3763.64, samples=24
+   iops        : min=  476, max= 9248, avg=3401.83, stdev=3740.65, samples=48
+  lat (usec)   : 1000=0.05%
+  lat (msec)   : 2=0.17%, 4=73.23%, 10=5.97%, 20=0.80%, 50=17.44%
+  lat (msec)   : 100=2.35%
+  cpu          : usr=3.15%, sys=5.43%, ctx=81335, majf=0, minf=11
+  IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.1%, 16=0.1%, 32=100.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.1%, 64=0.0%, >=64=0.0%
+     issued rwts: total=0,81920,0,0 short=0,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=32
+
+Run status group 0 (all jobs):
+  WRITE: bw=3357MiB/s (3520MB/s), 3357MiB/s-3357MiB/s (3520MB/s-3520MB/s), io=80.0GiB (85.9GB), run=24406-24406msec
+
+Disk stats (read/write):
+  nvme0n1: ios=1/655265, sectors=8/167744424, merge=0/689, ticks=0/6114991, in_queue=6115001, util=95.53%
