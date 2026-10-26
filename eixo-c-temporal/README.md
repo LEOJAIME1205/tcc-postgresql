@@ -29,6 +29,9 @@ mantenedora do TimescaleDB; a mitigação está descrita em ADR-008.
 ## Advertência sobre o armazenamento
 
 Queda de vazão em escrita sustentada pode originar-se do cache pSLC do SSD e
-não do banco de dados. O dimensionamento do conjunto de dados é escolhido para
-que a comparação principal ocorra em regime permanente. Ver ADR-004 e a
-caracterização em `../ambiente/caracterizacao/`.
+não do banco de dados. O cache é dinâmico e esvaziado em segundo plano, então o
+controle não é dimensionar os dados para fugir dele. Em todas as execuções
+medem-se a taxa de escrita do disco e os bytes gravados por container; uma
+execução de controle com `fio` reproduz a taxa observada; e a atribuição de uma
+queda ao SSD segue um critério fixado antes da coleta. Ver a revisão da ADR-004
+e a caracterização em `../ambiente/README.md`.

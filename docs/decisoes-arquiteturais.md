@@ -307,6 +307,27 @@ montagem, impossíveis sob virtualização.
 
 ---
 
+## ADR-021 — Coleta de métricas internas com a mesma frequência em todas as arquiteturas
+
+**Contexto.** Os coletores do harness rodam nos núcleos do gerador de carga (ADR-018), mas as consultas de métricas internas são executadas dentro do sistema sob teste e consomem CPU, memória e I/O dele. Se o PostgreSQL for consultado com mais frequência, ou com sondas mais pesadas, que os sistemas especializados, o custo da observação recai mais sobre a arquitetura consolidada. Leituras de telemetria do kernel (`/proc`, `/sys`, cgroup) não passam pelos sistemas sob teste.
+
+**Decisão.**
+
+1. Telemetria do kernel, de host e containers: a cada 1 s.
+2. Estatísticas internas de todos os sistemas de dados (PostgreSQL, TimescaleDB, OpenSearch, Qdrant, RabbitMQ e InfluxDB): a cada 10 s, com uma conexão dedicada e somente leitura por sistema, fora do pool do gerador.
+3. Tamanhos em disco de tabelas, índices, coleções e filas: a cada 60 s, em todos os sistemas.
+4. `pgstattuple_approx`: a cada 5 min, só no teste de longa duração.
+5. `pg_stat_statements` habilitado via `shared_preload_libraries` e lido só ao fim de cada execução.
+6. No piloto (Etapa 2.5), medir o custo da coleta: a mesma execução com o protocolo completo e sem coleta interna nem `pg_stat_statements`. Se a diferença de vazão ou de latência superar a variação entre repetições, os intervalos são revistos e esta ADR é atualizada.
+
+**Justificativa.** Frequência igual torna o custo da observação comparável entre arquiteturas. Dez segundos bastam para as tendências que interessam, como tuplas mortas, WAL e autovacuum, que evoluem em minutos; o intervalo de 1 s fica reservado ao que é lido do kernel, sem custo para os sistemas sob teste. O `pgstattuple_approx` percorre páginas da tabela e é a sonda mais cara, por isso fica restrito ao cenário em que a inflação é a pergunta. O `pg_stat_statements` é a forma usual de diagnosticar consultas no PostgreSQL e é amplamente usado em operação.
+
+**Efeito sobre a comparação.** Desfavorece o PostgreSQL em pequena medida: ele recebe duas sondas sem equivalente do outro lado, o `pgstattuple_approx` no teste de longa duração e o custo contínuo do `pg_stat_statements`. No Eixo B, as três configurações gravam o dado de negócio no PostgreSQL, então essas sondas valem para todas elas. O custo total é medido no piloto e reportado.
+
+**Estado.** Aceita.
+
+---
+
 ## Registro de alterações
 
 | Data | Alteração |
@@ -316,4 +337,5 @@ montagem, impossíveis sob virtualização.
 | 25/10/2026 | ADR-015 a ADR-019: governador, swap, fstrim, cpuset por núcleo físico e tarefas de manutenção |
 | 25/10/2026 | ADR-004: repouso de 20 minutos (recuperação completa medida em 15, mais margem de precaução). ADR-017: `fstrim` precedido de `sync` |
 | 25/10/2026 | ADR-020: APST do NVMe desligado durante as coletas |
+| 25/10/2026 | ADR-021: coleta de métricas internas com a mesma frequência em todas as arquiteturas |
 
