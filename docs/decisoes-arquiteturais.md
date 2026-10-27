@@ -389,6 +389,101 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 
 ---
 
+## ADR-025 — Orçamento de memória de 20 GiB para o sistema sob teste
+
+**Contexto.** A ADR-003 exige limites explícitos de memória e orçamento idêntico entre as arquiteturas de cada eixo, mas não fixa o valor. A máquina tem 30,0 GiB visíveis. Sem as ferramentas de desenvolvimento abertas, o desktop, o Docker e o kernel usam de 1,5 a 2 GiB. O kernel cobra de cada container o cache de arquivo que ele usa (verificado em 27/10/2026, ver `harness/README.md`), e todo banco enche esse cache até o limite. Por isso o sistema sob teste ocupa o orçamento inteiro durante toda a execução, e o resto da máquina vive só no que sobra, sem swap (ADR-016). Se o resto ultrapassar essa sobra, o kernel recupera memória de todos os processos, inclusive o cache do banco, ou encerra algum deles.
+
+**Decisão.**
+
+1. Sistema sob teste: 20 GiB, a soma dos limites (`memory.max`) de todos os seus containers. A arquitetura consolidada concentra o valor num serviço; a poliglota o divide entre os seus, inclusive processos auxiliares como o relay do outbox, com a divisão definida na etapa de cada eixo.
+2. O mesmo orçamento nos três eixos.
+3. Gerador de carga: limite próprio de 4 GiB. A coleta usa poucos megabytes e roda no host.
+4. Os 6 GiB restantes ficam para o sistema, o desktop, o Docker e como margem.
+5. O limite do gerador é revisto no piloto (Etapa 2.5), com o uso real de memória medido.
+
+**Justificativa.** Vinte GiB aproveitam dois terços da máquina e deixam margem para o sistema sob teste cheio de cache, o gerador e imprevistos, sem que a falta de swap provoque recuperação de memória sobre o banco. O limite do gerador impede que um gerador descontrolado tire memória do sistema sob teste. O mesmo valor nos três eixos simplifica a configuração e a estimativa de custo em nuvem.
+
+**Efeito sobre a comparação.** Neutro entre as arquiteturas de cada eixo, por construção. Registra-se que a poliglota divide o orçamento (ADR-003). O valor define o regime medido junto com o tamanho dos dados: dados menores que 20 GiB colocam o sistema em regime de memória. A relação entre dados e memória é decidida na etapa de cada eixo. Na estimativa de custo em nuvem, 20 GiB não corresponde a um tamanho comum de instância, e a equivalência adotada é declarada no artigo.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-026 — Rede interna do Docker para todos os containers, sem portas publicadas
+
+**Contexto.** O gerador de carga precisa alcançar os sistemas sob teste, e na arquitetura poliglota os serviços conversam entre si. Um gerador fora dos containers, acessando portas publicadas no host, passaria por uma camada de tradução de endereços do Docker com custo próprio, que cresce com a vazão.
+
+**Decisão.** Sistemas sob teste e gerador de carga rodam em containers do mesmo projeto do Docker Compose e se comunicam pela rede interna padrão do projeto. Nenhuma porta é publicada no host. A coleta, que roda no host, acessa os containers pelo endereço deles na rede interna.
+
+**Justificativa.** O mesmo caminho de rede para todas as arquiteturas, sem a camada de tradução de endereços. Sem portas publicadas, os bancos também ficam inacessíveis de fora da máquina.
+
+**Efeito sobre a comparação.** A rede interna é mais rápida que uma rede real entre máquinas, e a arquitetura poliglota faz mais saltos de rede (aplicação para dois motores de busca, relay para o broker). A medição subestima esse custo da arquitetura poliglota e, portanto, a favorece levemente.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-027 — Logs dos containers com rotação por tamanho
+
+**Contexto.** O driver de log padrão do Docker (`json-file`) grava tudo o que os containers imprimem no mesmo SSD dos bancos, sem limite de tamanho.
+
+**Decisão.** Driver `json-file` com rotação, igual para todos os containers: até 5 arquivos de 100 MB cada. Os logs de cada execução são copiados para `ferramenta/` no diretório da execução.
+
+**Justificativa.** Limita o espaço ocupado e o volume de escrita dos logs, sem perder a trilha de auditoria de cada execução.
+
+**Efeito sobre a comparação.** Neutro. Um sistema que registre mais logs grava mais no disco, o que é uma característica real dele.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-028 — `/dev/shm` de 1 GiB nos containers PostgreSQL
+
+**Contexto.** O Docker monta 64 MB de memória compartilhada em `/dev/shm` por padrão. O PostgreSQL usa esse espaço para a memória compartilhada dinâmica das consultas paralelas, que podem falhar quando ele não basta. A documentação da imagem oficial mostra o aumento de `shm_size` na configuração com Docker Compose.
+
+**Decisão.** `shm_size` de 1 GiB nos containers PostgreSQL de todos os eixos. A memória usada ali é cobrada do container e conta dentro dos 20 GiB da ADR-025. Os demais sistemas ficam com o padrão.
+
+**Justificativa.** Remove uma falha que vem do ambiente Docker, não do PostgreSQL. É um ajuste de ambiente, não de desempenho.
+
+**Efeito sobre a comparação.** Favorece o PostgreSQL em relação ao padrão do Docker, de forma legítima: sem o ajuste, ele poderia falhar por uma limitação que não existe numa instalação comum fora de containers.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-029 — Restauração dos volumes por cópia de um estado inicial
+
+**Contexto.** A ADR-013 exige restaurar o estado inicial dos volumes entre execuções independentes, mas não define o mecanismo.
+
+**Decisão.**
+
+1. Os dados de cada arquitetura ficam em diretórios do host, fora do repositório e no P510, montados nos containers.
+2. Depois da carga dos dados, com os containers parados de forma limpa, faz-se uma cópia "inicial" do diretório, guardada ao lado.
+3. Antes de cada execução, com os containers parados: a cópia em uso é apagada e substituída por uma cópia da inicial, com `cp -a`, que preserva dono e permissões. Como os arquivos pertencem ao usuário do banco dentro do container, a cópia é feita por um container auxiliar, sem `sudo`.
+4. Em seguida vêm `sync`, `fstrim` e o repouso de 20 minutos (ADR-004 e ADR-017).
+
+**Justificativa.** Diretórios comuns são fáceis de copiar, conferir e medir, ao contrário dos volumes gerenciados pelo Docker. Os dados ficam em ext4 direto, sem passar pela camada de sistema de arquivos dos containers.
+
+**Efeito sobre a comparação.** Neutro. A restauração grava mais para a arquitetura de volume maior, efeito tratado pelo repouso da ADR-004.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-030 — Containers sem reinício automático e com encerramento limpo
+
+**Contexto.** Com reinício automático, um banco que caísse durante a execução, por exemplo por falta de memória, voltaria sozinho, e a falha ficaria escondida no meio dos dados. Ao parar um container, o Docker espera 10 segundos por padrão antes de forçar o encerramento, e o PostgreSQL pode precisar de mais tempo para o checkpoint de desligamento.
+
+**Decisão.** Nenhum container reinicia automaticamente (`restart: "no"`). Os containers PostgreSQL têm 2 minutos para encerrar (`stop_grace_period`), com o sinal de desligamento rápido e limpo que a imagem oficial já define (`SIGINT`).
+
+**Justificativa.** Uma falha durante a execução fica visível e é registrada (ADR-016). O encerramento limpo garante que a cópia inicial da ADR-029 seja feita a partir de dados consistentes.
+
+**Efeito sobre a comparação.** Neutro.
+
+**Estado.** Aceita.
+
+---
+
 ## Registro de alterações
 
 | Data | Alteração |
@@ -401,4 +496,6 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 | 25/10/2026 | ADR-021: coleta de métricas internas com a mesma frequência em todas as arquiteturas |
 | 27/10/2026 | ADR-022: imagem única do PostgreSQL 18 para os três eixos. ADR-023: telemetria desligada em todos os sistemas |
 | 27/10/2026 | ADR-024: `timescaledb-tune` executado uma vez, com recursos explícitos, e saída congelada |
+| 27/10/2026 | ADR-025: orçamento de memória de 20 GiB para o sistema sob teste, 4 GiB para o gerador |
+| 27/10/2026 | ADR-026 a ADR-030: rede interna sem portas publicadas, logs com rotação, `/dev/shm` de 1 GiB no PostgreSQL, restauração por cópia do estado inicial, sem reinício automático |
 
