@@ -263,10 +263,33 @@ Todas as imagens fixadas por digest. Ver ADR-011.
 
 | Sistema | Versão | Digest |
 |---|---|---|
-| PostgreSQL | a registrar | a registrar |
-| pgvector | a registrar | a registrar |
-| TimescaleDB | a registrar | a registrar |
+| PostgreSQL | 18.6 (`18.6-1.pgdg13+2`), Debian 13 | base `postgres:18.6-trixie@sha256:edb0c08dc33befd0262ab3b5cf1c4f3f8cfd8b09e88c05b45adee29d6761ddb6` |
+| pgvector | 0.8.7 (`0.8.7-1.pgdg13+1`, PGDG) | na imagem `tcc-postgres` |
+| TimescaleDB | 2.31.0 Community (`2.31.0~debian13-1806`), licença `timescale` | na imagem `tcc-postgres` |
 | OpenSearch | a registrar | a registrar |
 | Qdrant | a registrar | a registrar |
 | RabbitMQ | a registrar | a registrar |
 | InfluxDB | a registrar | a registrar |
+
+### Imagem do PostgreSQL usada nos três eixos
+
+Construída a partir de `harness/orquestracao/postgres/Dockerfile` (ADR-022) e
+verificada em 27/10/2026.
+
+| Item | Valor |
+|---|---|
+| Tag local | `tcc-postgres:18.6-ts2.31.0-pgv0.8.7` |
+| ID da imagem | `sha256:3c71fe3d3acb92bc6b4c2a1dfce722e9eff10c352252a6450051cd04880067ec` |
+| Pacotes acrescentados à base | `ca-certificates` 20250419+deb13u1, `postgresql-18-pgvector`, `timescaledb-2-postgresql-18`, `timescaledb-2-loader-postgresql-18`, `timescaledb-tools` 0.19.0 |
+| Extensões verificadas | `vector` 0.8.7, `timescaledb` 2.31.0, `pg_trgm` 1.6, `pgstattuple` 1.5, `pg_stat_statements` 1.12 |
+
+Verificação: índice HNSW usado em busca por vizinhos; hypertable com 4 chunks
+comprimidos de 23 MB para 3,9 MB (razão 6,1), o que confirma a edição Community;
+colunas `total_autovacuum_time` (PostgreSQL 18), `pg_stat_wal` e
+`pg_stat_checkpointer` disponíveis. A telemetria do TimescaleDB vem em `basic` e
+é desligada na configuração do Eixo C (ADR-023).
+
+O ID de uma imagem construída localmente muda a cada reconstrução, mesmo com as
+mesmas versões, porque inclui datas de criação. A referência do que foi medido é
+este ID, registrado também no manifesto de cada execução; a receita para
+reconstruir é a base fixada por digest com as versões fixadas dos pacotes.

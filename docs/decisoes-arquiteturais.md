@@ -328,6 +328,67 @@ montagem, impossíveis sob virtualização.
 
 ---
 
+## ADR-022 — Imagem única do PostgreSQL 18 para os três eixos
+
+**Contexto.** Os três eixos usam PostgreSQL: o A com `pgvector` e `pg_trgm`, o B sem extensões de dados, o C com TimescaleDB. O PostgreSQL 18 é a versão estável atual; o 19 está em *release candidate*, com lançamento previsto para 19/11/2026. As imagens prontas diferem entre si de forma relevante. A `timescale/timescaledb` é baseada em Alpine, com a biblioteca C `musl` em vez da `glibc`, e roda o `timescaledb-tune` automaticamente na primeira inicialização; o script lê a CPU da cota do container e ignora o `cpuset` da ADR-018. A `timescale/timescaledb-ha` é feita para Kubernetes, com Patroni e várias ferramentas que o trabalho não usa. O pacote do TimescaleDB nos repositórios Debian e PGDG é a edição Apache, que não inclui a compressão medida no Eixo C.
+
+**Decisão.** Uma imagem construída pelo projeto e usada nos três eixos, com Dockerfile em `harness/orquestracao/postgres/`:
+
+- base oficial `postgres:18.6-trixie` (Debian 13, `glibc`), fixada por digest;
+- `postgresql-18-pgvector` 0.8.7, do repositório PGDG que a imagem oficial já configura;
+- `timescaledb-2-postgresql-18` 2.31.0 e `timescaledb-tools` 0.19.0, do repositório oficial da Timescale (edição Community, com compressão), com a chave do repositório conferida por hash;
+- versões de todos os pacotes fixadas.
+
+Cada eixo ativa apenas o que usa: `timescaledb` em `shared_preload_libraries` só no Eixo C; `pg_stat_statements` em todos (ADR-021). O digest da imagem construída é registrado em `ambiente/README.md` (ADR-011).
+
+**Justificativa.** É a única opção avaliada que garante o mesmo binário do PostgreSQL, com a mesma biblioteca C, em todos os eixos, e em que nenhum parâmetro é aplicado sem decisão explícita, condição das ADR-003 e ADR-010. Corresponde também ao enunciado da tese: um único PostgreSQL com extensões.
+
+**Efeito sobre a comparação.** Neutro. Remove diferenças de biblioteca C e de compilação entre os eixos e não favorece nenhuma das arquiteturas. O custo é manter o Dockerfile; a reconstrução depende de os repositórios PGDG e da Timescale manterem as versões fixadas, e o digest da imagem construída permanece como referência do que foi medido.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-023 — Telemetria dos fabricantes desligada em todos os sistemas
+
+**Contexto.** TimescaleDB, Qdrant e InfluxDB vêm com telemetria ligada por padrão e enviam periodicamente estatísticas de uso aos fabricantes pela rede. Durante as medições, isso é atividade de rede e de CPU dentro do sistema sob teste que não pertence à carga, em intensidade diferente para cada sistema, além de enviar a terceiros dados do ambiente experimental.
+
+**Decisão.** Desligar a telemetria em todos os sistemas que a tenham:
+
+- TimescaleDB: `timescaledb.telemetry_level = off`, que também desliga a verificação de versão;
+- Qdrant: `QDRANT__TELEMETRY_DISABLED=true`;
+- InfluxDB: opção equivalente da versão adotada, a confirmar na Etapa 2.4;
+- OpenSearch, RabbitMQ e PostgreSQL: verificados na etapa de cada eixo; nenhuma telemetria conhecida até aqui.
+
+As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disponíveis para a coleta da ADR-021.
+
+**Justificativa.** Remove atividade que não pertence à carga medida e evita o envio de dados. Aplicar a todos mantém a simetria.
+
+**Efeito sobre a comparação.** Neutro, aplicado a todos os sistemas.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-024 — `timescaledb-tune` executado uma vez, com recursos explícitos, e saída congelada
+
+**Contexto.** A instalação oficial do TimescaleDB recomenda rodar o `timescaledb-tune`, que ajusta memória, paralelismo, WAL, processos de fundo e outros parâmetros do PostgreSQL para cargas de séries temporais. Sem ele, o PostgreSQL do Eixo C ficaria com os padrões de fábrica (`shared_buffers` de 128 MB) e sem os ajustes próprios do TimescaleDB, como processos de fundo para as rotinas de compressão e limite de locks para hypertables com muitos chunks. A detecção automática de recursos da ferramenta lê a CPU da cota do container e ignora o `cpuset` da ADR-018, e seu resultado depende da versão da ferramenta.
+
+**Decisão.**
+
+1. Executar o `timescaledb-tune` uma única vez, com `--dry-run`, a partir da imagem da ADR-022, informando explicitamente a memória do container do Eixo C (o orçamento da ADR-003) e `--cpus=12` (ADR-018).
+2. Revisar cada parâmetro recomendado e congelar os valores num arquivo de configuração versionado do Eixo C. A lista completa de parâmetros e valores é acrescentada a esta ADR.
+3. Nunca deixar a ferramenta rodar automaticamente na inicialização.
+4. O InfluxDB recebe tratamento simétrico: a configuração recomendada por seu fabricante para cargas de ingestão, com o mesmo orçamento de memória, documentada da mesma forma.
+
+**Justificativa.** Segue a recomendação publicada pelo mantenedor (ADR-010) sem herdar a leitura errada de CPU da detecção automática. Congelar a saída torna a configuração auditável e reprodutível, independente da versão futura da ferramenta.
+
+**Efeito sobre a comparação.** Em relação aos padrões de fábrica, favorece o lado consolidado do Eixo C, de forma legítima pela ADR-010 e compensada pelo tratamento simétrico do InfluxDB. O PostgreSQL do Eixo C fica com configuração mais completa que o dos Eixos A e B, que não têm ferramenta equivalente e seguem a documentação do PostgreSQL para memória (ADR-003). Como as comparações são feitas dentro de cada eixo, a diferença entre eixos é declarada, e não corrigida.
+
+**Estado.** Aceita. A execução depende da definição do orçamento de memória dos containers.
+
+---
+
 ## Registro de alterações
 
 | Data | Alteração |
@@ -338,4 +399,6 @@ montagem, impossíveis sob virtualização.
 | 25/10/2026 | ADR-004: repouso de 20 minutos (recuperação completa medida em 15, mais margem de precaução). ADR-017: `fstrim` precedido de `sync` |
 | 25/10/2026 | ADR-020: APST do NVMe desligado durante as coletas |
 | 25/10/2026 | ADR-021: coleta de métricas internas com a mesma frequência em todas as arquiteturas |
+| 27/10/2026 | ADR-022: imagem única do PostgreSQL 18 para os três eixos. ADR-023: telemetria desligada em todos os sistemas |
+| 27/10/2026 | ADR-024: `timescaledb-tune` executado uma vez, com recursos explícitos, e saída congelada |
 
