@@ -186,8 +186,18 @@ intervalos de coleta seguem a ADR-021.
 | `host` | `disco_ocupado_ms_total` | `nvme0n1` | `/proc/diskstats`, tempo com I/O em andamento |
 | `container` | `cont_cpu_us_total` | container | cgroup v2, `cpu.stat` (`usage_usec`) |
 | `container` | `cont_mem_bytes`, `cont_mem_pico_bytes` | container | cgroup v2, `memory.current` e `memory.peak` |
+| `container` | `cont_mem_anon_bytes`, `cont_mem_arquivo_bytes`, `cont_mem_shmem_bytes` | container | cgroup v2, `memory.stat` (`anon`, `file`, `shmem`) |
 | `container` | `cont_escrita_bytes_total`, `cont_leitura_bytes_total` | container | cgroup v2, `io.stat`, linha `259:0` |
 | `container` | `cont_oom_total` | container | cgroup v2, `memory.events` (`oom_kill`) |
+
+O kernel cobra do container o cache de páginas dos arquivos que ele lê e grava,
+então `cont_mem_bytes` e `cont_mem_pico_bytes` incluem esse cache e tendem ao
+limite de memória em qualquer banco. A memória própria do processo é `anon` mais
+`shmem` (onde fica, por exemplo, o `shared_buffers` do PostgreSQL); o cache de
+arquivo é `arquivo` menos `shmem`, porque o `file` do kernel já inclui o
+`shmem`. Verificado em 27/10/2026 com um container que gravou 200 MiB em
+`/dev/shm`, 1 GiB em arquivo e alocou 300 MiB: os três valores apareceram
+separados, e `arquivo` marcou 1224 MiB.
 
 **PostgreSQL**, em todas as arquiteturas que o usam (inclusive as poliglotas do
 Eixo B, que gravam nele o dado de negócio). Visões e colunas conferidas na
@@ -303,7 +313,7 @@ Cada variável dependente da proposta (seção 6.2) e de onde ela sai:
 | Razão de compressão e espaço por ponto | Métricas `tsdb_` e `influx_` de tamanho, divididas pelos pontos ingeridos |
 | Bytes gravados por métrica ingerida (ADR-004) | Diferença de `cont_escrita_bytes_total` dos containers do sistema sob teste, dividida pela de `tsbs_metricas_total` |
 | Deriva de latência | `operacoes.csv` ao longo do tempo, cenário `longa`; no Eixo C, percentis por lote de consultas |
-| Pico de memória e uso de CPU | `cont_mem_pico_bytes`, `cont_cpu_us_total` |
+| Pico de memória e uso de CPU | Máximo de `cont_mem_anon_bytes` + `cont_mem_shmem_bytes` (memória própria), com o cache de arquivo reportado à parte; `cont_cpu_us_total` |
 | Tamanho e tempo de construção de índices | `resumo.json` e métricas de tamanho |
 | Complexidade operacional e custo | Fora deste formato: medidos sobre os arquivos de composição, não por execução |
 
