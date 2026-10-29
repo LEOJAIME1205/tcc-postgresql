@@ -505,6 +505,53 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 
 ---
 
+## ADR-032 — Ordem das execuções sorteada em blocos
+
+**Contexto.** A ADR-012 manda aleatorizar a ordem entre arquiteturas, mas não define o esquema. Num sorteio livre de todas as execuções de uma janela, as repetições de uma arquitetura podem, por acaso, concentrar-se no início ou no fim. Uma deriva ao longo da janela, como disco mais ocupado, temperatura ambiente mais alta ou cache do SSD em outro estado, ficaria então confundida com a diferença entre arquiteturas.
+
+**Decisão.** As execuções de uma janela são organizadas em blocos. Cada bloco contém uma repetição de cada configuração da janela (arquitetura, cenário e nível de concorrência), em ordem sorteada dentro do bloco, e os blocos rodam em sequência. A semente do sorteio é definida no plano da janela e registrada na abertura, de modo que a ordem pode ser reproduzida. Execuções do cenário de longa duração, que rodam uma vez por arquitetura, ocupam janelas próprias, e a ordem entre elas é registrada.
+
+**Justificativa.** O sorteio em blocos é o desenho de blocos completos aleatorizados: cada arquitetura passa pelo começo, pelo meio e pelo fim da janela na mesma proporção, e a deriva temporal se distribui igualmente entre elas.
+
+**Efeito sobre a comparação.** Neutro. Protege as duas arquiteturas de cada eixo contra um viés de posição na janela.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-033 — Tratamento de falhas e interrupções
+
+**Contexto.** Durante uma janela, uma execução pode falhar: o gerador termina com erro, um container encerra, o kernel mata um processo por falta de memória. A janela também pode ser interrompida pelo operador ou por queda da máquina. Descartar falhas esconderia resultados, e repetir execuções à vontade permitiria escolher as mais favoráveis.
+
+**Decisão.**
+
+1. Uma execução que falha recebe o estado `falha` ou `oom` no manifesto. Os logs são salvos, a arquitetura é desligada, e a janela segue para a próxima execução. A execução falha é mantida e reportada, nunca repetida para substituí-la (ADR-016).
+2. Se um controle bloqueante do protocolo falhar na conferência antes de uma execução, a janela é encerrada, porque o ambiente deixou de ser válido.
+3. Uma interrupção do operador (Ctrl+C) marca a execução em curso como `abortada`, desliga a arquitetura, para os coletores e grava o registro de encerramento.
+4. O registro da janela é atualizado depois de cada execução. Uma janela interrompida pode ser retomada: as execuções pendentes rodam na ordem sorteada original, e só a execução `abortada` é repetida, como nova execução. A abortada continua registrada.
+
+**Justificativa.** Separa o que é resultado (falhas do sistema sob teste, que são dados) do que é acidente de operação (interrupções, que não dizem nada sobre as arquiteturas). Preservar a ordem sorteada na retomada mantém o desenho em blocos da ADR-032.
+
+**Efeito sobre a comparação.** Neutro. Impede tanto o descarte de resultados desfavoráveis quanto a repetição seletiva de execuções.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-034 — `pg_stat_statements` zerado no início do gerador
+
+**Contexto.** A cópia inicial dos dados (ADR-029) é feita depois da carga, e o PostgreSQL guarda as estatísticas acumuladas quando desliga de forma limpa. Sem intervenção, o `pg_stat_statements` lido ao fim de uma execução conteria também as consultas da preparação dos dados.
+
+**Decisão.** Nas arquiteturas com PostgreSQL, o orquestrador executa `pg_stat_statements_reset()` imediatamente antes de iniciar o gerador. Ao fim da execução, o conteúdo do `pg_stat_statements` é gravado em `instantaneos/pg_stat_statements.csv`. Os contadores cumulativos lidos pelo coletor do PostgreSQL não são zerados, porque a análise usa diferenças.
+
+**Justificativa.** O instantâneo passa a cobrir só o aquecimento e a medição, que é o que interessa para diagnosticar as consultas da carga.
+
+**Efeito sobre a comparação.** Neutro. Afeta apenas um dado de diagnóstico do lado do PostgreSQL. As consultas do aquecimento ficam incluídas no instantâneo, o que é declarado.
+
+**Estado.** Aceita.
+
+---
+
 ## Registro de alterações
 
 | Data | Alteração |
@@ -520,4 +567,5 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 | 27/10/2026 | ADR-025: orçamento de memória de 20 GiB para o sistema sob teste, 4 GiB para o gerador |
 | 27/10/2026 | ADR-026 a ADR-030: rede interna sem portas publicadas, logs com rotação, `/dev/shm` de 1 GiB no PostgreSQL, restauração por cópia do estado inicial, sem reinício automático |
 | 27/10/2026 | ADR-031: ambiente Python com versões travadas por `uv` |
+| 29/10/2026 | ADR-032 a ADR-034: ordem sorteada em blocos, tratamento de falhas e interrupções, `pg_stat_statements` zerado no início do gerador |
 

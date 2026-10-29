@@ -323,18 +323,28 @@ As saídas originais (`stdout` e os JSON) ficam em `ferramenta/`.
 ### instantaneos/ e ferramenta/
 
 - `instantaneos/`: estados capturados ao fim, como `docker-inspect.json`,
-  `pg_stat_statements.csv` e tamanhos finais em disco.
+  `pg_stat_statements.csv` e tamanhos finais em disco. O `pg_stat_statements`
+  é zerado imediatamente antes de o gerador começar, e por isso cobre o
+  aquecimento e a medição (ADR-034).
 - `ferramenta/`: saída padrão e de erro das ferramentas (TSBS, gerador) e
   `docker logs` de cada container, sem tratamento. A análise só lê esses
   arquivos quando o formato estiver documentado aqui.
 
 ### Registros de janela
 
-`abertura.json` e `encerramento.json` trazem o horário, os controles lidos do
-sistema, a ocupação do disco e os campos do SMART do P510 (temperatura, dados
-gravados, desgaste). O encerramento acrescenta a lista das execuções da janela,
-na ordem em que rodaram. A saída completa do `nvme smart-log` fica ao lado, em
-texto.
+Em `resultados/brutos/janelas/<id-janela>/`:
+
+- `plano.toml`: cópia do plano executado.
+- `abertura.json`: horário, controles lidos do sistema, ocupação do disco,
+  campos do SMART do P510 (temperatura, dados gravados, desgaste), semente e a
+  ordem sorteada das execuções (ADR-032).
+- `estado.json`: atualizado depois de cada execução, com o identificador e o
+  estado de cada uma. É o que permite retomar uma janela interrompida
+  (ADR-033).
+- `encerramento.json`: o mesmo da abertura, ao fim, mais a lista das execuções
+  na ordem em que rodaram.
+- `smart-abertura.txt` e `smart-encerramento.txt`: saída completa do
+  `nvme smart-log`.
 
 ### Mapa das variáveis dependentes
 
@@ -376,9 +386,7 @@ de descompactado. O tamanho real dos pacotes é estimado no piloto (Etapa 2.5).
 
 1. Confirmar na Etapa 2.4, com o TSBS instalado, as saídas descritas em
    "Eixo C: adaptação do TSBS" e a unidade dos percentis no JSON.
-2. Fixar o PostgreSQL em versão 18 ou posterior ao escolher as imagens
-   (ADR-011).
-3. Medir o custo da coleta no piloto (ADR-021, item 6).
+2. Medir o custo da coleta no piloto (ADR-021, item 6).
 
 ## Protocolo de execução
 
@@ -396,3 +404,132 @@ abertura e o encerramento de cada janela de coleta, e os detalhes de cada
 passo, estão em `docs/protocolo-coleta.md`.
 
 Ver ADR-002, ADR-004, ADR-012, ADR-013, ADR-015, ADR-017 e ADR-018.
+
+## Orquestrador
+
+`harness/orquestracao/executar.py` encadeia o protocolo. Roda no host, preso
+aos núcleos do gerador (`6-7,14-15`), dentro de
+`powerprofilesctl launch -p performance`. Tem três subcomandos:
+
+| Subcomando | O que faz |
+|---|---|
+| `verificar` | Confere os controles do protocolo e lista o que está fora, sem rodar nada |
+| `preparar` | Carrega os dados de uma arquitetura uma vez e grava a cópia inicial (ADR-029) |
+| `executar` | Roda uma janela inteira a partir de um plano; `--retomar` continua uma janela interrompida (ADR-033) |
+
+### Plano da janela
+
+Arquivo TOML versionado em `harness/planos/`. Cada `[[configuracao]]` se
+expande em um nível de concorrência por valor de `concorrencias`, repetido
+`repeticoes` vezes. As execuções são sorteadas em blocos com a `semente`
+(ADR-032).
+
+```toml
+nome = "piloto"
+semente = 20261108
+espaco_livre_min_gib = 100
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "outbox"
+cenario = "curta"
+concorrencias = [8, 32]
+repeticoes = 3
+aquecimento_s = 60
+medicao_s = 300
+```
+
+### Descritor de cada arquitetura
+
+Arquivo `arquitetura.toml` na pasta da arquitetura, ao lado da composição, por
+exemplo `eixo-b-fila/outbox/arquitetura.toml`. Tudo o que é específico de uma
+arquitetura fica ali, e o orquestrador permanece genérico.
+
+```toml
+eixo = "b"
+arquitetura = "outbox"
+compose = "compose.yaml"                  # relativo a este arquivo
+servicos_sob_teste = ["postgres", "rabbitmq", "relay"]
+servico_gerador = "gerador"
+
+[dados]                                    # variável de ambiente -> subdiretório
+TCC_DADOS_POSTGRES = "postgres"
+TCC_DADOS_RABBITMQ = "rabbitmq"
+
+[[coletor]]
+tipo = "postgres"
+servico = "postgres"
+banco = "fila"
+```
+
+Os diretórios de dados ficam em `~/tcc-dados/<eixo>/<arquitetura>/<subdiretório>/`,
+com `inicial/` e `atual/` (ADR-029). A variável de ambiente aponta para `atual/`
+e é definida em todo comando do Compose, inclusive no `down`.
+
+### Contrato do gerador de carga
+
+Todo gerador, de qualquer eixo, roda no serviço `servico_gerador` e aceita dois
+subcomandos:
+
+- `preparar`: carrega os dados no sistema sob teste. Código de saída 0 em caso
+  de sucesso.
+- `executar --saida DIR --concorrencia N --aquecimento-s A --medicao-s M --semente S`:
+  uma única invocação contínua, com aquecimento seguido de medição. Grava em
+  `DIR` o `operacoes.csv` e um `gerador.json` com os seus próprios instantes
+  (`aquecimento_inicio_ms`, `medicao_inicio_ms`, `medicao_fim_ms`), além da
+  ferramenta, da versão e dos parâmetros. Pode gravar também
+  `metricas-gerador.csv` e arquivos em `DIR/ferramenta/`. Código de saída 0 em
+  caso de sucesso.
+
+O adaptador do TSBS, no Eixo C, cumpre o mesmo contrato.
+
+### Controles conferidos
+
+Conferidos na abertura da janela e antes de cada execução. O orquestrador
+confere, não aplica: a abertura e o encerramento são os comandos de
+`docs/protocolo-coleta.md`.
+
+| Tipo | Controle |
+|---|---|
+| Bloqueante | Swap desligado (ADR-016) |
+| Bloqueante | `fstrim.timer` e timers de manutenção parados (ADR-017 e ADR-019) |
+| Bloqueante | APST desligado: `pm_qos_latency_tolerance_us` igual a 0 (ADR-020) |
+| Bloqueante | Governador e preferência de energia em `performance` nos 16 processadores, boost ligado (ADR-015) |
+| Bloqueante | `nvme0` é o P510 |
+| Bloqueante | Nenhum container rodando além dos da execução |
+| Bloqueante | Nenhum navegador aberto |
+| Bloqueante | Espaço livre de pelo menos `espaco_livre_min_gib` |
+| Bloqueante | `fstrim` e `nvme smart-log` executáveis sem senha (regra do `sudoers` abaixo) |
+| Aviso | Outros programas pesados abertos, como o VS Code |
+
+Um controle bloqueante que falha antes de uma execução encerra a janela
+(ADR-033). Os avisos vão para o manifesto.
+
+### Comandos com `sudo`
+
+O `fstrim` antes de cada execução e a leitura do SMART exigem root, e uma
+janela de horas não pode parar pedindo senha. Uma regra em
+`/etc/sudoers.d/tcc-coleta` libera sem senha só estes dois comandos, com estes
+argumentos exatos:
+
+```
+leojaime ALL=(root) NOPASSWD: /usr/sbin/fstrim -v /, /usr/sbin/nvme smart-log /dev/nvme0
+```
+
+O orquestrador nunca roda como root.
+
+### Sequência de cada execução
+
+1. Conferir os controles.
+2. Restaurar os diretórios de dados a partir de `inicial/`, com um container
+   auxiliar (ADR-029).
+3. `sync` e `sudo fstrim -v /`; repouso de 20 minutos (ADR-004 e ADR-017).
+4. Iniciar a telemetria de host e containers.
+5. Subir a arquitetura e iniciar os coletores internos.
+6. Zerar o `pg_stat_statements` (ADR-034) e rodar o gerador.
+7. Parar os coletores; capturar `instantaneos/` (`pg_stat_statements`,
+   `docker inspect`) e os logs dos containers em `ferramenta/`.
+8. Desligar a arquitetura.
+9. Definir o estado (`ok`, `falha`, `oom`, `abortada`), calcular o SHA-256 de
+   cada arquivo e fechar o `manifesto.json`; atualizar o `estado.json` da
+   janela.

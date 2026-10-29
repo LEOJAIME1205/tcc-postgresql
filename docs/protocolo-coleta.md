@@ -19,6 +19,12 @@ carga e da coleta.
   (seção 3). Se a máquina for reiniciada no meio, a abertura é refeita, porque
   swap, timers e APST voltam ao padrão no reinício.
 
+## Pré-requisito, feito uma única vez
+
+A regra de `sudoers` que permite ao orquestrador rodar `fstrim -v /` e
+`nvme smart-log /dev/nvme0` sem senha, descrita em `harness/README.md`
+("Comandos com `sudo`"). Sem ela, o orquestrador recusa iniciar a janela.
+
 ## 1. Abertura da janela
 
 ### 1.1 Máquina ociosa
