@@ -484,6 +484,27 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 
 ---
 
+## ADR-031 — Ambiente Python com versões travadas por `uv`
+
+**Contexto.** O harness é escrito em Python e passa a depender de bibliotecas externas, a começar pelo driver do PostgreSQL usado pelo coletor. O Python 3.14.4 do Ubuntu vem sem `pip` e sem `ensurepip`, então nem o `venv` padrão funciona sem pacotes adicionais. A reprodução exige fixar a ferramenta, o interpretador e cada biblioteca, no mesmo espírito da ADR-011.
+
+**Decisão.**
+
+1. Ferramenta: `uv` 0.12.24, instalado pelo instalador oficial na versão fixada e exigido pelo projeto (`required-version`). É a última versão da série 0.12, escolhida em vez de uma recém-lançada.
+2. Um projeto na raiz do repositório, descrito em `pyproject.toml`, marcado como aplicação e não como pacote.
+3. Interpretador: Python 3.14.4, fixado em `.python-version`. Nesta máquina, o `uv` usa o do sistema; em outra, baixa a mesma versão.
+4. Dependências diretas com versão exata no `pyproject.toml`. Todas as dependências, inclusive as indiretas, travadas com hash no `uv.lock`, que é versionado. O ambiente é recriado com `uv sync --locked`, que falha se o `uv.lock` estiver desatualizado.
+5. Primeira dependência: `psycopg[binary]` 3.3.6, com a biblioteca cliente do PostgreSQL embutida.
+6. Verificação de tipos em modo estrito configurada no próprio `pyproject.toml` (`[tool.pyright]`), para que o Pylance e qualquer avaliador usem o mesmo critério.
+
+**Justificativa.** O `uv` cria o ambiente sem depender do `pip` do sistema, gera um arquivo de travamento com hash de cada pacote e reproduz o ambiente com um único comando. Versões exatas tornam a reprodução independente de quando ela for feita.
+
+**Efeito sobre a comparação.** Neutro. Afeta a reprodutibilidade, não os resultados. A escolha dos drivers usados pelos geradores de carga, que afeta os resultados, será decidida em ADR própria na etapa de cada eixo.
+
+**Estado.** Aceita.
+
+---
+
 ## Registro de alterações
 
 | Data | Alteração |
@@ -498,4 +519,5 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 | 27/10/2026 | ADR-024: `timescaledb-tune` executado uma vez, com recursos explícitos, e saída congelada |
 | 27/10/2026 | ADR-025: orçamento de memória de 20 GiB para o sistema sob teste, 4 GiB para o gerador |
 | 27/10/2026 | ADR-026 a ADR-030: rede interna sem portas publicadas, logs com rotação, `/dev/shm` de 1 GiB no PostgreSQL, restauração por cópia do estado inicial, sem reinício automático |
+| 27/10/2026 | ADR-031: ambiente Python com versões travadas por `uv` |
 

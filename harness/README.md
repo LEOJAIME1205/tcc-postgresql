@@ -10,6 +10,32 @@ evitar instrumentação divergente entre eles.
   métricas dos serviços especializados e telemetria de host
 - `analise/` — scripts de consolidação, tratamento estatístico e geração de figuras
 
+## Ambiente Python
+
+O harness roda num ambiente Python isolado, com versões travadas (ADR-031). O
+projeto fica na raiz do repositório: `pyproject.toml`, `uv.lock` e
+`.python-version`.
+
+Para preparar o ambiente numa máquina nova:
+
+```bash
+curl -LsSf https://astral.sh/uv/0.12.24/install.sh | env UV_NO_MODIFY_PATH=1 sh
+uv sync --locked
+```
+
+O primeiro comando instala o `uv` 0.12.24 em `~/.local/bin`, sem alterar os
+arquivos de configuração do shell. O segundo cria o ambiente em `.venv/` com
+exatamente as versões do `uv.lock`, e falha se o arquivo estiver desatualizado.
+Os scripts rodam com `uv run`, por exemplo:
+
+```bash
+uv run python harness/metricas/telemetria.py metricas.csv
+```
+
+Para acrescentar ou atualizar uma dependência, edite a versão exata no
+`pyproject.toml`, rode `uv lock` e versione o `pyproject.toml` e o `uv.lock`
+juntos.
+
 ## Formato de saída
 
 Versão 1. Os três eixos gravam no mesmo formato, de modo que os scripts de
