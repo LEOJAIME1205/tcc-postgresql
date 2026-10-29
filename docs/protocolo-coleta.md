@@ -85,16 +85,24 @@ governador e preferência de energia em `performance` e volta ao perfil
    apagados e o `fstrim` não os descarta (ADR-017).
 3. Repouso de **20 minutos**, com os containers parados. Recupera o cache pSLC
    (ADR-004) e cobre o resfriamento térmico (ADR-012).
-4. Iniciar a amostragem contínua: frequência e temperatura da CPU, temperatura
-   do NVMe, memória do host, taxa e latência de escrita do disco e bytes
-   gravados por container (ADR-004 e ADR-012). **(harness)**
+4. Iniciar a telemetria de host e containers (`metricas-host.csv`): frequência
+   e temperatura da CPU, temperatura do NVMe, memória do host, taxa e latência
+   de escrita do disco e bytes gravados por container (ADR-004 e ADR-012).
+   **(harness)**
 5. Subir a arquitetura sob teste com `cpuset` por núcleo físico (sistema sob
    teste em `0-5,8-13`; gerador de carga e coleta em `6-7,14-15`) e limites de
-   memória (ADR-002, ADR-003 e ADR-018). Conferir:
+   memória (ADR-002, ADR-003 e ADR-018). Todo comando do Compose, inclusive o
+   `down`, precisa das variáveis de diretório de dados definidas, como
+   `TCC_DADOS_POSTGRES`; sem elas o Compose recusa rodar. Conferir:
 
    ```bash
    docker inspect -f '{{.Name}} cpus={{.HostConfig.CpusetCpus}} mem={{.HostConfig.Memory}}' $(docker ps -q)
    ```
+
+   Logo depois de subir, iniciar os coletores internos de cada sistema, como o
+   do PostgreSQL (`metricas-postgres.csv`). Eles precisam do IP do container na
+   rede interna, que só existe depois do `up`, e esperam sozinhos o banco
+   aceitar conexões. **(harness)**
 6. Aquecer, descartando o período inicial, e executar a carga (ADR-013).
    **(harness)**
 7. Coletar resultados e telemetria com os metadados da execução: arquitetura,

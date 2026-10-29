@@ -29,7 +29,7 @@ exatamente as versões do `uv.lock`, e falha se o arquivo estiver desatualizado.
 Os scripts rodam com `uv run`, por exemplo:
 
 ```bash
-uv run python harness/metricas/telemetria.py metricas.csv
+uv run python harness/metricas/telemetria.py metricas-host.csv
 ```
 
 Para acrescentar ou atualizar uma dependência, edite a versão exata no
@@ -73,7 +73,7 @@ resultados/brutos/
     └── <id-execucao>/
         ├── manifesto.json       metadados, controles e limites de tempo
         ├── operacoes.csv        uma linha por operação do gerador de carga
-        ├── metricas.csv         séries amostradas de host, containers e sistemas
+        ├── metricas-*.csv       séries amostradas, um arquivo por coletor
         ├── resumo.json          valores únicos informados por ferramentas
         ├── instantaneos/        estados capturados no fim da execução
         └── ferramenta/          saídas originais das ferramentas, sem tratamento
@@ -83,7 +83,10 @@ resultados/brutos/
 |---|---|
 | `manifesto.json` | Orquestrador: início ao subir a execução, complemento ao fim |
 | `operacoes.csv` | Gerador de carga |
-| `metricas.csv` | Coletores do harness e, no Eixo C, o adaptador do TSBS |
+| `metricas-host.csv` | Coletor de telemetria de host e containers |
+| `metricas-postgres.csv` | Coletor do PostgreSQL |
+| `metricas-<sistema>.csv` | Coletor de cada sistema especializado e do TimescaleDB |
+| `metricas-gerador.csv` | Adaptador do TSBS, no Eixo C |
 | `resumo.json`, `instantaneos/`, `ferramenta/` | Orquestrador, ao fim |
 
 ### Identificadores
@@ -185,7 +188,12 @@ primeira linha, sem separador de milhar. Valor ausente é campo vazio, booleano
 O Eixo C não grava `operacoes.csv`, porque o TSBS não registra operações
 individuais. Ver "Eixo C: adaptação do TSBS".
 
-### metricas.csv
+### metricas-*.csv
+
+Cada coletor roda num processo próprio e grava o seu arquivo, sempre com as
+mesmas colunas. A análise lê todos os `metricas-*.csv` do diretório da execução
+como uma tabela só. Dois processos nunca escrevem no mesmo arquivo, e a falha de
+um coletor não interrompe os outros.
 
 | Coluna | Tipo | Conteúdo |
 |---|---|---|
@@ -242,6 +250,13 @@ causa das colunas de tempo de autovacuum:
 | `pg_tabela_bytes`, `pg_indices_bytes` | tabela | `pg_table_size`, `pg_indexes_size` | 60 s |
 | `pg_tuplas_mortas_pct`, `pg_espaco_livre_pct` | tabela | `pgstattuple_approx` | 5 min, só no cenário `longa` |
 
+O rótulo `tabela` é `esquema.tabela`, para distinguir, por exemplo, os chunks do
+TimescaleDB, que ficam no esquema `_timescaledb_internal`. O rótulo `banco` é o
+banco a que o coletor se conecta. O coletor usa uma conexão em modo
+*autocommit*, de modo que cada consulta termina na hora e nunca deixa uma
+transação aberta, o que impediria o autovacuum de remover tuplas mortas e
+contaminaria a própria medição de inflação.
+
 **Sistemas especializados e TimescaleDB**, estatísticas a cada 10 s e tamanhos
 a cada 60 s, como no PostgreSQL. O catálogo de cada um é definido na etapa do
 seu eixo, com prefixo por sistema: `os_` (OpenSearch, `_nodes/stats`),
@@ -281,7 +296,7 @@ baseadas no código-fonte da ferramenta (`load/loader.go`,
 - **Ingestão.** `tsbs_load` roda com `--reporting-period=1s` e
   `--results-file`. A cada segundo, ele imprime na saída padrão uma linha com o
   tempo Unix em segundos, a taxa do período e o total acumulado de métricas e
-  de linhas. O adaptador grava os totais em `metricas.csv` como
+  de linhas. O adaptador grava os totais em `metricas-gerador.csv` como
   `tsbs_metricas_total` e `tsbs_linhas_total` (origem `gerador`), com `ts_ms`
   igual ao tempo da linha multiplicado por 1000. Os totais vêm em notação
   exponencial com 7 algarismos significativos, precisão suficiente para
