@@ -354,13 +354,19 @@ Em `resultados/brutos/janelas/<id-janela>/`:
 - `abertura.json`: horário, controles lidos do sistema, ocupação do disco,
   campos do SMART do P510 (temperatura, dados gravados, desgaste), semente e a
   ordem sorteada das execuções (ADR-032).
-- `estado.json`: atualizado depois de cada execução, com o identificador e o
-  estado de cada uma. É o que permite retomar uma janela interrompida
-  (ADR-033).
-- `encerramento.json`: o mesmo da abertura, ao fim, mais a lista das execuções
-  na ordem em que rodaram.
-- `smart-abertura.txt` e `smart-encerramento.txt`: saída completa do
-  `nvme smart-log`.
+- `estado.json`: resumo atualizado depois de cada execução, com o estado de
+  cada posição da ordem sorteada e as tentativas feitas.
+- `retomada-<AAAAMMDD-HHMMSS>.json`: o mesmo da abertura, a cada retomada.
+- `encerramento.json`: o mesmo da abertura, ao fim de cada sessão, mais o
+  motivo do encerramento, o histórico de sessões e a lista das execuções na
+  ordem em que rodaram.
+- `smart-*.txt`: saída completa do `nvme smart-log` em cada um desses momentos.
+
+A fonte de verdade sobre o que já rodou são os manifestos das execuções, que
+trazem `janela` e `ordem_na_janela`. Na retomada, uma posição com manifesto
+`ok`, `falha` ou `oom` não roda de novo; uma com `abortada`, ou sem manifesto,
+roda. Um manifesto que ficou `em_andamento`, porque a máquina ou o orquestrador
+caiu no meio, é fechado como `abortada` antes de a retomada começar (ADR-033).
 
 ### Mapa das variáveis dependentes
 
@@ -433,7 +439,7 @@ aos núcleos do gerador (`6-7,14-15`), dentro de `systemd-inhibit` e de
 | `verificar` | Confere os controles do protocolo e lista o que está fora, sem rodar nada |
 | `planejar` | Lê um plano e mostra a ordem sorteada das execuções, bloco a bloco, com a duração mínima da janela |
 | `preparar` | Carrega os dados de uma arquitetura uma vez e grava a cópia inicial (ADR-029) |
-| `executar` | Roda uma janela inteira a partir de um plano; `--retomar` continua uma janela interrompida (ADR-033) |
+| `executar` | Roda uma janela inteira a partir de um plano; `--retomar <id-janela>` continua uma janela interrompida (ADR-033). Código de saída 0 quando a janela termina, 1 quando o ambiente fica inválido ou a configuração está errada, 130 quando o operador interrompe |
 
 ### Plano da janela
 

@@ -53,6 +53,15 @@ class Arquitetura:
         return {variavel: os.path.join(self.diretorio_dados(sub), "atual")
                 for variavel, sub in self.dados}
 
+    def projeto(self) -> str:
+        """Nome do projeto do Compose: containers e rede identificáveis por arquitetura."""
+        return f"tcc-{self.eixo}-{self.arquitetura}"
+
+    def container(self, servico: str) -> str:
+        """Nome do container de um serviço, no padrão do Compose."""
+        return f"{self.projeto()}-{servico}-1"
+
+
 
 def _sem_chaves_desconhecidas(dados: Dict[str, Any], permitidas: Set[str], onde: str) -> None:
     desconhecidas = sorted(set(dados) - permitidas)

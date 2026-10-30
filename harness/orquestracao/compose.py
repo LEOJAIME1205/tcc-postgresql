@@ -12,8 +12,7 @@ class Compose:
         self.arq = arq
         self.log = log
         self.ambiente: Dict[str, str] = {**os.environ, **arq.ambiente(), "TCC_SAIDA": saida}
-        self.base: List[str] = ["docker", "compose", "-p", f"tcc-{arq.eixo}-{arq.arquitetura}",
-                                "-f", arq.compose]
+        self.base: List[str] = ["docker", "compose", "-p", arq.projeto(), "-f", arq.compose]
 
     def _rodar(self, argumentos: List[str]) -> int:
         with open(self.log, "a", encoding="utf-8") as f:

@@ -93,6 +93,18 @@ systemd-inhibit --what=sleep:shutdown --who=tcc-coleta \
 
 O orquestrador recusa iniciar se não encontrar as duas travas.
 
+Para interromper uma janela, aperte Ctrl+C **uma vez** e espere: a execução em
+curso é fechada como `abortada`, a arquitetura é desligada e o encerramento é
+gravado. Os Ctrl+C seguintes são ignorados até o fim da limpeza. Para continuar
+depois, com a abertura aplicada:
+
+```bash
+systemd-inhibit --what=sleep:shutdown --who=tcc-coleta \
+    --why="janela de coleta do TCC" --mode=block \
+  powerprofilesctl launch -p performance -r coleta -- \
+  uv run python -m harness.orquestracao.executar executar --retomar <id-janela>
+```
+
 ### 1.6 Queda de energia
 
 Nenhuma configuração protege contra falta de luz. Se acontecer, a janela fica
