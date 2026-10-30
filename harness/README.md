@@ -414,6 +414,7 @@ aos núcleos do gerador (`6-7,14-15`), dentro de
 | Subcomando | O que faz |
 |---|---|
 | `verificar` | Confere os controles do protocolo e lista o que está fora, sem rodar nada |
+| `planejar` | Lê um plano e mostra a ordem sorteada das execuções, bloco a bloco, com a duração mínima da janela |
 | `preparar` | Carrega os dados de uma arquitetura uma vez e grava a cópia inicial (ADR-029) |
 | `executar` | Roda uma janela inteira a partir de um plano; `--retomar` continua uma janela interrompida (ADR-033) |
 
@@ -422,7 +423,9 @@ aos núcleos do gerador (`6-7,14-15`), dentro de
 Arquivo TOML versionado em `harness/planos/`. Cada `[[configuracao]]` se
 expande em um nível de concorrência por valor de `concorrencias`, repetido
 `repeticoes` vezes. As execuções são sorteadas em blocos com a `semente`
-(ADR-032).
+(ADR-032): o bloco *r* contém a repetição *r* de cada configuração. Chaves
+desconhecidas, valores fora do domínio, configurações repetidas e a mistura do
+cenário `longa` com outros cenários são recusados com a explicação do problema.
 
 ```toml
 nome = "piloto"
