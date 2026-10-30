@@ -1,0 +1,15 @@
+# Arquitetura de teste do harness: PostgreSQL com carga do pgbench.
+# Valida o orquestrador de ponta a ponta; nenhum resultado entrou no artigo.
+eixo = "t"
+arquitetura = "pgbench"
+compose = "compose.yaml"
+servicos_sob_teste = ["postgres"]
+servico_gerador = "gerador"
+
+[dados]
+TCC_DADOS_POSTGRES = "postgres"
+
+[[coletor]]
+tipo = "postgres"
+servico = "postgres"
+banco = "postgres"

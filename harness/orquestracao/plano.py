@@ -11,6 +11,7 @@ ARQUITETURAS: Dict[str, Tuple[str, ...]] = {
     "a": ("consolidada", "poliglota"),
     "b": ("consolidada", "ingenua", "outbox"),
     "c": ("timescaledb", "influxdb"),
+    "t": ("pgbench",),
 }
 CENARIOS: Tuple[str, ...] = ("calibracao", "curta", "mista", "longa", "qualidade")
 CHAVES_PLANO: Set[str] = {"nome", "semente", "espaco_livre_min_gib", "configuracao"}

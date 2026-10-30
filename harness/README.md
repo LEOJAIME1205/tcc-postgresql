@@ -98,8 +98,11 @@ resultados/brutos/
 
 | Campo | Valores |
 |---|---|
-| `eixo` | `a`, `b`, `c` |
-| `arquitetura` | Eixo A: `consolidada`, `poliglota`. Eixo B: `consolidada`, `ingenua`, `outbox`. Eixo C: `timescaledb`, `influxdb` |
+| `eixo` | `a`, `b`, `c`; e `t`, o eixo de teste do harness |
+| `arquitetura` | Eixo A: `consolidada`, `poliglota`. Eixo B: `consolidada`, `ingenua`, `outbox`. Eixo C: `timescaledb`, `influxdb`. Eixo T: `pgbench` |
+
+O eixo `t` existe só para validar o harness de ponta a ponta. Nenhum resultado
+dele entra no artigo.
 | `cenario` | `calibracao`, `curta`, `mista`, `longa`, `qualidade` |
 
 Identificadores e nomes de métricas usam apenas letras minúsculas sem acento,
@@ -184,6 +187,7 @@ primeira linha, sem separador de milhar. Valor ausente é campo vazio, booleano
 | B | `enfileira` | Gravação do dado de negócio e enfileiramento, até a confirmação |
 | B | `consome` | Retirada, processamento e confirmação de uma tarefa |
 | B | `fim_a_fim` | Do enfileiramento ao fim do consumo. `ts_us` é o instante do enfileiramento, que viaja na carga útil da mensagem |
+| T | `transacao_pgbench` | Uma transação do script padrão do `pgbench`, só na arquitetura de teste. Em transações que falham, o `pgbench` não informa a latência: `latencia_us` fica vazio e `ts_us` é o instante do fim |
 
 O Eixo C não grava `operacoes.csv`, porque o TSBS não registra operações
 individuais. Ver "Eixo C: adaptação do TSBS".
@@ -444,8 +448,11 @@ medicao_s = 300
 
 ### Descritor de cada arquitetura
 
-Arquivo `arquitetura.toml` na pasta da arquitetura, ao lado da composição, por
-exemplo `eixo-b-fila/outbox/arquitetura.toml`. Tudo o que é específico de uma
+Arquivo `arquitetura.toml` em `<pasta do eixo>/<arquitetura>/`, ao lado da
+composição. A pasta de cada eixo é fixa: `a` em `eixo-a-busca`, `b` em
+`eixo-b-fila`, `c` em `eixo-c-temporal` e `t` em `harness/teste`. Assim o
+descritor da arquitetura `outbox` do Eixo B é sempre
+`eixo-b-fila/outbox/arquitetura.toml`. Tudo o que é específico de uma
 arquitetura fica ali, e o orquestrador permanece genérico.
 
 ```toml
@@ -468,6 +475,13 @@ banco = "fila"
 Os diretórios de dados ficam em `~/tcc-dados/<eixo>/<arquitetura>/<subdiretório>/`,
 com `inicial/` e `atual/` (ADR-029). A variável de ambiente aponta para `atual/`
 e é definida em todo comando do Compose, inclusive no `down`.
+
+O orquestrador sobe só os `servicos_sob_teste`, com
+`docker compose up -d <serviços>`. O gerador roda à parte, com
+`docker compose run --rm --no-deps --user <uid>:<gid> <servico_gerador> ...`,
+para que os arquivos de resultado pertençam ao usuário e não ao root. O serviço
+do gerador monta em `/saida` o diretório da execução, indicado pela variável
+`TCC_SAIDA`.
 
 ### Contrato do gerador de carga
 
