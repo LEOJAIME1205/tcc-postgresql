@@ -20,6 +20,9 @@ Embeddings gerados uma única vez, offline, com `BAAI/bge-small-en-v1.5`
 (384 dimensões), e compartilhados pelas duas arquiteturas. As consultas recebem
 o prefixo recomendado pelo modelo. Ver ADR-005 e ADR-035.
 
+O corpus é baixado e os embeddings são gerados pelos scripts de `preparo/`.
+Comandos, arquivos e hashes em [`dados/README.md`](dados/README.md).
+
 ## Consulta híbrida
 
 - Ramo léxico: configuração `english` do PostgreSQL (`websearch_to_tsquery` e

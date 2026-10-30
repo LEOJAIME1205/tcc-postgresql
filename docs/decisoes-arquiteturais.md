@@ -496,6 +496,8 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 4. Dependências diretas com versão exata no `pyproject.toml`. Todas as dependências, inclusive as indiretas, travadas com hash no `uv.lock`, que é versionado. O ambiente é recriado com `uv sync --locked`, que falha se o `uv.lock` estiver desatualizado.
 5. Primeira dependência: `psycopg[binary]` 3.3.6, com a biblioteca cliente do PostgreSQL embutida.
 6. Verificação de tipos em modo estrito configurada no próprio `pyproject.toml` (`[tool.pyright]`), para que o Pylance e qualquer avaliador usem o mesmo critério.
+7. Acrescentado em 30/10/2026: `exclude-newer` no `pyproject.toml`, com uma data duas semanas anterior à resolução. O `uv` ignora qualquer pacote publicado depois dela, e a regra de não usar versões recém-lançadas passa a valer também para as dependências indiretas.
+8. Acrescentado em 30/10/2026: as bibliotecas de geração de embeddings (PyTorch com CUDA e `sentence-transformers`, ADR-035), que somam alguns gigabytes, ficam num grupo de dependências separado (`embeddings`). O grupo é travado no mesmo `uv.lock`, mas só é instalado para gerar os embeddings; o harness e os geradores não o carregam.
 
 **Justificativa.** O `uv` cria o ambiente sem depender do `pip` do sistema, gera um arquivo de travamento com hash de cada pacote e reproduz o ambiente com um único comando. Versões exatas tornam a reprodução independente de quando ela for feita.
 
@@ -556,13 +558,13 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 
 **Contexto.** A ADR-005 define que os embeddings do Eixo A são gerados uma vez, offline, e compartilhados pelas duas arquiteturas, mas não escolhe o modelo. A dimensão dos vetores decide quanta memória os vetores e os índices HNSW ocupam e, com ela, se cada arquitetura cabe nos 20 GiB da ADR-025.
 
-**Decisão.** `BAAI/bge-small-en-v1.5`: 384 dimensões, 33 milhões de parâmetros, licença MIT, média de 51,68 nas tarefas de recuperação do MTEB. Vetores normalizados, em precisão simples, sem quantização. As consultas recebem o prefixo recomendado pelo modelo ("Represent this sentence for searching relevant passages: "); as passagens, não. A versão exata do modelo é fixada pelo identificador de revisão do repositório.
+**Decisão.** `BAAI/bge-small-en-v1.5`: 384 dimensões, 33 milhões de parâmetros, licença MIT, média de 51,68 nas tarefas de recuperação do MTEB. Vetores normalizados, em precisão simples, sem quantização. As consultas recebem o prefixo recomendado pelo modelo ("Represent this sentence for searching relevant passages: "); as passagens, não. O texto de cada passagem é o título seguido do texto, separados por um espaço, convenção do BEIR e do MTEB. A versão exata do modelo é fixada pelo identificador de revisão do repositório.
 
 **Justificativa.** O `bge-base-en-v1.5`, de 768 dimensões, tem média de 53,25, só 1,6 ponto acima, com o dobro de memória por vetor. Com 768 dimensões, os vetores e o índice HNSW do PostgreSQL passariam de 17 GB, e o lado consolidado sairia do regime de memória antes do poliglota. Com 384, as duas arquiteturas cabem no orçamento. Licença permissiva e execução local na GPU tornam a geração reproduzível.
 
 **Efeito sobre a comparação.** Neutro entre as arquiteturas: os mesmos vetores alimentam o `pgvector` e o Qdrant. Os modelos BGE foram treinados com dados que incluem a NQ, o que infla o nDCG absoluto do ramo vetorial nas duas arquiteturas igualmente; isso é declarado no artigo.
 
-**Estado.** Aceita.
+**Estado.** Aceita. Embeddings gerados em 30/10/2026, revisão `5c38ec7c405ec4b44b94cc5a9bb96e735b38267a`, em fp32 na GPU. A busca vetorial exata sobre eles dá nDCG@10 de 0,5018 nas 3.452 consultas, igual ao publicado no MTEB para o modelo na NQ (50,18), o que confere o modelo, o prefixo e o texto das passagens. Arquivos e hashes em `eixo-a-busca/dados/README.md`.
 
 ---
 
@@ -671,4 +673,5 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 | 27/10/2026 | ADR-031: ambiente Python com versões travadas por `uv` |
 | 29/10/2026 | ADR-032 a ADR-034: ordem sorteada em blocos, tratamento de falhas e interrupções, `pg_stat_statements` zerado no início do gerador |
 | 30/10/2026 | ADR-009: corpus definido com o orientador (NQ do BEIR). ADR-035 a ADR-040: modelo de embeddings, OpenSearch e Qdrant, divisão da memória da poliglota, HNSW, fusão por RRF num serviço de busca, `pg_trgm` fora da consulta medida |
+| 30/10/2026 | ADR-035: texto das passagens (título e texto) explicitado; embeddings gerados e conferidos (nDCG@10 da busca exata igual ao do MTEB) |
 
