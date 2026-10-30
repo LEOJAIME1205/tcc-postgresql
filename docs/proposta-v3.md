@@ -20,6 +20,7 @@ A versão 2 incorporou os eixos de escrita apontados pelo orientador. Esta vers�
 3. **Ambiente de medição especificado**, com tratamento explícito dos fatores de confusão que a máquina única introduz (seção 9).
 4. A revisão multivocal em paralelo à construção do ambiente.
 5. **Controle do cache pSLC revisto** após a caracterização do SSD em 24/10/2026. O cache se mostrou dinâmico, e a premissa de executar fora da faixa de cache foi substituída por medição da taxa de escrita, execução de controle e critério de atribuição definido antes da coleta (seção 9 e ADR-004).
+6. **Eixo A definido** em 30/10/2026, com o orientador: corpus NQ do BEIR (ADR-009), modelo de embeddings `bge-small-en-v1.5` (ADR-035) e fusão por RRF num serviço de busca dentro do sistema sob teste (ADR-039). O `pg_trgm` saiu da consulta medida, por não ter contraparte simétrica na arquitetura poliglota e pouco efeito num corpus de perguntas bem escritas; a busca aproximada por caracteres passa a ser discutida qualitativamente (ADR-040).
 
 ### Consequência de enunciado do Eixo C
 
@@ -74,7 +75,7 @@ Existe hoje um movimento expressivo na indústria defendendo essa consolidação
 
 | Eixo | Perfil | Arquitetura consolidada | Baseline especializado |
 |---|---|---|---|
-| **A. Busca híbrida** | Leitura | `TSVECTOR` + GIN, `pg_trgm`, `pgvector` (HNSW), fusão em SQL | OpenSearch (BM25) + Qdrant (HNSW), fusão na aplicação |
+| **A. Busca híbrida** | Leitura | `TSVECTOR` + GIN e `pgvector` (HNSW), fusão em SQL | OpenSearch (BM25) + Qdrant (HNSW), fusão na aplicação |
 | **B. Fila de tarefas** | Escrita transacional | Tabela com `SELECT ... FOR UPDATE SKIP LOCKED` | RabbitMQ, em configuração ingênua e com outbox |
 | **C. Ingestão temporal** | Escrita intensiva | PostgreSQL + TimescaleDB | InfluxDB |
 
@@ -179,7 +180,7 @@ A máquina é adequada à faixa de escala investigada, que é explicitamente a d
 
 ## 10. Recursos necessários
 
-Máquina especificada na seção 9. Docker e Docker Compose; k6 ou Locust para os eixos A e B; TSBS para o Eixo C; `fio` para caracterização de armazenamento. PostgreSQL 17 ou superior com `pgvector`, `pg_trgm` e TimescaleDB. OpenSearch, Qdrant, RabbitMQ e InfluxDB em versões estáveis correntes, fixadas por digest. Coleta via `pg_stat_*`, `pgstattuple` e `pg_stat_statements`. Modelo de embedding de código aberto executado localmente. Repositório público no GitHub.
+Máquina especificada na seção 9. Docker e Docker Compose; k6 ou Locust para os eixos A e B; TSBS para o Eixo C; `fio` para caracterização de armazenamento. PostgreSQL 17 ou superior com `pgvector` e TimescaleDB. OpenSearch, Qdrant, RabbitMQ e InfluxDB em versões estáveis correntes, fixadas por digest. Coleta via `pg_stat_*`, `pgstattuple` e `pg_stat_statements`. Modelo de embedding de código aberto executado localmente. Repositório público no GitHub.
 
 ## 11. Aderência aos critérios de avaliação (Art. 12)
 

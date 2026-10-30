@@ -16,7 +16,7 @@ A publicação atende ao Art. 5º, §8º da Resolução nº 1/2023 do Conselho d
 
 | Eixo | Perfil | Arquitetura consolidada | Baseline especializado |
 |---|---|---|---|
-| A — Busca híbrida | Leitura | `TSVECTOR` + GIN, `pg_trgm`, `pgvector` (HNSW), fusão em SQL | OpenSearch (BM25) + Qdrant (HNSW), fusão na aplicação |
+| A — Busca híbrida | Leitura | `TSVECTOR` + GIN e `pgvector` (HNSW), fusão em SQL | OpenSearch (BM25) + Qdrant (HNSW), fusão na aplicação |
 | B — Fila de tarefas | Escrita transacional | Tabela com `SELECT ... FOR UPDATE SKIP LOCKED` | RabbitMQ, em duas configurações: ingênua e com *transactional outbox* |
 | C — Ingestão temporal | Escrita intensiva | PostgreSQL + TimescaleDB | InfluxDB |
 

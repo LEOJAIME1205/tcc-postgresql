@@ -140,7 +140,7 @@ O Eixo C consiste precisamente em escrita sustentada por horas. Uma queda de vaz
 
 **Efeito sobre a comparação.** Neutro. Ambas as arquiteturas são avaliadas contra o mesmo padrão-ouro.
 
-**Estado.** Aceita. Coleção específica a definir com o orientador.
+**Estado.** Aceita. Coleção definida em 30/10/2026, com o orientador: **NQ (Natural Questions) do BEIR**, com 2,68 milhões de passagens da Wikipédia e 3.452 consultas de teste com julgamentos de relevância (média de 1,2 documento relevante por consulta). Escolhida por três motivos: é o cenário de RAG que ancora o eixo (perguntas em linguagem natural sobre passagens); tem escala para exercitar os índices e ainda caber nos 20 GiB da ADR-025 nas duas arquiteturas, com vetores de 384 dimensões (ADR-035); e tem consultas em número suficiente para variar a carga. As alternativas maiores (MS MARCO, HotpotQA, FEVER, DBPedia) não cabem no orçamento de memória; as menores (FiQA, SciFact, NFCorpus) não exercitam os índices; a TREC-COVID tem só 50 consultas. A avaliação com 1,2 relevante por consulta é rasa, o que vale igualmente para as duas arquiteturas e é declarado.
 
 ---
 
@@ -552,6 +552,108 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 
 ---
 
+## ADR-035 — Modelo de embeddings: bge-small-en-v1.5
+
+**Contexto.** A ADR-005 define que os embeddings do Eixo A são gerados uma vez, offline, e compartilhados pelas duas arquiteturas, mas não escolhe o modelo. A dimensão dos vetores decide quanta memória os vetores e os índices HNSW ocupam e, com ela, se cada arquitetura cabe nos 20 GiB da ADR-025.
+
+**Decisão.** `BAAI/bge-small-en-v1.5`: 384 dimensões, 33 milhões de parâmetros, licença MIT, média de 51,68 nas tarefas de recuperação do MTEB. Vetores normalizados, em precisão simples, sem quantização. As consultas recebem o prefixo recomendado pelo modelo ("Represent this sentence for searching relevant passages: "); as passagens, não. A versão exata do modelo é fixada pelo identificador de revisão do repositório.
+
+**Justificativa.** O `bge-base-en-v1.5`, de 768 dimensões, tem média de 53,25, só 1,6 ponto acima, com o dobro de memória por vetor. Com 768 dimensões, os vetores e o índice HNSW do PostgreSQL passariam de 17 GB, e o lado consolidado sairia do regime de memória antes do poliglota. Com 384, as duas arquiteturas cabem no orçamento. Licença permissiva e execução local na GPU tornam a geração reproduzível.
+
+**Efeito sobre a comparação.** Neutro entre as arquiteturas: os mesmos vetores alimentam o `pgvector` e o Qdrant. Os modelos BGE foram treinados com dados que incluem a NQ, o que infla o nDCG absoluto do ramo vetorial nas duas arquiteturas igualmente; isso é declarado no artigo.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-036 — Versões e configuração do OpenSearch e do Qdrant
+
+**Contexto.** A arquitetura poliglota do Eixo A usa OpenSearch para o ramo léxico e Qdrant para o vetorial. A ADR-010 manda seguir as recomendações dos mantenedores, e a ADR-011, fixar as imagens por digest.
+
+**Decisão.**
+
+1. Versões: OpenSearch 3.8.0 e Qdrant 1.19.2, as últimas com pelo menos duas semanas de publicação em 30/10/2026, mesma regra da ADR-031. Imagens oficiais, fixadas por digest.
+2. OpenSearch: nó único (`discovery.type=single-node`); `vm.max_map_count=262144` no host, exigido pela documentação; heap da JVM em metade da memória do container, deixando a outra metade para o cache de arquivos do Lucene, conforme a orientação do mantenedor (regra conferida na implementação); plugin de segurança desligado.
+3. Qdrant: configuração padrão (vetores em memória, sem quantização) e telemetria desligada (ADR-023).
+
+**Justificativa.** São as configurações de referência dos mantenedores. O plugin de segurança do OpenSearch liga TLS e autenticação; o PostgreSQL roda sem TLS na rede interna (ADR-026), e TLS de um lado só mediria criptografia, não o motor de busca. O `vm.max_map_count` é uma configuração do host exigida pelo OpenSearch e não altera o comportamento dos outros sistemas.
+
+**Efeito sobre a comparação.** Desligar o plugin de segurança favorece o OpenSearch em relação ao seu padrão de produção, mas iguala as condições com o PostgreSQL, que também roda sem TLS. Os demais itens são neutros.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-037 — Divisão dos 20 GiB na arquitetura poliglota do Eixo A medida no preparo
+
+**Contexto.** A ADR-025 dá 20 GiB ao sistema sob teste e deixa a divisão entre os serviços da arquitetura poliglota para a etapa de cada eixo. No Eixo A, o orçamento é dividido entre OpenSearch, Qdrant e o serviço de busca (ADR-039). Uma divisão arbitrária poderia deixar um dos motores fora do regime de memória sem necessidade.
+
+**Decisão.** Depois do preparo dos dados, medir o que cada serviço ocupa de verdade (índices em disco e memória própria, `anon` + `shmem`) e dividir os 20 GiB na proporção dessa necessidade, com margem para o cache de arquivos. O serviço de busca recebe o mesmo limite nas duas arquiteturas. A divisão medida e os números que a sustentam são registrados nesta ADR antes da coleta. Estimativa inicial: cerca de 12 GiB para o OpenSearch e 8 GiB para o Qdrant.
+
+**Justificativa.** O objetivo é que cada motor tenha o que precisa para manter seus índices em memória, como o PostgreSQL terá na arquitetura consolidada. Medir evita que a divisão favoreça um dos motores por palpite.
+
+**Efeito sobre a comparação.** Neutro por construção. Registra-se que a arquitetura poliglota precisa repartir o orçamento entre motores (ADR-003), o que é uma característica real dela.
+
+**Estado.** Aceita. Números a registrar depois do preparo.
+
+---
+
+## ADR-038 — HNSW com o mesmo grafo e esforço de busca calibrado para o mesmo recall
+
+**Contexto.** Os padrões dos dois sistemas diferem: o `pgvector` usa m = 16, `ef_construction` = 64 e `ef_search` = 40; o Qdrant usa m = 16, `ef_construct` = 100 e, na busca, `ef` igual ao `ef_construct`. Com os padrões, o PostgreSQL buscaria com menos da metade do esforço do Qdrant: pareceria mais rápido devolvendo vizinhos piores.
+
+**Decisão.**
+
+1. O mesmo grafo nos dois: m = 16 e construção = 100.
+2. A mesma distância (cosseno), sobre os mesmos vetores (ADR-035), sem quantização.
+3. O esforço de busca de cada sistema é calibrado na Etapa 3.1: o menor `ef` que atinge recall@10 de 0,95 em relação à busca exata, medido nas consultas da NQ. As medições usam esse valor.
+4. O índice é construído depois da carga dos dados, nos dois sistemas.
+
+**Justificativa.** Comparar latência com qualidade de vizinhança igual é a prática dos benchmarks de busca aproximada. Copiar os padrões compararia esforços diferentes; copiar o mesmo `ef` nos dois ignoraria que as implementações chegam a recalls diferentes com o mesmo valor.
+
+**Efeito sobre a comparação.** A construção com 100, em vez dos 64 padrão do `pgvector`, favorece o PostgreSQL em relação ao seu padrão: grafo melhor, construção mais lenta. A calibração por recall remove o viés de esforço nos dois sentidos. O tempo de construção dos índices é reportado.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-039 — Fusão por RRF num serviço de busca dentro do sistema sob teste
+
+**Contexto.** A busca híbrida funde um ramo léxico e um vetorial. Na arquitetura consolidada, a fusão roda dentro do PostgreSQL, nos núcleos do sistema sob teste. Na poliglota, ela roda na aplicação. Se a aplicação fosse o próprio gerador de carga, o trabalho de fusão da poliglota correria nos núcleos do gerador, fora da medição.
+
+**Decisão.**
+
+1. Fusão por Reciprocal Rank Fusion, com k = 60: os 100 primeiros resultados de cada ramo, fundidos pelo inverso da posição; devolve os 10 primeiros. A mesma fórmula e os mesmos números nas duas arquiteturas.
+2. Ramo léxico com o mesmo tratamento de texto: configuração `english` do PostgreSQL (`websearch_to_tsquery` e `ts_rank_cd`) e analisador `english` do OpenSearch (consulta `match`, BM25).
+3. Ramo vetorial: os 100 vizinhos mais próximos, com os parâmetros da ADR-038.
+4. Um serviço de busca, com a mesma interface HTTP nas duas arquiteturas, chamado pelo gerador. Roda dentro do sistema sob teste (cpuset da ADR-018 e dentro dos 20 GiB) e é feito da mesma forma nos dois lados. Na consolidada, faz uma única consulta SQL que inclui a fusão; na poliglota, consulta OpenSearch e Qdrant em paralelo e funde. Linguagem e framework do serviço são decididos na implementação, em ADR própria.
+
+**Justificativa.** A RRF é o método de fusão mais usado e não tem pesos a calibrar, o que evita ajustar um lado. O mesmo tratamento de texto torna os ramos léxicos comparáveis. O serviço dentro do sistema sob teste faz o trabalho de fusão e as chamadas de rede da poliglota contarem na medição, como a fusão do PostgreSQL conta. É o "serviço único de busca híbrida" da proposta.
+
+**Efeito sobre a comparação.** Remove uma vantagem artificial da poliglota, que de outro modo fundiria resultados fora do sistema sob teste. A função de ordenação léxica continua diferente (`ts_rank_cd` não é BM25), o que provavelmente favorece o OpenSearch em qualidade; a diferença é real, não é corrigida e é declarada. O serviço precisa não ser o gargalo; isso é verificado na calibração.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-040 — `pg_trgm` fora da consulta medida do Eixo A
+
+**Contexto.** A proposta lista o `pg_trgm` entre os recursos da arquitetura consolidada do Eixo A. O `pg_trgm` mede a semelhança entre textos pela quantidade de trigramas (sequências de três caracteres) em comum. Serve para tolerar erros de digitação e variações de grafia, e não tem conhecimento da língua nem do significado. A consulta híbrida da ADR-039 tem dois ramos, léxico e vetorial, com a mesma estrutura nas duas arquiteturas.
+
+**Decisão.** O `pg_trgm` não entra na consulta híbrida medida, nem como terceiro ramo da fusão nem como índice. A extensão continua disponível na imagem (ADR-022), e a busca aproximada por caracteres é discutida qualitativamente no artigo como recurso nativo da arquitetura consolidada.
+
+**Justificativa.**
+
+1. **Simetria.** Um terceiro ramo só do lado consolidado tornaria as fusões diferentes. O equivalente mais próximo no OpenSearch, a busca com tolerância a erros por distância de edição (`fuzziness`), funciona de outro modo e exigiria configurar um terceiro ramo nos dois lados, sem recomendação de mantenedor que fixe os parâmetros, contra a ADR-010.
+2. **Pouco efeito no corpus.** As consultas da NQ são perguntas bem escritas, e a tolerância a erros de digitação tem pouco a acrescentar à relevância. Um ramo que não melhora a qualidade só acrescentaria custo.
+3. **Custo de memória.** Um índice de trigramas sobre 2,68 milhões de passagens ocupa vários gigabytes e poderia tirar o lado consolidado do regime de memória (ADR-025) por um recurso que não é avaliado.
+
+**Efeito sobre a comparação.** Torna a consulta simétrica: dois ramos, mesma fusão, nos dois lados. Retira do lado consolidado um recurso nativo que fica fora da medição; a afirmação do eixo passa a ser sobre busca léxica e vetorial fundidas, e a busca aproximada por caracteres fica como discussão qualitativa. Alteração em relação à proposta, comunicada ao orientador.
+
+**Estado.** Aceita.
+
+---
+
 ## Registro de alterações
 
 | Data | Alteração |
@@ -568,4 +670,5 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 | 27/10/2026 | ADR-026 a ADR-030: rede interna sem portas publicadas, logs com rotação, `/dev/shm` de 1 GiB no PostgreSQL, restauração por cópia do estado inicial, sem reinício automático |
 | 27/10/2026 | ADR-031: ambiente Python com versões travadas por `uv` |
 | 29/10/2026 | ADR-032 a ADR-034: ordem sorteada em blocos, tratamento de falhas e interrupções, `pg_stat_statements` zerado no início do gerador |
+| 30/10/2026 | ADR-009: corpus definido com o orientador (NQ do BEIR). ADR-035 a ADR-040: modelo de embeddings, OpenSearch e Qdrant, divisão da memória da poliglota, HNSW, fusão por RRF num serviço de busca, `pg_trgm` fora da consulta medida |
 

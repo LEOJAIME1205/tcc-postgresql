@@ -4,14 +4,34 @@ Perfil de carga: leitura.
 
 | Arquitetura | Composição |
 |---|---|
-| Consolidada | PostgreSQL com `TSVECTOR` + GIN, `pg_trgm` e `pgvector` (HNSW), fusão léxico-semântica em SQL |
-| Poliglota | OpenSearch (BM25) + Qdrant (HNSW), fusão na camada de aplicação |
+| Consolidada | Serviço de busca + PostgreSQL com `TSVECTOR` + GIN e `pgvector` (HNSW); fusão léxico-semântica numa única consulta SQL |
+| Poliglota | Serviço de busca + OpenSearch 3.8.0 (BM25) + Qdrant 1.19.2 (HNSW); fusão no serviço |
+
+Nas duas arquiteturas, o gerador de carga chama um serviço de busca com a mesma
+interface HTTP, que roda dentro do sistema sob teste. Assim o trabalho de fusão
+e as chamadas de rede contam na medição dos dois lados. Ver ADR-039.
 
 ## Dados
 
-Subconjunto de coleção pública com julgamentos de relevância, permitindo medir
-qualidade de recuperação e não apenas latência. Embeddings gerados uma única vez,
-offline, e compartilhados por ambas as arquiteturas. Ver ADR-005 e ADR-009.
+Coleção NQ (Natural Questions) do BEIR: 2,68 milhões de passagens da Wikipédia
+e 3.452 consultas de teste com julgamentos de relevância. Ver ADR-009.
+
+Embeddings gerados uma única vez, offline, com `BAAI/bge-small-en-v1.5`
+(384 dimensões), e compartilhados pelas duas arquiteturas. As consultas recebem
+o prefixo recomendado pelo modelo. Ver ADR-005 e ADR-035.
+
+## Consulta híbrida
+
+- Ramo léxico: configuração `english` do PostgreSQL (`websearch_to_tsquery` e
+  `ts_rank_cd`) e analisador `english` do OpenSearch (consulta `match`, BM25).
+  As funções de ordenação diferem, e a diferença é declarada.
+- Ramo vetorial: os 100 vizinhos mais próximos por cosseno, com o mesmo grafo
+  HNSW nos dois sistemas (m = 16, construção = 100) e esforço de busca
+  calibrado para o mesmo recall (ADR-038).
+- Fusão: Reciprocal Rank Fusion com k = 60 sobre os 100 primeiros de cada
+  ramo; devolve os 10 primeiros.
+
+O `pg_trgm` não entra na consulta medida. Ver ADR-040.
 
 ## Métricas
 
