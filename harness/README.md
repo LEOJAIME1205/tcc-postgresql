@@ -412,8 +412,9 @@ Ver ADR-002, ADR-004, ADR-012, ADR-013, ADR-015, ADR-017 e ADR-018.
 ## Orquestrador
 
 `harness/orquestracao/executar.py` encadeia o protocolo. Roda no host, preso
-aos núcleos do gerador (`6-7,14-15`), dentro de
-`powerprofilesctl launch -p performance`. Tem três subcomandos:
+aos núcleos do gerador (`6-7,14-15`), dentro de `systemd-inhibit` e de
+`powerprofilesctl launch -p performance` (comando completo em
+`docs/protocolo-coleta.md`, seção 1.5). Tem estes subcomandos:
 
 | Subcomando | O que faz |
 |---|---|
@@ -512,6 +513,7 @@ confere, não aplica: a abertura e o encerramento são os comandos de
 | Bloqueante | `fstrim.timer` e timers de manutenção parados (ADR-017 e ADR-019) |
 | Bloqueante | APST desligado: `pm_qos_latency_tolerance_us` igual a 0 (ADR-020) |
 | Bloqueante | Governador e preferência de energia em `performance` nos 16 processadores, boost ligado (ADR-015) |
+| Bloqueante | Suspensão e desligamento bloqueados pela trava `tcc-coleta` do `systemd-inhibit` (`docs/protocolo-coleta.md`, seção 1.5) |
 | Bloqueante | `nvme0` é o P510 |
 | Bloqueante | Nenhum container rodando além dos da execução |
 | Bloqueante | Nenhum navegador aberto |

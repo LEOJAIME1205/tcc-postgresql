@@ -72,12 +72,37 @@ NVMe pode mudar entre inicializações.
   `df -B1 /` e `sudo nvme smart-log /dev/nvme0`
 - [ ] Digests das imagens em uso registrados (ADR-011)
 
+### 1.5 Comando da janela
+
+A janela inteira roda dentro de duas travas, que valem só enquanto o comando
+roda e se desfazem sozinhas ao fim:
+
+```bash
+systemd-inhibit --what=sleep:shutdown --who=tcc-coleta \
+    --why="janela de coleta do TCC" --mode=block \
+  powerprofilesctl launch -p performance -r coleta -- \
+  uv run python -m harness.orquestracao.executar executar harness/planos/<plano>.toml
+```
+
+- `systemd-inhibit` impede que a máquina suspenda ou seja desligada pelo menu do
+  desktop durante a janela. A suspensão automática do GNOME já está desligada
+  nesta máquina (tempo `0` na tomada), mas essa é uma configuração do desktop,
+  que pode mudar com uma atualização; a trava não depende dela.
+- `powerprofilesctl launch` põe governador e preferência de energia em
+  `performance` (ADR-015).
+
+O orquestrador recusa iniciar se não encontrar as duas travas.
+
+### 1.6 Queda de energia
+
+Nenhuma configuração protege contra falta de luz. Se acontecer, a janela fica
+interrompida e o reinício da máquina desfaz os controles da abertura (swap,
+timers, APST). Depois de religar: refazer a abertura (seções 1.1 a 1.3) e
+continuar com `executar --retomar` (ADR-033). Um no-break evita o problema.
+
 ## 2. Cada execução
 
-A sequência inteira de cada execução roda dentro de
-`powerprofilesctl launch -p performance -r coleta -- <comando>`, que põe
-governador e preferência de energia em `performance` e volta ao perfil
-`balanced` quando o comando termina (ADR-015).
+Cada execução roda dentro das travas do comando da janela (seção 1.5).
 
 1. Restaurar o estado inicial dos volumes, exceto no teste de longa duração
    (ADR-013). **(harness)**

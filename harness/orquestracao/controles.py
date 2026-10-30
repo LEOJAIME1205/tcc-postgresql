@@ -91,6 +91,20 @@ def energia() -> Resultado:
     return Resultado("energia em performance", ok, True, detalhe)
 
 
+def suspensao_bloqueada() -> Resultado:
+    """Protocolo de coleta: suspensão e desligamento bloqueados pela trava tcc-coleta."""
+    r = subprocess.run(["systemd-inhibit", "--list", "--no-pager", "--no-legend"],
+                       capture_output=True, text=True)
+    ativa = any(linha.startswith("tcc-coleta ") and "sleep" in linha
+                and "shutdown" in linha and linha.rstrip().endswith("block")
+                for linha in r.stdout.splitlines())
+    detalhe = ("trava tcc-coleta ativa" if ativa
+               else "sem a trava tcc-coleta; rode dentro de systemd-inhibit "
+                    "(docs/protocolo-coleta.md, seção 1.5)")
+    return Resultado("suspensão e desligamento bloqueados", ativa, True, detalhe)
+
+
+
 def containers() -> Resultado:
     """Nenhum container rodando antes de a execução subir a sua arquitetura."""
     r = subprocess.run(["docker", "ps", "--format", "{{.Names}}"], capture_output=True, text=True)
@@ -133,5 +147,5 @@ def programas_pesados() -> Resultado:
 
 def conferir(espaco_min_gib: float) -> List[Resultado]:
     """Todos os controles, na ordem da tabela de harness/README.md."""
-    return [swap(), timers(), ssd(), apst(), energia(), containers(),
+    return [swap(), timers(), ssd(), apst(), energia(), suspensao_bloqueada(), containers(),
             navegadores(), espaco(espaco_min_gib), sudo_sem_senha(), programas_pesados()]
