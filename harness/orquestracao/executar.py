@@ -1,9 +1,15 @@
 """Orquestrador das execuções do experimento"""
 
 import argparse
+import json
+import os
 import sys
+import time
 
-from harness.orquestracao import controles, plano
+from harness.orquestracao import arquitetura, controles, dados, plano
+from harness.orquestracao.compose import Compose
+
+RESULTADOS_PADRAO: str = os.path.join(arquitetura.RAIZ, "resultados", "brutos")
 
 
 def verificar(espaco_min_gib: float) -> int:
@@ -40,6 +46,54 @@ def planejar(caminho: str) -> int:
           "(repouso, aquecimento e medição; sem restauração, subida e desligamento)")
     return 0
 
+def preparar(eixo: str, nome: str, refazer: bool, margem_gib: float, resultados: str) -> int:
+    """Carrega os dados de uma arquitetura e grava a cópia inicial (ADR-029)."""
+    try:
+        arq = arquitetura.ler_arquitetura(eixo, nome)
+    except arquitetura.ErroDescritor as erro:
+        print(f"Descritor inválido: {erro}")
+        return 1
+    if dados.existe_inicial(arq) and not refazer:
+        print(f"{eixo}/{nome} já tem cópia inicial; use --refazer para substituí-la")
+        return 1
+    rodando = controles.containers()
+    if not rodando.ok:
+        print(f"Recusado: {rodando.detalhe}")
+        return 1
+
+    inicio = time.strftime("%Y-%m-%dT%H:%M:%S%z")
+    pasta = os.path.join(resultados, "preparos", f"{time.strftime('%Y%m%d-%H%M%S')}_{eixo}_{nome}")
+    os.makedirs(pasta)
+    log = os.path.join(pasta, "compose.log")
+    c = Compose(arq, pasta, log)
+    try:
+        dados.preparar_diretorios(arq)
+        try:
+            if c.subir() != 0 or c.gerador(["preparar"]) != 0:
+                print(f"Falha na carga dos dados; veja {log}")
+                return 1
+        finally:
+            c.desligar()
+        tamanhos = dados.salvar_inicial(arq, margem_gib)
+    except dados.ErroDados as erro:
+        print(f"Erro nos diretórios de dados: {erro}")
+        return 1
+
+    registro = {
+        "eixo": eixo,
+        "arquitetura": nome,
+        "inicio": inicio,
+        "fim": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "refeito": refazer,
+        "tamanhos_bytes": tamanhos,
+    }
+    with open(os.path.join(pasta, "preparo.json"), "w", encoding="utf-8") as f:
+        json.dump(registro, f, indent=2, ensure_ascii=False)
+    for sub, tamanho in tamanhos.items():
+        print(f"Cópia inicial de {sub}: {tamanho / 2**20:.0f} MiB em {arq.diretorio_dados(sub)}/inicial")
+    print(f"Registro do preparo em {pasta}")
+    return 0
+
 
 def main() -> None:
     p = argparse.ArgumentParser(description="Orquestrador das execuções do experimento")
@@ -48,6 +102,13 @@ def main() -> None:
     v.add_argument("--espaco-livre-min-gib", type=float, default=100.0)
     pp = sub.add_parser("planejar", help="mostra a ordem sorteada das execuções de um plano")
     pp.add_argument("plano", help="arquivo TOML do plano da janela")
+    pr = sub.add_parser("preparar", help="carrega os dados de uma arquitetura e grava a cópia inicial")
+    pr.add_argument("eixo")
+    pr.add_argument("arquitetura")
+    pr.add_argument("--refazer", action="store_true", help="substitui a cópia inicial existente")
+    pr.add_argument("--margem-gib", type=float, default=100.0, help="espaço livre que precisa sobrar depois da cópia")
+    pr.add_argument("--resultados", default=RESULTADOS_PADRAO, help="raiz dos resultados brutos")
+
 
     args = p.parse_args()
     subcomando: str = args.subcomando
@@ -58,6 +119,13 @@ def main() -> None:
     elif subcomando == "planejar":
         caminho: str = args.plano
         sys.exit(planejar(caminho))
+    elif subcomando == "preparar":
+        eixo: str = args.eixo
+        nome: str = args.arquitetura
+        refazer: bool = args.refazer
+        margem_gib: float = args.margem_gib
+        resultados: str = args.resultados
+        sys.exit(preparar(eixo, nome, refazer, margem_gib, resultados))
 
 
 
