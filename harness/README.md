@@ -149,12 +149,16 @@ primeira linha, sem separador de milhar. Valor ausente é campo vazio, booleano
     "parametros": {}
   },
   "controles": {
-    "perfil_energia": "performance", "governador": "performance",
-    "epp": "performance", "boost": true, "swap_ativo": false, "apst": false,
-    "fstrim_timer": "inactive", "fstrim_saida": "/: 12,3 GiB descartado",
-    "repouso_s": 1200, "volumes_restaurados": true
+    "conferidos": [
+      { "controle": "swap desligado", "ok": true, "bloqueante": true,
+        "detalhe": "nenhuma área ativa" }
+    ],
+    "volumes_restaurados": true,
+    "fstrim": "/: 12,3 GiB (13207024640 bytes) descartado",
+    "repouso_s": 1200
   },
   "disco": { "ocupado_bytes": 0, "livre_bytes": 0 },
+  "host": { "kernel": "7.0.0-38-generic", "docker": "29.9.2" },
   "arquivos": [
     { "nome": "operacoes.csv", "bytes": 0, "sha256": "..." }
   ]
@@ -163,9 +167,13 @@ primeira linha, sem separador de milhar. Valor ausente é campo vazio, booleano
 
 - `estado` assume `ok`, `falha`, `oom` ou `abortada`. Execuções que não
   terminaram em `ok` são mantidas e reportadas (ADR-016).
-- `controles` são lidos do sistema no início de cada execução, não copiados de
-  configuração. Se algum estiver fora do protocolo de `docs/protocolo-coleta.md`,
-  o orquestrador não inicia a execução.
+- `controles.conferidos` é a lista de controles lidos do sistema no início de
+  cada execução, a mesma que o `verificar` mostra. Se algum bloqueante estiver
+  fora do protocolo de `docs/protocolo-coleta.md`, o orquestrador não inicia a
+  execução.
+- `repositorio.alteracoes_locais` indica arquivos versionados alterados sem
+  commit; arquivos novos não versionados, como os próprios resultados, não
+  contam.
 - `arquivos` traz tamanho e SHA-256 de cada arquivo, preenchidos ao fim. Como os
   CSV não são versionados no Git, os hashes no manifesto permitem verificar o
   pacote de dados publicado à parte.
@@ -326,13 +334,17 @@ As saídas originais (`stdout` e os JSON) ficam em `ferramenta/`.
 
 ### instantaneos/ e ferramenta/
 
-- `instantaneos/`: estados capturados ao fim, como `docker-inspect.json`,
-  `pg_stat_statements.csv` e tamanhos finais em disco. O `pg_stat_statements`
-  é zerado imediatamente antes de o gerador começar, e por isso cobre o
-  aquecimento e a medição (ADR-034).
-- `ferramenta/`: saída padrão e de erro das ferramentas (TSBS, gerador) e
-  `docker logs` de cada container, sem tratamento. A análise só lê esses
-  arquivos quando o formato estiver documentado aqui.
+- `instantaneos/`: estados capturados ao fim, antes de a arquitetura ser
+  desligada: `docker-inspect.json` (todos os containers da arquitetura) e
+  `pg_stat_statements-<serviço>.csv` (um por serviço PostgreSQL). O
+  `pg_stat_statements` é zerado imediatamente antes de o gerador começar, e
+  por isso cobre o aquecimento e a medição (ADR-034).
+- `ferramenta/`: saídas sem tratamento. `orquestrador.log` (cada passo da
+  execução, com horário), `compose.log` (todos os comandos do Compose e a
+  saída do gerador), `coletor-<origem>.log` (saída de cada coletor),
+  `<serviço>.log` (`docker logs` de cada container) e as saídas próprias do
+  gerador. A análise só lê esses arquivos quando o formato estiver documentado
+  aqui.
 
 ### Registros de janela
 
@@ -538,6 +550,20 @@ leojaime ALL=(root) NOPASSWD: /usr/sbin/fstrim -v /, /usr/sbin/nvme smart-log /d
 O orquestrador nunca roda como root.
 
 ### Sequência de cada execução
+
+O repouso do passo 3 só pode ser encurtado, com `--repouso-s`, quando todas as
+execuções do plano são do eixo `t`. Com qualquer execução dos eixos A, B ou C,
+o orquestrador recusa repouso abaixo de 1200 s (ADR-004). O repouso usado vai
+para o manifesto.
+
+Os coletores rodam como processos filhos do orquestrador, com o mesmo Python do
+ambiente do `uv` (ADR-031), presos aos núcleos do gerador e num grupo de
+processos próprio, para que um Ctrl+C no terminal não os derrube antes da hora.
+A saída de cada um vai para `ferramenta/`, e eles são encerrados com `SIGTERM`
+antes de a arquitetura ser desligada.
+
+Cada execução recebe uma semente própria, derivada da semente do plano e do
+identificador da execução: reproduzível, e diferente entre repetições.
 
 1. Conferir os controles.
 2. Restaurar os diretórios de dados a partir de `inicial/`, com um container
