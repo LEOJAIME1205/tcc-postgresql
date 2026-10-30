@@ -27,7 +27,7 @@ class ErroJanela(Exception):
     """O ambiente deixou de ser válido e a janela precisa ser encerrada (ADR-033)."""
 
 
-def _interromper_uma_vez(_signum: int, _frame: Optional[FrameType]) -> None:
+def interromper_uma_vez(_signum: int, _frame: Optional[FrameType]) -> None:
     """Primeiro Ctrl+C interrompe; os seguintes são ignorados, para a limpeza terminar."""
     signal.signal(signal.SIGINT, signal.SIG_IGN)
     raise KeyboardInterrupt
@@ -180,7 +180,7 @@ def executar_uma(pl: Plano, ex: Execucao, janela: str, resultados: str,
     Levanta ErroJanela se o ambiente deixar de ser válido e KeyboardInterrupt se o
     operador interromper; nos dois casos o manifesto é fechado como 'abortada'.
     """
-    signal.signal(signal.SIGINT, _interromper_uma_vez)
+    signal.signal(signal.SIGINT, interromper_uma_vez)
     conferidos = controles.conferir(pl.espaco_livre_min_gib)
     fora = [r for r in conferidos if r.bloqueante and not r.ok]
     if fora:

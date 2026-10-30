@@ -115,6 +115,15 @@ def containers() -> Resultado:
     return Resultado("nenhum container rodando", not nomes, True, detalhe)
 
 
+def coletores_orfaos() -> Resultado:
+    """Nenhum coletor rodando antes da execução: sobra de um orquestrador que caiu."""
+    r = subprocess.run(["pgrep", "-f", "harness/metricas/"], capture_output=True, text=True)
+    pids = r.stdout.split()
+    detalhe = "nenhum" if not pids else "rodando, PID " + ", ".join(pids)
+    return Resultado("nenhum coletor órfão", not pids, True, detalhe)
+
+
+
 def navegadores() -> Resultado:
     """Protocolo de coleta: nenhum navegador aberto."""
     abertos = processos(NAVEGADORES)
@@ -148,4 +157,6 @@ def programas_pesados() -> Resultado:
 def conferir(espaco_min_gib: float) -> List[Resultado]:
     """Todos os controles, na ordem da tabela de harness/README.md."""
     return [swap(), timers(), ssd(), apst(), energia(), suspensao_bloqueada(), containers(),
-            navegadores(), espaco(espaco_min_gib), sudo_sem_senha(), programas_pesados()]
+            coletores_orfaos(), navegadores(), espaco(espaco_min_gib), sudo_sem_senha(),
+            programas_pesados()]
+

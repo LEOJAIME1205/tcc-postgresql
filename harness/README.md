@@ -534,6 +534,7 @@ confere, não aplica: a abertura e o encerramento são os comandos de
 | Bloqueante | Suspensão e desligamento bloqueados pela trava `tcc-coleta` do `systemd-inhibit` (`docs/protocolo-coleta.md`, seção 1.5) |
 | Bloqueante | `nvme0` é o P510 |
 | Bloqueante | Nenhum container rodando além dos da execução |
+| Bloqueante | Nenhum coletor órfão: nenhum processo com `harness/metricas/` na linha de comando, sobra de um orquestrador que caiu. Um editor aberto com um arquivo dessa pasta pela linha de comando também conta |
 | Bloqueante | Nenhum navegador aberto |
 | Bloqueante | Espaço livre de pelo menos `espaco_livre_min_gib` |
 | Bloqueante | `fstrim` e `nvme smart-log` executáveis sem senha (regra do `sudoers` abaixo) |
