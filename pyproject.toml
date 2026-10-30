@@ -7,9 +7,16 @@ dependencies = [
     "psycopg[binary]==3.3.6",
 ]
 
+[dependency-groups]
+embeddings = [
+    "sentence-transformers==6.1.0",
+    "torch==2.14.1",
+]
+
 [tool.uv]
 package = false
 required-version = "==0.12.24"
+exclude-newer = "2026-10-16T00:00:00Z"
 
 [tool.pyright]
 typeCheckingMode = "strict"

@@ -34,7 +34,20 @@ uv run python harness/metricas/telemetria.py metricas-host.csv
 
 Para acrescentar ou atualizar uma dependência, edite a versão exata no
 `pyproject.toml`, rode `uv lock` e versione o `pyproject.toml` e o `uv.lock`
-juntos.
+juntos. O `exclude-newer` do `pyproject.toml` impede o `uv` de escolher
+pacotes publicados depois da data configurada, inclusive dependências
+indiretas; para atualizar, a data é avançada de propósito (ADR-031).
+
+As bibliotecas de geração de embeddings do Eixo A ficam no grupo `embeddings`,
+instalado só quando necessário:
+
+```bash
+uv sync --locked --group embeddings
+uv run --group embeddings python <script de geração>
+```
+
+Um `uv sync --locked` sem o grupo remove essas bibliotecas do `.venv/` e libera
+o espaço.
 
 ## Formato de saída
 
