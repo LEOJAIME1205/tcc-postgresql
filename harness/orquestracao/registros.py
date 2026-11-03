@@ -10,7 +10,7 @@ from dataclasses import asdict
 from typing import Any, Dict, List, Tuple, cast
 
 from harness.orquestracao.arquitetura import RAIZ
-from harness.orquestracao.controles import Resultado
+from harness.orquestracao.controles import MODELO_SSD, Resultado, controlador_ssd
 
 VERSAO_FORMATO: int = 1
 CAMPOS_SMART: Tuple[str, ...] = (
@@ -92,7 +92,10 @@ def disco() -> Dict[str, int]:
 
 def smart() -> Tuple[str, Dict[str, str]]:
     """Saída completa do nvme smart-log do P510 e os campos principais."""
-    r = subprocess.run(["sudo", "-n", "/usr/sbin/nvme", "smart-log", "/dev/nvme0"],
+    ctrl = controlador_ssd()
+    if ctrl is None:
+        raise RuntimeError(f"SSD {MODELO_SSD} não encontrado")
+    r = subprocess.run(["sudo", "-n", "/usr/sbin/nvme", "smart-log", f"/dev/{ctrl}"],
                        capture_output=True, text=True)
     if r.returncode != 0:
         raise RuntimeError(f"nvme smart-log falhou: {r.stderr.strip()}")

@@ -238,16 +238,21 @@ intervalos de coleta seguem a ADR-021.
 | `host` | `cpu_freq_khz` | `cpuN` | `/sys/devices/system/cpu/cpuN/cpufreq/scaling_cur_freq` |
 | `host` | `cpu_ocupado_ms_total`, `cpu_ocioso_ms_total` | `cpuN` | `/proc/stat` |
 | `host` | `cpu_temp_c` | `tctl` | `k10temp`, `temp1_input` |
-| `host` | `nvme_temp_c` | `nvme0` | `/sys/class/nvme/nvme0/hwmon*/temp1_input` |
+| `host` | `nvme_temp_c` | `nvmeN` | `/sys/class/nvme/nvmeN/hwmon*/temp1_input` |
 | `host` | `mem_disponivel_bytes` | | `/proc/meminfo`, `MemAvailable` |
-| `host` | `disco_escrita_bytes_total`, `disco_escritas_total`, `disco_escrita_ms_total` | `nvme0n1` | `/proc/diskstats` |
-| `host` | `disco_leitura_bytes_total`, `disco_leituras_total`, `disco_leitura_ms_total` | `nvme0n1` | `/proc/diskstats` |
-| `host` | `disco_ocupado_ms_total` | `nvme0n1` | `/proc/diskstats`, tempo com I/O em andamento |
+| `host` | `disco_escrita_bytes_total`, `disco_escritas_total`, `disco_escrita_ms_total` | `nvmeNn1` | `/proc/diskstats` |
+| `host` | `disco_leitura_bytes_total`, `disco_leituras_total`, `disco_leitura_ms_total` | `nvmeNn1` | `/proc/diskstats` |
+| `host` | `disco_ocupado_ms_total` | `nvmeNn1` | `/proc/diskstats`, tempo com I/O em andamento |
 | `container` | `cont_cpu_us_total` | container | cgroup v2, `cpu.stat` (`usage_usec`) |
 | `container` | `cont_mem_bytes`, `cont_mem_pico_bytes` | container | cgroup v2, `memory.current` e `memory.peak` |
 | `container` | `cont_mem_anon_bytes`, `cont_mem_arquivo_bytes`, `cont_mem_shmem_bytes` | container | cgroup v2, `memory.stat` (`anon`, `file`, `shmem`) |
-| `container` | `cont_escrita_bytes_total`, `cont_leitura_bytes_total` | container | cgroup v2, `io.stat`, linha `259:0` |
+| `container` | `cont_escrita_bytes_total`, `cont_leitura_bytes_total` | container | cgroup v2, `io.stat`, linha do `major:minor` do P510 |
 | `container` | `cont_oom_total` | container | cgroup v2, `memory.events` (`oom_kill`) |
+
+O coletor acha o P510 pelo modelo a cada início, porque a numeração dos
+controladores NVMe muda entre inicializações. O rótulo `nvmeN` e o
+`major:minor` são os daquela inicialização: o P510 já apareceu como `nvme0` e
+como `nvme1`. A análise identifica o disco pela métrica, não pelo rótulo.
 
 O kernel cobra do container o cache de páginas dos arquivos que ele lê e grava,
 então `cont_mem_bytes` e `cont_mem_pico_bytes` incluem esse cache e tendem ao
@@ -508,6 +513,12 @@ Os diretórios de dados ficam em `~/tcc-dados/<eixo>/<arquitetura>/<subdiretóri
 com `inicial/` e `atual/` (ADR-029). A variável de ambiente aponta para `atual/`
 e é definida em todo comando do Compose, inclusive no `down`.
 
+Os volumes ficam na composição de cada arquitetura, nunca em
+`harness/orquestracao/modelos.yaml`. Ao herdar de um serviço com `extends`, o
+Compose resolve o arquivo de modelos inteiro, e uma variável obrigatória ali
+passaria a ser exigida de toda arquitetura, inclusive das que não usam aquele
+serviço.
+
 O orquestrador sobe só os `servicos_sob_teste`, com
 `docker compose up -d <serviços>`. O gerador roda à parte, com
 `docker compose run --rm --no-deps --user <uid>:<gid> <servico_gerador> ...`,
@@ -545,7 +556,7 @@ confere, não aplica: a abertura e o encerramento são os comandos de
 | Bloqueante | APST desligado: `pm_qos_latency_tolerance_us` igual a 0 (ADR-020) |
 | Bloqueante | Governador e preferência de energia em `performance` nos 16 processadores, boost ligado (ADR-015) |
 | Bloqueante | Suspensão e desligamento bloqueados pela trava `tcc-coleta` do `systemd-inhibit` (`docs/protocolo-coleta.md`, seção 1.5) |
-| Bloqueante | `nvme0` é o P510 |
+| Bloqueante | P510 encontrado entre os controladores NVMe, pelo modelo |
 | Bloqueante | Nenhum container rodando além dos da execução |
 | Bloqueante | Nenhum coletor órfão: nenhum processo com `harness/metricas/` na linha de comando, sobra de um orquestrador que caiu. Um editor aberto com um arquivo dessa pasta pela linha de comando também conta |
 | Bloqueante | Nenhum navegador aberto |
@@ -560,12 +571,16 @@ Um controle bloqueante que falha antes de uma execução encerra a janela
 
 O `fstrim` antes de cada execução e a leitura do SMART exigem root, e uma
 janela de horas não pode parar pedindo senha. Uma regra em
-`/etc/sudoers.d/tcc-coleta` libera sem senha só estes dois comandos, com estes
+`/etc/sudoers.d/tcc-coleta` libera sem senha só estes comandos, com estes
 argumentos exatos:
 
 ```
-leojaime ALL=(root) NOPASSWD: /usr/sbin/fstrim -v /, /usr/sbin/nvme smart-log /dev/nvme0
+leojaime ALL=(root) NOPASSWD: /usr/sbin/fstrim -v /, /usr/sbin/nvme smart-log /dev/nvme0, /usr/sbin/nvme smart-log /dev/nvme1
 ```
+
+O `smart-log` está liberado nos dois controladores NVMe da máquina porque a
+numeração muda entre inicializações. O orquestrador acha o P510 pelo modelo e
+só lê o SMART dele; o `smart-log` apenas lê.
 
 O orquestrador nunca roda como root.
 

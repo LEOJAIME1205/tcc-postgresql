@@ -4,7 +4,7 @@ import glob
 import os
 import subprocess
 from dataclasses import dataclass
-from typing import List, Set
+from typing import List, Set, Optional
 
 MODELO_SSD: str = "CT1000P510SSD5"
 TIMERS_PARADOS: List[str] = [
@@ -14,10 +14,6 @@ TIMERS_PARADOS: List[str] = [
 ]
 NAVEGADORES: List[str] = ["firefox", "chrome", "chromium", "brave", "msedge", "opera", "vivaldi"]
 PROGRAMAS_PESADOS: List[str] = ["code", "claude"]
-COMANDOS_SUDO: List[List[str]] = [
-    ["/usr/sbin/fstrim", "-v", "/"],
-    ["/usr/sbin/nvme", "smart-log", "/dev/nvme0"],
-]
 
 
 @dataclass(frozen=True)
@@ -31,6 +27,23 @@ class Resultado:
 def ler_arquivo(caminho: str) -> str:
     with open(caminho, encoding="utf-8") as f:
         return f.read().strip()
+
+
+def controlador_ssd() -> Optional[str]:
+    """Controlador do P510 (nvme0, nvme1...): a numeração muda entre inicializações."""
+    for modelo in sorted(glob.glob("/sys/class/nvme/nvme*/model")):
+        if ler_arquivo(modelo) == MODELO_SSD:
+            return os.path.basename(os.path.dirname(modelo))
+    return None
+
+
+def comandos_sudo() -> List[List[str]]:
+    """Os comandos que a regra do sudoers precisa liberar, com o controlador do P510."""
+    comandos = [["/usr/sbin/fstrim", "-v", "/"]]
+    ctrl = controlador_ssd()
+    if ctrl is not None:
+        comandos.append(["/usr/sbin/nvme", "smart-log", f"/dev/{ctrl}"])
+    return comandos
 
 
 def processos(nomes: List[str]) -> List[str]:
@@ -64,15 +77,20 @@ def timers() -> Resultado:
 
 
 def ssd() -> Resultado:
-    """O nvme0, usado pela regra do sudoers e pelo APST, precisa ser o P510."""
-    modelo = ler_arquivo("/sys/class/nvme/nvme0/model")
-    return Resultado("nvme0 é o P510", modelo == MODELO_SSD, True, f"nvme0 = {modelo}")
+    """O P510 precisa estar presente: APST e SMART usam o controlador achado aqui."""
+    ctrl = controlador_ssd()
+    detalhe = f"controlador {ctrl}" if ctrl is not None else f"{MODELO_SSD} não encontrado"
+    return Resultado("P510 encontrado", ctrl is not None, True, detalhe)
 
 
 def apst() -> Resultado:
     """ADR-020: transição autônoma de energia do P510 desligada."""
-    valor = ler_arquivo("/sys/class/nvme/nvme0/power/pm_qos_latency_tolerance_us")
-    return Resultado("APST desligado", valor == "0", True, f"pm_qos_latency_tolerance_us = {valor}")
+    ctrl = controlador_ssd()
+    if ctrl is None:
+        return Resultado("APST desligado", False, True, f"{MODELO_SSD} não encontrado")
+    valor = ler_arquivo(f"/sys/class/nvme/{ctrl}/power/pm_qos_latency_tolerance_us")
+    return Resultado("APST desligado", valor == "0", True,
+                     f"{ctrl}: pm_qos_latency_tolerance_us = {valor}")
 
 
 def energia() -> Resultado:
@@ -139,12 +157,24 @@ def espaco(min_gib: float) -> Resultado:
                      f"{livre_gib:.0f} GiB livres")
 
 
+def liberados_sem_senha() -> Set[str]:
+    """Comandos das entradas NOPASSWD do usuário, lidos da listagem do sudo."""
+    r = subprocess.run(["sudo", "-n", "-l"], capture_output=True, text=True)
+    liberados: Set[str] = set()
+    for linha in r.stdout.splitlines():
+        _, achou, comandos = linha.partition("NOPASSWD:")
+        if achou:
+            liberados.update(c.strip() for c in comandos.split(","))
+    return liberados
+
+
 def sudo_sem_senha() -> Resultado:
     """fstrim e nvme smart-log liberados sem senha pela regra do sudoers."""
-    negados = [" ".join(c) for c in COMANDOS_SUDO
-               if subprocess.run(["sudo", "-n", "-l", *c], capture_output=True).returncode != 0]
+    liberados = liberados_sem_senha()
+    negados = [" ".join(c) for c in comandos_sudo() if " ".join(c) not in liberados]
     detalhe = "fstrim e nvme smart-log liberados" if not negados else "exigem senha: " + "; ".join(negados)
     return Resultado("sudo sem senha para a coleta", not negados, True, detalhe)
+
 
 
 def programas_pesados() -> Resultado:

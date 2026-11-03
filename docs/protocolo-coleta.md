@@ -22,8 +22,13 @@ carga e da coleta.
 ## Pré-requisito, feito uma única vez
 
 A regra de `sudoers` que permite ao orquestrador rodar `fstrim -v /` e
-`nvme smart-log /dev/nvme0` sem senha, descrita em `harness/README.md`
-("Comandos com `sudo`"). Sem ela, o orquestrador recusa iniciar a janela.
+`nvme smart-log` nos dois controladores NVMe sem senha, descrita em
+`harness/README.md` ("Comandos com `sudo`"). Sem ela, o orquestrador recusa
+iniciar a janela.
+
+A numeração dos controladores NVMe muda entre inicializações: o P510 já
+apareceu como `nvme0` e como `nvme1`. Os comandos deste protocolo acham o P510
+pelo modelo, na variável `P510`, e o orquestrador faz o mesmo.
 
 ## 1. Abertura da janela
 
@@ -50,26 +55,25 @@ sudo systemctl stop fstrim.timer apt-daily.timer apt-daily-upgrade.timer \
     anacron.timer logrotate.timer dpkg-db-backup.timer e2scrub_all.timer
 sudo snap refresh --hold=24h          # ajustar ao tamanho da janela
 
-# APST do NVMe desligado (ADR-020)
-echo 0 | sudo tee /sys/class/nvme/nvme0/power/pm_qos_latency_tolerance_us > /dev/null
+# APST do NVMe desligado (ADR-020), no controlador do P510
+P510=$(dirname $(grep -l CT1000P510SSD5 /sys/class/nvme/nvme*/model))
+echo 0 | sudo tee $P510/power/pm_qos_latency_tolerance_us > /dev/null
 ```
 
 ### 1.3 Verificação
 
 ```bash
-cat /sys/class/nvme/nvme0/model                            # CT1000P510SSD5
+echo $P510                                                 # /sys/class/nvme/nvme0 ou nvme1
+cat $P510/power/pm_qos_latency_tolerance_us                # 0
 swapon --show                                              # sem saída
 systemctl is-active fstrim.timer apt-daily-upgrade.timer   # inactive
-sudo nvme get-feature /dev/nvme0 -f 0x0c -H | head -2      # Current value:00000000
+sudo nvme get-feature /dev/$(basename $P510) -f 0x0c -H | head -2   # Current value:00000000
 ```
-
-O primeiro comando confirma que `nvme0` é o P510. A numeração dos dispositivos
-NVMe pode mudar entre inicializações.
 
 ### 1.4 Registro de abertura
 
 - [ ] Ocupação do disco e SMART salvos com os dados da janela (ADR-004):
-  `df -B1 /` e `sudo nvme smart-log /dev/nvme0`
+  `df -B1 /` e `sudo nvme smart-log /dev/$(basename $P510)`
 - [ ] Digests das imagens em uso registrados (ADR-011)
 
 ### 1.5 Comando da janela
@@ -163,7 +167,8 @@ Regras que valem para todas as execuções:
 
 ```bash
 # APST de volta ao padrão (ADR-020)
-echo 100000 | sudo tee /sys/class/nvme/nvme0/power/pm_qos_latency_tolerance_us > /dev/null
+P510=$(dirname $(grep -l CT1000P510SSD5 /sys/class/nvme/nvme*/model))
+echo 100000 | sudo tee $P510/power/pm_qos_latency_tolerance_us > /dev/null
 
 # swap, timers e snaps de volta
 sudo swapon -a
@@ -174,7 +179,7 @@ sudo snap refresh --unhold
 ```
 
 - [ ] Ocupação do disco e SMART salvos de novo: `df -B1 /` e
-  `sudo nvme smart-log /dev/nvme0`
+  `sudo nvme smart-log /dev/$(basename $P510)`
 
 Reiniciar a máquina também restaura swap, timers e APST. A suspensão dos snaps
 vence sozinha no prazo dado.
@@ -190,7 +195,8 @@ de cada teste estão em `ambiente/README.md`.
 Em terminais separados, durante qualquer janela:
 
 ```bash
-iostat -dxm 5 nvme0n1                                        # vazão, latência e utilização do disco
-watch -n 5 'echo $(( $(cat /sys/class/nvme/nvme0/hwmon*/temp1_input) / 1000 )) °C'   # temperatura do P510
+P510=$(dirname $(grep -l CT1000P510SSD5 /sys/class/nvme/nvme*/model))
+iostat -dxm 5 $(basename $P510)n1                            # vazão, latência e utilização do disco
+watch -n 5 "echo \$(( \$(cat $P510/hwmon*/temp1_input) / 1000 )) °C"   # temperatura do P510
 watch -n 2 'grep MHz /proc/cpuinfo | sort -t: -k2 -n | tail -4'                       # frequências mais altas
 ```
