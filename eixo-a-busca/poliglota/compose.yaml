@@ -1,0 +1,38 @@
+# Arquitetura poliglota do Eixo A: OpenSearch (BM25) e Qdrant (HNSW).
+services:
+  opensearch:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: sistema-sob-teste
+    image: opensearchproject/opensearch:3.8.0@sha256:fafe3fc3587088674669235575aa166228c48bdb940294a8cdbbc1da75236a40
+    mem_limit: 12g
+    memswap_limit: 12g
+    stop_grace_period: 2m
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    environment:
+      discovery.type: single-node
+      bootstrap.memory_lock: "true"
+      OPENSEARCH_JAVA_OPTS: -Xms6g -Xmx6g
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      DISABLE_SECURITY_PLUGIN: "true"
+    volumes:
+      - ${TCC_DADOS_OPENSEARCH:?defina TCC_DADOS_OPENSEARCH}:/usr/share/opensearch/data
+
+  qdrant:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: sistema-sob-teste
+    image: qdrant/qdrant:v1.19.2@sha256:b7b0444c4c351c970b98e90a6f89c2ee4287c65b44e52b4cb503fa5b2aa927ad
+    mem_limit: 8g
+    memswap_limit: 8g
+    stop_grace_period: 2m
+    environment:
+      QDRANT__TELEMETRY_DISABLED: "true"
+    volumes:
+      - ${TCC_DADOS_QDRANT:?defina TCC_DADOS_QDRANT}:/qdrant/storage

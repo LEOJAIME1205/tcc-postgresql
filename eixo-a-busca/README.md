@@ -25,14 +25,19 @@ Comandos, arquivos e hashes em [`dados/README.md`](dados/README.md).
 
 ## Consulta híbrida
 
-- Ramo léxico: configuração `english` do PostgreSQL (`websearch_to_tsquery` e
-  `ts_rank_cd`) e analisador `english` do OpenSearch (consulta `match`, BM25).
-  As funções de ordenação diferem, e a diferença é declarada.
-- Ramo vetorial: os 100 vizinhos mais próximos por cosseno, com o mesmo grafo
-  HNSW nos dois sistemas (m = 16, construção = 100) e esforço de busca
-  calibrado para o mesmo recall (ADR-038).
+- Ramo léxico: basta um termo da consulta para o documento entrar (OU), sobre
+  título e texto. Configuração `english` do PostgreSQL (termos do
+  `plainto_tsquery` ligados por OU, ordenação por `ts_rank_cd`) e analisador
+  `english` do OpenSearch (consulta `match` padrão, BM25). As funções de
+  ordenação diferem, e a diferença é declarada.
+- Ramo vetorial: os 100 vizinhos mais próximos, com o mesmo grafo HNSW nos
+  dois sistemas (m = 16, construção = 100), produto interno no `pgvector` e
+  cosseno no Qdrant (mesma ordem, vetores normalizados) e esforço de busca
+  calibrado para o mesmo recall@100 (ADR-038).
 - Fusão: Reciprocal Rank Fusion com k = 60 sobre os 100 primeiros de cada
-  ramo; devolve os 10 primeiros.
+  ramo; devolve os 10 primeiros, só identificadores e pontuações (ADR-041).
+
+Esquema, configuração e carga do PostgreSQL: ADR-041 a ADR-043.
 
 O `pg_trgm` não entra na consulta medida. Ver ADR-040.
 

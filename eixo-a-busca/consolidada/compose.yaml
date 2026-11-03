@@ -1,0 +1,23 @@
+# Arquitetura consolidada do Eixo A: PostgreSQL com tsvector + GIN e pgvector.
+services:
+  postgres:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: postgres
+    volumes:
+      - ${TCC_DADOS_POSTGRES:?defina TCC_DADOS_POSTGRES}:/var/lib/postgresql
+    shm_size: 9g
+    environment:
+      POSTGRES_DB: busca
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - shared_buffers=5GB
+      - -c
+      - effective_cache_size=15GB
+      - -c
+      - work_mem=4MB
+      - -c
+      - max_worker_processes=16

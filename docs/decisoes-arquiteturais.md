@@ -297,7 +297,7 @@ montagem, impossíveis sob virtualização.
 
 **Contexto.** O P510 tem a transição autônoma de estados de energia (APST) habilitada pelo kernel. Com a configuração padrão, após 100 ms sem I/O o dispositivo passa ao estado PS3, cuja saída leva 2,5 ms, e após mais 2 s passa ao PS4, cuja saída leva 40 ms (inventário em `ambiente/caracterizacao/inventario.txt`). Qualquer pausa acima de 100 ms numa carga faz a operação seguinte pagar esse tempo de despertar, que aparece como latência do banco sem ser.
 
-**Decisão.** Desligar o APST antes de cada janela de coleta e religá-lo ao fim, pelo controle de tolerância de latência do kernel: `echo 0 > /sys/class/nvme/nvme0/power/pm_qos_latency_tolerance_us` para desligar e `echo 100000` no mesmo arquivo para restaurar o padrão. Verificado em 25/10/2026: com 0, o recurso fica desabilitado no dispositivo; com 100000, volta habilitado e com a tabela de transições refeita pelo kernel. O ASPM L1 do link PCIe e os estados ociosos da CPU (até C3, saída em 350 µs) permanecem no padrão.
+**Decisão.** Desligar o APST antes de cada janela de coleta e religá-lo ao fim, pelo controle de tolerância de latência do kernel: `echo 0 > /sys/class/nvme/nvmeN/power/pm_qos_latency_tolerance_us` para desligar e `echo 100000` no mesmo arquivo para restaurar o padrão, em que `nvmeN` é o controlador do P510, achado pelo modelo (a numeração muda entre inicializações; em 03/11/2026 o P510 apareceu como `nvme1`). Verificado em 25/10/2026: com 0, o recurso fica desabilitado no dispositivo; com 100000, volta habilitado e com a tabela de transições refeita pelo kernel. O ASPM L1 do link PCIe e os estados ociosos da CPU (até C3, saída em 350 µs) permanecem no padrão.
 
 **Justificativa.** O efeito do APST está na escala de milissegundos, a mesma das latências medidas, e depende do padrão de pausas de cada sistema, não do seu desempenho. É o mesmo raciocínio da ADR-015, aplicado ao armazenamento. O ASPM e os C-states ficam no padrão porque seu efeito está na escala de microssegundos, e desligar os C-states aumentaria o calor e reduziria a margem de boost (ADR-015). O controle do kernel é usado no lugar de `nvme set-feature` porque reconstrói a tabela de transições ao restaurar.
 
@@ -447,7 +447,7 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 
 **Efeito sobre a comparação.** Favorece o PostgreSQL em relação ao padrão do Docker, de forma legítima: sem o ajuste, ele poderia falhar por uma limitação que não existe numa instalação comum fora de containers.
 
-**Estado.** Aceita.
+**Estado.** Aceita. No Eixo A, o `shm_size` do PostgreSQL é de 9 GiB, porque a construção paralela do índice HNSW guarda o grafo nesse espaço (ADR-042).
 
 ---
 
@@ -582,7 +582,7 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 
 **Efeito sobre a comparação.** Desligar o plugin de segurança favorece o OpenSearch em relação ao seu padrão de produção, mas iguala as condições com o PostgreSQL, que também roda sem TLS. Os demais itens são neutros.
 
-**Estado.** Aceita.
+**Estado.** Aceita. Conferido em 03/11/2026: o Ubuntu 26.04 já vem com `vm.max_map_count` = 1.048.576, acima do exigido, e o host não precisa de ajuste. Imagens fixadas pelo digest do repositório: `opensearchproject/opensearch:3.8.0@sha256:fafe3fc3587088674669235575aa166228c48bdb940294a8cdbbc1da75236a40` (publicada em 15/09/2026) e `qdrant/qdrant:v1.19.2@sha256:b7b0444c4c351c970b98e90a6f89c2ee4287c65b44e52b4cb503fa5b2aa927ad` (05/10/2026). Padrões do Qdrant 1.19.2 conferidos no arquivo de configuração oficial: m = 16, `ef_construct` = 100, número de segmentos e threads de indexação escolhidos pelos núcleos disponíveis.
 
 ---
 
@@ -596,7 +596,14 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 
 **Efeito sobre a comparação.** Neutro por construção. Registra-se que a arquitetura poliglota precisa repartir o orçamento entre motores (ADR-003), o que é uma característica real dela.
 
-**Estado.** Aceita. Números a registrar depois do preparo.
+**Estado.** Aceita. Medido na carga de desenvolvimento de 03/11/2026, com 12 GiB para o OpenSearch (heap de 6 GiB) e 8 GiB para o Qdrant, depois do estado pronto:
+
+| Motor | Dados em disco | Memória própria (`anon` + `shmem`) | Cache de arquivo | Pico na carga |
+|---|---|---|---|---|
+| OpenSearch | 1,6 GiB (índice de 1,18 GiB, 5 segmentos) | 6,8 GiB (heap de 6 GiB travado e ~0,8 GiB fora do heap) | 0,4 GiB | 8,8 GiB |
+| Qdrant | 4,1 GiB (6 segmentos, todos indexados) | 0,24 GiB | 3,5 GiB | 6,7 GiB |
+
+O Qdrant mantém vetores e grafos em arquivos mapeados, contados pelo kernel como cache de arquivo; por isso a necessidade de memória de cada motor é a memória própria somada aos arquivos que ele lê nas consultas, e não só `anon` + `shmem`. O heap do OpenSearch é metade do container (ADR-036), então sua memória própria cresce com o limite dado e não mede necessidade: o mínimo coerente é o container em que a outra metade comporta o que fica fora do heap e o índice. A divisão final depende da memória do serviço de busca (ADR-039), que sai dos mesmos 20 GiB, e é registrada aqui quando ele for definido.
 
 ---
 
@@ -607,15 +614,15 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 **Decisão.**
 
 1. O mesmo grafo nos dois: m = 16 e construção = 100.
-2. A mesma distância (cosseno), sobre os mesmos vetores (ADR-035), sem quantização.
-3. O esforço de busca de cada sistema é calibrado na Etapa 3.1: o menor `ef` que atinge recall@10 de 0,95 em relação à busca exata, medido nas consultas da NQ. As medições usam esse valor.
+2. A mesma medida de semelhança, sobre os mesmos vetores (ADR-035), sem quantização. Como os vetores têm norma 1, cosseno e produto interno dão a mesma ordem, e cada sistema usa a forma que seu mantenedor recomenda para vetores normalizados: produto interno no `pgvector` (`vector_ip_ops`, operador `<#>`), como manda o README do projeto; cosseno no Qdrant, que o implementa como produto interno sobre vetores normalizados.
+3. O esforço de busca de cada sistema é calibrado na Etapa 3.1: o menor `ef` que atinge recall@100 de 0,95 em relação aos 100 vizinhos exatos, medido nas consultas da NQ, com piso de 100 nos dois sistemas. O recall@100 mede a lista que de fato entra na fusão (ADR-039). O piso existe porque o `pgvector` devolve no máximo `ef_search` linhas: com `ef` menor que 100, o ramo devolveria menos de 100 vizinhos. As medições usam o valor calibrado.
 4. O índice é construído depois da carga dos dados, nos dois sistemas.
 
 **Justificativa.** Comparar latência com qualidade de vizinhança igual é a prática dos benchmarks de busca aproximada. Copiar os padrões compararia esforços diferentes; copiar o mesmo `ef` nos dois ignoraria que as implementações chegam a recalls diferentes com o mesmo valor.
 
-**Efeito sobre a comparação.** A construção com 100, em vez dos 64 padrão do `pgvector`, favorece o PostgreSQL em relação ao seu padrão: grafo melhor, construção mais lenta. A calibração por recall remove o viés de esforço nos dois sentidos. O tempo de construção dos índices é reportado.
+**Efeito sobre a comparação.** A construção com 100, em vez dos 64 padrão do `pgvector`, favorece o PostgreSQL em relação ao seu padrão: grafo melhor, construção mais lenta. O produto interno também o favorece em relação ao cosseno do `pgvector`, que calcula as normas a cada comparação, e iguala o cálculo ao do Qdrant. A calibração por recall remove o viés de esforço nos dois sentidos. O tempo de construção dos índices é reportado.
 
-**Estado.** Aceita.
+**Estado.** Aceita. Revisada em 30/10/2026: produto interno no `pgvector`, e calibração pelo recall@100 com piso de 100 (antes: cosseno nos dois e recall@10).
 
 ---
 
@@ -625,16 +632,16 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 
 **Decisão.**
 
-1. Fusão por Reciprocal Rank Fusion, com k = 60: os 100 primeiros resultados de cada ramo, fundidos pelo inverso da posição; devolve os 10 primeiros. A mesma fórmula e os mesmos números nas duas arquiteturas.
-2. Ramo léxico com o mesmo tratamento de texto: configuração `english` do PostgreSQL (`websearch_to_tsquery` e `ts_rank_cd`) e analisador `english` do OpenSearch (consulta `match`, BM25).
+1. Fusão por Reciprocal Rank Fusion, com k = 60: os 100 primeiros resultados de cada ramo, fundidos pelo inverso da posição; devolve os 10 primeiros, só identificadores e pontuações (ADR-041). A mesma fórmula e os mesmos números nas duas arquiteturas.
+2. Ramo léxico com a mesma semântica e o mesmo tratamento de texto: basta um termo da consulta para o documento entrar (OU), sobre o mesmo texto (título e texto, ADR-041). No PostgreSQL, configuração `english`, termos do `plainto_tsquery` ligados por OU e ordenação por `ts_rank_cd`; no OpenSearch, analisador `english` e consulta `match` com o operador padrão (OU), ordenação por BM25.
 3. Ramo vetorial: os 100 vizinhos mais próximos, com os parâmetros da ADR-038.
 4. Um serviço de busca, com a mesma interface HTTP nas duas arquiteturas, chamado pelo gerador. Roda dentro do sistema sob teste (cpuset da ADR-018 e dentro dos 20 GiB) e é feito da mesma forma nos dois lados. Na consolidada, faz uma única consulta SQL que inclui a fusão; na poliglota, consulta OpenSearch e Qdrant em paralelo e funde. Linguagem e framework do serviço são decididos na implementação, em ADR própria.
 
-**Justificativa.** A RRF é o método de fusão mais usado e não tem pesos a calibrar, o que evita ajustar um lado. O mesmo tratamento de texto torna os ramos léxicos comparáveis. O serviço dentro do sistema sob teste faz o trabalho de fusão e as chamadas de rede da poliglota contarem na medição, como a fusão do PostgreSQL conta. É o "serviço único de busca híbrida" da proposta.
+**Justificativa.** A RRF é o método de fusão mais usado e não tem pesos a calibrar, o que evita ajustar um lado. O mesmo tratamento de texto torna os ramos léxicos comparáveis. A semântica OU é a do `match` padrão do OpenSearch e a das linhas de base BM25 do BEIR; o `websearch_to_tsquery`, previsto na primeira versão desta ADR, exige todos os termos e compararia semânticas diferentes, com o lado E achando muito menos documentos nas perguntas da NQ. O serviço dentro do sistema sob teste faz o trabalho de fusão e as chamadas de rede da poliglota contarem na medição, como a fusão do PostgreSQL conta. É o "serviço único de busca híbrida" da proposta.
 
-**Efeito sobre a comparação.** Remove uma vantagem artificial da poliglota, que de outro modo fundiria resultados fora do sistema sob teste. A função de ordenação léxica continua diferente (`ts_rank_cd` não é BM25), o que provavelmente favorece o OpenSearch em qualidade; a diferença é real, não é corrigida e é declarada. O serviço precisa não ser o gargalo; isso é verificado na calibração.
+**Efeito sobre a comparação.** Remove uma vantagem artificial da poliglota, que de outro modo fundiria resultados fora do sistema sob teste. A função de ordenação léxica continua diferente (`ts_rank_cd` não é BM25), o que provavelmente favorece o OpenSearch em qualidade; a diferença é real, não é corrigida e é declarada. Com a semântica OU, o PostgreSQL calcula o `ts_rank_cd` de todo documento que contém algum termo da consulta, porque o índice GIN não ordena por relevância, enquanto o OpenSearch descarta cedo os documentos que não podem ficar entre os melhores. Isso favorece a poliglota em latência; é uma diferença estrutural da busca textual nativa, medida e não corrigida. O tratamento de texto também não é idêntico: o `english` do PostgreSQL descarta 127 palavras vazias, e o do OpenSearch, as 33 do Lucene, mantendo termos como "who", "what" e "over" (conferido em 03/11/2026: na pergunta "what emperor took over france after the reign of terror", 5 termos no PostgreSQL e 8 no OpenSearch); os radicalizadores também diferem. Igualar exigiria personalizar um dos lados (ADR-010), e a diferença é declarada. O serviço precisa não ser o gargalo; isso é verificado na calibração.
 
-**Estado.** Aceita.
+**Estado.** Aceita. Revisada em 30/10/2026: ramo léxico com semântica OU nos dois lados (antes: `websearch_to_tsquery`, que exige todos os termos) e resposta só com identificadores e pontuações.
 
 ---
 
@@ -656,6 +663,104 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 
 ---
 
+## ADR-041 — Esquema, identificadores e resposta do serviço no Eixo A
+
+**Contexto.** As duas arquiteturas precisam guardar as mesmas passagens e devolver resultados comparáveis entre si e com os julgamentos da NQ. O corpus identifica as passagens por texto (`doc0` a `doc2681467`); o Qdrant aceita como identificador de ponto só inteiros sem sinal ou UUID.
+
+**Decisão.**
+
+1. Identificador inteiro: o número *N* de `docN`, que é também a posição da passagem no corpus (conferido nas 2.681.468 linhas). É o `id` no PostgreSQL, o identificador do ponto no Qdrant e o `_id` no OpenSearch. O gerador converte de volta para `docN` ao comparar com os julgamentos.
+2. Texto indexado no ramo léxico: título e texto separados por um espaço, num único campo, sem pesos, o mesmo texto dos embeddings (ADR-035).
+3. PostgreSQL: tabela `passagens (id integer PRIMARY KEY, titulo text, texto text, lexico tsvector, embedding vector(384))`, com `lexico` como coluna gerada e armazenada, `to_tsvector('english', titulo || ' ' || texto)`, como recomenda a documentação do PostgreSQL (seção 12.2.2); índice GIN em `lexico` e HNSW em `embedding` (ADR-038). Armazenamento das colunas no padrão.
+4. Onde o texto fica guardado: no PostgreSQL, nas colunas da tabela; no OpenSearch, no `_source`, ligado por padrão; no Qdrant, nada além do vetor e do identificador.
+5. O serviço de busca devolve os 10 primeiros como identificadores e pontuações da fusão, sem o texto das passagens.
+
+**Justificativa.** O identificador inteiro é aceito pelos três sistemas sem tabela de tradução. A coluna gerada calcula o `tsvector` uma vez, na ingestão, como o OpenSearch analisa o texto ao indexar; a alternativa do exemplo do `pgvector`, um índice sobre expressão, refaria o `to_tsvector` de cada documento ordenado durante a consulta. Guardar o texto segue o padrão de cada sistema: o `_source` do OpenSearch vem ligado, e uma tabela de passagens guarda as passagens. Devolver só identificadores restringe a medição à recuperação e à fusão, que são o objeto do eixo.
+
+**Efeito sobre a comparação.** Os itens 1 a 4 são neutros: mesmo texto, mesmos identificadores, cada sistema com o armazenamento padrão; o texto guardado conta no disco e na memória do PostgreSQL e do OpenSearch. O item 5 favorece a poliglota: se o serviço devolvesse o texto, os resultados vindos só do Qdrant exigiriam uma segunda consulta ao OpenSearch, ou o texto duplicado no Qdrant, enquanto o PostgreSQL o devolveria na mesma consulta. Declarado no artigo.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-042 — Configuração do PostgreSQL no Eixo A
+
+**Contexto.** A ADR-003 manda configurar explicitamente `shared_buffers`, `work_mem` e `effective_cache_size`, e a ADR-024 deixa os Eixos A e B com a documentação do PostgreSQL, sem ferramenta de ajuste. O README do `pgvector` recomenda, para construir índices HNSW, aumentar o `maintenance_work_mem` até o grafo caber na memória e aumentar os processos paralelos de manutenção, que são 2 por padrão. A construção paralela guarda o grafo inteiro em memória compartilhada dinâmica, que no container fica em `/dev/shm` (conferido no código do `pgvector` 0.8.7). O Qdrant e o OpenSearch constroem seus índices com todos os núcleos que enxergam.
+
+**Decisão.**
+
+1. Servidor: `shared_buffers` = 5 GB (25% dos 20 GiB, valor inicial indicado pela documentação do PostgreSQL); `effective_cache_size` = 15 GB (o restante do orçamento); `work_mem` = 4 MB (o padrão, declarado); `max_worker_processes` = 16 (o padrão, 8, não comporta 11 processos paralelos); `shared_preload_libraries` = `pg_stat_statements` (ADR-021).
+2. Só na sessão que constrói os índices: `maintenance_work_mem` = 8 GB (valor do exemplo do README do `pgvector`; o grafo estimado ocupa uns 6 GB); `max_parallel_maintenance_workers` = 11; `max_parallel_workers` = 12. O `pgvector` usa exatamente esse número de processos na construção do HNSW, que com o processo líder somam os 12 núcleos do sistema sob teste (conferido no código do `pgvector` 0.8.7 e numa construção de teste com 300 mil passagens). No índice GIN, o próprio PostgreSQL escolhe quantos processos usar pelo tamanho da tabela, até esse teto; o número não é forçado.
+3. `shm_size` de 9 GiB no container do PostgreSQL do Eixo A: os 8 GB do grafo e 1 GiB de margem (revisão da ADR-028 para este eixo).
+4. Os demais parâmetros ficam no padrão, inclusive o `hnsw.ef_search`, até a calibração (ADR-038).
+
+**Justificativa.** São os valores da documentação do PostgreSQL e do mantenedor do `pgvector` (ADR-010). Os parâmetros de construção valem só na sessão de preparo porque o `autovacuum_work_mem` padrão herda o `maintenance_work_mem`, e 8 GB por processo de autovacuum não cabem no orçamento; assim, nada muda durante as medições. Sem o `/dev/shm` maior, a construção paralela falharia por um limite do Docker. Com os 2 processos padrão, o tempo de construção compararia esforços diferentes, já que os motores da poliglota usam todos os núcleos.
+
+**Efeito sobre a comparação.** Os parâmetros de construção favorecem o PostgreSQL em relação ao seu padrão: índice construído em paralelo e com o grafo em memória. Igualam o esforço de construção ao dos motores da poliglota, e o tempo de construção é reportado nessas condições. Os parâmetros de memória do servidor são os da documentação e valem só no Eixo A. O limite do `/dev/shm` é um teto: o que se usa ali conta dentro dos 20 GiB e fica vazio durante as consultas.
+
+**Estado.** Aceita. Conferida na carga de desenvolvimento de 03/11/2026, com as 2,68 milhões de passagens: o grafo coube nos 8 GB (nenhum aviso do `pgvector`); o HNSW usou 11 processos paralelos e o GIN, 6, escolhidos pelo PostgreSQL; o pico de memória do container foi de 19,0 GiB, sem atingir o limite.
+
+---
+
+## ADR-043 — Carga dos dados do Eixo A no PostgreSQL
+
+**Contexto.** As 2,68 milhões de passagens e seus vetores (ADR-035) precisam entrar no PostgreSQL. A documentação do PostgreSQL (seção 14.4) e o README do `pgvector` recomendam `COPY` para carga em massa e índices criados depois da carga; o `pgvector` indica o `COPY` binário, com o cliente Python do próprio projeto. O tempo de construção dos índices é métrica do eixo.
+
+**Decisão.**
+
+1. Carga por `COPY passagens (id, titulo, texto, embedding) FROM STDIN (FORMAT BINARY)`, com o `pgvector` para Python 0.5.1 (cliente do mantenedor, publicado em 09/10/2026, dentro do `exclude-newer` da ADR-031) sobre o `psycopg`.
+2. Ordem: `COPY` na tabela sem índices; chave primária; índice GIN em `lexico`; índice HNSW em `embedding` (ADR-038 e ADR-042); `VACUUM ANALYZE`. Durante a carga, `max_wal_size` de 16 GB, desfeito ao fim (ADR-045).
+3. A duração de cada fase e o tamanho da tabela e de cada índice são registrados.
+4. O carregador fica em `eixo-a-busca/consolidada/` e passa a ser o `preparar` do gerador do Eixo A quando o gerador existir; até lá, roda do host, contra o IP do container.
+
+**Justificativa.** Segue as recomendações dos mantenedores (ADR-010). O formato binário evita converter um bilhão de números em texto e de volta. Criar os índices depois da carga é a recomendação das duas documentações e o que a ADR-038 fixa nos dois lados. O `VACUUM ANALYZE` final gera as estatísticas do planejador e grava as marcações de visibilidade nas páginas; sem ele, as primeiras leituras de cada página durante a medição fariam essas gravações, e a cópia inicial (ADR-029) guarda o estado já limpo.
+
+**Efeito sobre a comparação.** Neutro nas consultas, cuja medição começa depois do preparo. O tempo de preparo é reportado por fase, do banco vazio ao estado pronto (ADR-044).
+
+**Estado.** Aceita. Revisada em 03/11/2026: chave primária criada depois do `COPY` (seção 14.4.3 da documentação) e `max_wal_size` maior durante a carga (ADR-045). Antes, a chave existia durante o `COPY` e o `max_wal_size` ficava no padrão, com checkpoints a cada 9 segundos.
+
+---
+
+## ADR-044 — Arquitetura poliglota do Eixo A: composição, índices e estado pronto
+
+**Contexto.** A ADR-036 fixa as versões e a configuração de referência do OpenSearch e do Qdrant; a ADR-037 deixa a divisão de memória para depois da carga; a ADR-041 fixa o texto indexado e os identificadores; a ADR-038, os parâmetros do HNSW. Falta definir como os dois motores são montados e carregados, e em que estado a carga termina.
+
+**Decisão.**
+
+1. Composição em `eixo-a-busca/poliglota/compose.yaml`, com os dois motores herdando o `sistema-sob-teste` (cpuset da ADR-018) e as imagens fixadas pelo digest registrado na ADR-036. OpenSearch conforme o exemplo oficial de Docker Compose: `discovery.type=single-node`, `bootstrap.memory_lock=true` com `memlock` ilimitado, `nofile` de 65536, `DISABLE_INSTALL_DEMO_CONFIG` e `DISABLE_SECURITY_PLUGIN` (ADR-036), heap fixo em metade da memória do container. Qdrant com `QDRANT__TELEMETRY_DISABLED=true` (ADR-023). Os dois com 2 minutos para encerrar, pela mesma razão dos containers PostgreSQL na ADR-030: a cópia inicial precisa sair de dados consistentes. Memória durante a carga: 12 GiB para o OpenSearch (heap de 6 GiB) e 8 GiB para o Qdrant, a estimativa da ADR-037, revista com o que for medido.
+2. OpenSearch: índice `passagens` com 1 shard e 0 réplicas; `_id` = N (ADR-041); um único campo `texto` (título, espaço, texto) do tipo `text` com o analisador `english`; `_source` no padrão.
+3. Qdrant: coleção `passagens` com vetores de 384 dimensões, distância `Cosine`, `m` = 16 e `ef_construct` = 100 (os padrões, declarados); identificador do ponto = N; sem payload; o resto no padrão, inclusive a segmentação automática e os vetores em memória.
+4. Carga com os clientes oficiais dos mantenedores, `opensearch-py` 3.2.0 e `qdrant-client` 1.19.1 (por gRPC), fixados no lock, como o `pgvector` no lado consolidado (ADR-043).
+5. Estado pronto, em que a cópia inicial (ADR-029) é tirada: no PostgreSQL, `VACUUM ANALYZE` concluído; no OpenSearch, `refresh` feito e nenhuma fusão de segmentos em andamento; no Qdrant, coleção verde e todos os vetores indexados. O tempo de preparo de cada arquitetura vai do banco vazio ao estado pronto, por fase. Não há `force merge`.
+
+**Justificativa.** São as configurações de referência dos mantenedores (ADR-010). Com um nó só, a réplica nunca seria alocada e o índice ficaria amarelo, sem efeito sobre os dados. O mesmo texto e os mesmos identificadores da ADR-041 tornam os resultados comparáveis entre si e com os julgamentos. O estado pronto definido pelo critério de cada sistema garante que nenhuma atividade de fundo da carga (fusões, indexação) invada a medição. O `force merge` é uma otimização de busca para índices somente leitura, não o estado padrão depois da carga.
+
+**Efeito sobre a comparação.** O Qdrant divide os dados em vários segmentos, cada um com seu grafo HNSW, enquanto o `pgvector` tem um grafo só: os parâmetros são os mesmos, a estrutura não, e a calibração por recall (ADR-038) iguala a qualidade da vizinhança; a diferença é declarada. Sem `force merge`, o OpenSearch fica no estado padrão depois da carga, com vários segmentos, o que pode lhe custar latência em relação a um índice fundido; também declarado. O `memory_lock` impede que o heap vá para o swap, sem efeito prático com o swap desligado (ADR-016).
+
+**Estado.** Aceita. As recomendações de carga em massa de cada sistema são tratadas na ADR-045.
+
+---
+
+## ADR-045 — Recomendações de carga em massa no preparo do Eixo A
+
+**Contexto.** Cada mantenedor publica orientações para cargas em massa. A documentação do PostgreSQL 18 (seção 14.4) manda usar `COPY`, criar os índices depois da carga, aumentar temporariamente o `maintenance_work_mem` e o `max_wal_size` e rodar `ANALYZE` ao fim, sem indicar valores. A do OpenSearch (ajuste para velocidade de indexação) indica desligar o `refresh` numa indexação pura e começar com lotes de 5 a 15 MiB; o resto da página são sugestões a experimentar (buffer de indexação, translog, threads de fusão). A do Qdrant (envio em massa) indica lotes de 64 a 256 pontos em 2 a 4 fluxos paralelos. Na carga de desenvolvimento de 03/11/2026, o PostgreSQL com `max_wal_size` padrão (1 GB) fez checkpoints a cada 9 segundos durante o `COPY`.
+
+**Decisão.** Aplicar só as recomendações concretas de cada mantenedor, só durante o preparo:
+
+1. PostgreSQL: `max_wal_size` de 16 GB durante a carga, acima dos cerca de 13 GB de WAL que ela gera, para que só o `checkpoint_timeout` dispare checkpoints, e volta ao padrão ao fim (`ALTER SYSTEM` e `RESET`); chave primária criada depois do `COPY`. O `COPY`, os índices depois da carga, o `maintenance_work_mem` e o `VACUUM ANALYZE` já estão nas ADR-042 e ADR-043.
+2. OpenSearch: `refresh_interval` = `-1` durante a carga e de volta ao padrão ao fim, com um `refresh`; lotes de 10 MiB.
+3. Qdrant: lotes de 256 pontos, em 4 fluxos paralelos, um por núcleo do gerador.
+
+As sugestões que a documentação do OpenSearch trata como experimento não são aplicadas.
+
+**Justificativa.** Segue a ADR-010 nos três sistemas da mesma forma: o que o mantenedor recomenda para carga em massa entra; o que ele sugere testar, não. Os ajustes de servidor são desfeitos antes do estado pronto (ADR-044), e os do Qdrant ficam só no cliente; nada do que muda o preparo chega às consultas. Para o `max_wal_size`, a documentação não dá valor; 16 GB é o menor valor redondo acima do WAL da carga.
+
+**Efeito sobre a comparação.** Neutro nas consultas. No tempo de preparo, cada sistema fica no melhor documentado pelo seu mantenedor. O envio paralelo é recomendação só do Qdrant: o `COPY` do PostgreSQL e o envio ao OpenSearch ficam com um fluxo cada, o que favorece o tempo de envio do Qdrant. A construção do grafo do Qdrant vem depois do envio, feita pelo otimizador, e é contada até o estado pronto.
+
+**Estado.** Aceita. Corrige a proposta inicial, que atribuía ao Qdrant a recomendação de desligar a indexação durante o envio; ela não consta da documentação atual.
+
+---
+
 ## Registro de alterações
 
 | Data | Alteração |
@@ -674,4 +779,7 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 | 29/10/2026 | ADR-032 a ADR-034: ordem sorteada em blocos, tratamento de falhas e interrupções, `pg_stat_statements` zerado no início do gerador |
 | 30/10/2026 | ADR-009: corpus definido com o orientador (NQ do BEIR). ADR-035 a ADR-040: modelo de embeddings, OpenSearch e Qdrant, divisão da memória da poliglota, HNSW, fusão por RRF num serviço de busca, `pg_trgm` fora da consulta medida |
 | 30/10/2026 | ADR-035: texto das passagens (título e texto) explicitado; embeddings gerados e conferidos (nDCG@10 da busca exata igual ao do MTEB) |
+| 30/10/2026 | ADR-038 revisada (produto interno no `pgvector`; calibração pelo recall@100 com piso de 100). ADR-039 revisada (ramo léxico com semântica OU nos dois lados; resposta só com identificadores). ADR-028: `/dev/shm` de 9 GiB no Eixo A. ADR-041 a ADR-043: esquema e identificadores, configuração do PostgreSQL e carga do Eixo A |
+| 03/11/2026 | ADR-020: controlador do P510 achado pelo modelo. ADR-036: `vm.max_map_count` já atende; digests das imagens. ADR-042: conferida na carga. ADR-044: composição, índices e estado pronto da poliglota do Eixo A. ADR-045: recomendações de carga em massa dos três sistemas. ADR-043 revisada (chave primária depois do `COPY`, `max_wal_size` na carga) |
+| 03/11/2026 | ADR-037: memória e disco medidos nos dois motores da poliglota. ADR-039: diferença das listas de palavras vazias e dos radicalizadores declarada |
 
