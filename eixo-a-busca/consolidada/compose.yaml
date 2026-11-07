@@ -1,11 +1,11 @@
-# Arquitetura consolidada do Eixo A: PostgreSQL com tsvector + GIN e pgvector.
+# Arquitetura consolidada do Eixo A: PostgreSQL com tsvector + GIN e pgvector, e o serviço de busca.
 services:
   postgres:
     extends:
       file: ../../harness/orquestracao/modelos.yaml
       service: postgres
-    volumes:
-      - ${TCC_DADOS_POSTGRES:?defina TCC_DADOS_POSTGRES}:/var/lib/postgresql
+    mem_limit: 19g
+    memswap_limit: 19g
     shm_size: 9g
     environment:
       POSTGRES_DB: busca
@@ -14,10 +14,28 @@ services:
       - -c
       - shared_preload_libraries=pg_stat_statements
       - -c
-      - shared_buffers=5GB
+      - shared_buffers=4864MB
       - -c
-      - effective_cache_size=15GB
+      - effective_cache_size=14592MB
       - -c
       - work_mem=4MB
       - -c
       - max_worker_processes=16
+    volumes:
+      - ${TCC_DADOS_POSTGRES:?defina TCC_DADOS_POSTGRES}:/var/lib/postgresql
+
+  busca:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: sistema-sob-teste
+    image: tcc-busca:1
+    mem_limit: 1g
+    memswap_limit: 1g
+    environment:
+      TCC_MOTOR: consolidada
+      TCC_CONEXOES: "16"
+      TCC_EF_BUSCA: "100"
+      PGHOST: postgres
+      PGUSER: postgres
+      PGPASSWORD: tcc
+      PGDATABASE: busca

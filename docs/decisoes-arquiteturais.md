@@ -605,6 +605,8 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 
 O Qdrant mantém vetores e grafos em arquivos mapeados, contados pelo kernel como cache de arquivo; por isso a necessidade de memória de cada motor é a memória própria somada aos arquivos que ele lê nas consultas, e não só `anon` + `shmem`. O heap do OpenSearch é metade do container (ADR-036), então sua memória própria cresce com o limite dado e não mede necessidade: o mínimo coerente é o container em que a outra metade comporta o que fica fora do heap e o índice. A divisão final depende da memória do serviço de busca (ADR-039), que sai dos mesmos 20 GiB, e é registrada aqui quando ele for definido.
 
+Divisão definida em 03/11/2026, com o serviço de busca em 1 GiB nas duas arquiteturas (ADR-046): OpenSearch com 10 GiB (heap de 5 GiB) e Qdrant com 9 GiB. Os mínimos medidos são de cerca de 4,8 GiB para o OpenSearch (com o heap na metade, a outra metade precisa comportar os ~0,8 GiB fora do heap e o índice de 1,6 GiB) e de cerca de 4,4 GiB para o Qdrant (4,1 GiB de arquivos e 0,24 GiB próprios); os 19 GiB foram divididos nessa proporção (52% e 48%), e cada motor fica com mais que o dobro do seu mínimo. Na consolidada, o PostgreSQL fica com 19 GiB (ADR-042).
+
 ---
 
 ## ADR-038 — HNSW com o mesmo grafo e esforço de busca calibrado para o mesmo recall
@@ -700,6 +702,8 @@ O Qdrant mantém vetores e grafos em arquivos mapeados, contados pelo kernel com
 
 **Estado.** Aceita. Conferida na carga de desenvolvimento de 03/11/2026, com as 2,68 milhões de passagens: o grafo coube nos 8 GB (nenhum aviso do `pgvector`); o HNSW usou 11 processos paralelos e o GIN, 6, escolhidos pelo PostgreSQL; o pico de memória do container foi de 19,0 GiB, sem atingir o limite.
 
+Revisada em 03/11/2026: o serviço de busca ocupa 1 GiB dos 20 GiB (ADR-046), e o container do PostgreSQL passa a ter 19 GiB. Pela mesma regra do item 1, `shared_buffers` = 4864 MB (25% de 19 GiB) e `effective_cache_size` = 14592 MB (o restante). Os parâmetros de construção, o `max_worker_processes` e o `/dev/shm` de 9 GiB não mudam.
+
 ---
 
 ## ADR-043 — Carga dos dados do Eixo A no PostgreSQL
@@ -761,6 +765,42 @@ As sugestões que a documentação do OpenSearch trata como experimento não sã
 
 ---
 
+## ADR-046 — Serviço de busca do Eixo A
+
+**Contexto.** A ADR-039 põe a fusão num serviço de busca dentro do sistema sob teste, com a mesma interface HTTP nas duas arquiteturas, e deixa a linguagem, o framework e os detalhes para a implementação. O serviço precisa não ser o gargalo, fazer o mesmo trabalho comum nos dois lados e respeitar a ADR-005 (nenhum modelo roda durante a medição).
+
+**Decisão.**
+
+1. Linguagem e servidor: Python 3.14, no mesmo ambiente travado da ADR-031, com Starlette 1.8.0 e Uvicorn 0.54.0 (`uvloop` 0.23.0 e `httptools` 0.9.0), em 6 processos, um por núcleo físico do sistema sob teste, sem registro de acesso por requisição. Clientes assíncronos oficiais: `psycopg` com `psycopg-pool` 3.3.3, `AsyncOpenSearch` do `opensearch-py` (com `aiohttp` 3.14.5) e `AsyncQdrantClient` por gRPC.
+2. Interface: `POST /buscar` recebe `{"texto": ..., "vetor": [384 números]}` e devolve `{"ids": [10 inteiros], "pontuacoes": [10 números]}`; `GET /saude` responde quando o serviço e os motores estão prontos. O vetor da consulta vem do gerador, calculado antes (ADR-005).
+3. Consulta: na consolidada, uma única consulta SQL com os 100 primeiros de cada ramo, a posição de cada resultado pelo `ROW_NUMBER`, a junção dos dois ramos e a soma de 1/(60 + posição); na poliglota, o `match` no OpenSearch (`size` 100, sem `_source`) e a busca no Qdrant (`limit` 100) em paralelo, e a mesma fusão em Python. Empates na fusão se resolvem pelo menor `id` nos dois lados; dentro do ramo léxico do PostgreSQL, onde empates do `ts_rank_cd` são comuns, também; no OpenSearch e no Qdrant vale a ordem que o motor devolve. O `ef` de cada motor vem da calibração (ADR-038): no PostgreSQL, fixado em cada conexão; no Qdrant, em cada busca.
+4. Conexões: um pool por processo e por motor, dimensionado para que nenhuma requisição espere por conexão na maior concorrência do plano (concorrência máxima ÷ 6 por processo), com a mesma regra para os três motores. Se a soma passar das 100 conexões padrão do PostgreSQL, a mudança vira ADR.
+5. Memória: 1 GiB para o serviço nas duas arquiteturas, dentro dos 20 GiB (ADR-037 e ADR-042).
+6. Imagem construída pelo projeto e usada nas duas arquiteturas: base `python:3.14.4-slim-trixie` fixada por digest, `uv` 0.12.24 instalando só as dependências principais do lock (sem o grupo `embeddings`), código em `eixo-a-busca/servico/`, motor escolhido por variável de ambiente.
+7. Equivalência: antes de qualquer medição, um teste de contrato manda as mesmas consultas aos dois lados e confere o formato da resposta, e confere que a fusão é idêntica, fundindo em Python os dois ramos do PostgreSQL obtidos em separado e comparando com a consulta SQL única.
+
+**Justificativa.** Python mantém o código no mesmo ambiente, ferramentas e autoria do harness, e os três motores têm clientes oficiais assíncronos nele. Os 6 processos usam os núcleos do sistema sob teste sem disputar com o gerador. Receber o vetor pronto imita um cliente que calculou o embedding antes, em vez de um serviço que conhece as consultas de antemão. O desempate pelo `id` torna a fusão determinística e permite comparar os dois lados resultado a resultado. O pool dimensionado pela concorrência máxima impede que a espera por conexão apareça como latência de um motor.
+
+**Efeito sobre a comparação.** O código do serviço é o mesmo nos dois lados, menos a parte que fala com os motores. A poliglota faz mais trabalho dentro dele (duas chamadas, leitura de 200 resultados e a fusão) do que a consolidada (uma chamada e 10 linhas); como Python é mais lento nesse trabalho do que uma linguagem compilada, a escolha encarece o lado poliglota, e isso é declarado. A calibração confere que o serviço não é o gargalo. O desempate pela ordem do motor no OpenSearch e no Qdrant, e não pelo `id`, é declarado; ordenar pelo `_id` no OpenSearch é desaconselhado pela documentação, e empates em BM25 e cosseno são raros.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-047 — Consultas do serviço ao PostgreSQL sem comandos preparados
+
+**Contexto.** Por padrão, o `psycopg` transforma uma consulta em comando preparado no servidor depois de 5 execuções na mesma conexão (`prepare_threshold` = 5), e o PostgreSQL, no modo padrão (`plan_cache_mode` = `auto`), passa a usar um plano genérico depois de 5 planos específicos. No plano genérico da consulta híbrida (ADR-046), o `tsquery` montado a partir do texto é recalculado em cada linha encontrada pelo índice GIN, em vez de virar uma constante. Medido em 03/11/2026 sobre os dados completos, com 12 perguntas da NQ numa conexão: a partir da 11ª execução, o padrão levou 979 ms de mediana, contra 340 ms com o plano específico. Reescrever a consulta com `MATERIALIZED` ou com subconsulta escalar estabiliza os dois planos em ~870 ms, mas o planejador deixa de paralelizar o ramo léxico, porque não enxerga a pergunta.
+
+**Decisão.** O pool do serviço abre as conexões com `prepare_threshold=None`: o cliente não prepara comandos, e cada consulta é planejada com os valores reais. Nenhuma configuração do servidor muda.
+
+**Justificativa.** É como o OpenSearch e o Qdrant tratam cada busca: interpretam e planejam a consulta inteira a cada requisição, sem plano em cache. O custo do planejamento (~0,8 ms por consulta) entra na medição. O padrão mediria uma regressão de plano causada pelo cliente e pela forma da consulta, que um usuário atento evitaria; as reescritas trocariam essa regressão por outra.
+
+**Efeito sobre a comparação.** Favorece o PostgreSQL em relação ao padrão do `psycopg`, e isso é declarado. A paralelização do ramo léxico (2 processos auxiliares por consulta) é o padrão do PostgreSQL; sob carga, os processos auxiliares são disputados (8 no total, `max_parallel_workers`), e a medição mostra esse efeito como ele é.
+
+**Estado.** Aceita.
+
+---
+
 ## Registro de alterações
 
 | Data | Alteração |
@@ -782,4 +822,6 @@ As sugestões que a documentação do OpenSearch trata como experimento não sã
 | 30/10/2026 | ADR-038 revisada (produto interno no `pgvector`; calibração pelo recall@100 com piso de 100). ADR-039 revisada (ramo léxico com semântica OU nos dois lados; resposta só com identificadores). ADR-028: `/dev/shm` de 9 GiB no Eixo A. ADR-041 a ADR-043: esquema e identificadores, configuração do PostgreSQL e carga do Eixo A |
 | 03/11/2026 | ADR-020: controlador do P510 achado pelo modelo. ADR-036: `vm.max_map_count` já atende; digests das imagens. ADR-042: conferida na carga. ADR-044: composição, índices e estado pronto da poliglota do Eixo A. ADR-045: recomendações de carga em massa dos três sistemas. ADR-043 revisada (chave primária depois do `COPY`, `max_wal_size` na carga) |
 | 03/11/2026 | ADR-037: memória e disco medidos nos dois motores da poliglota. ADR-039: diferença das listas de palavras vazias e dos radicalizadores declarada |
+| 03/11/2026 | ADR-046: serviço de busca do Eixo A. ADR-037: divisão definida (10 GiB OpenSearch, 9 GiB Qdrant, 1 GiB serviço). ADR-042 revisada: PostgreSQL com 19 GiB, `shared_buffers` 4864 MB e `effective_cache_size` 14592 MB |
+| 03/11/2026 | ADR-047: consultas do serviço ao PostgreSQL sem comandos preparados |
 

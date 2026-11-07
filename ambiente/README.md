@@ -266,8 +266,8 @@ Todas as imagens fixadas por digest. Ver ADR-011.
 | PostgreSQL | 18.6 (`18.6-1.pgdg13+2`), Debian 13 | base `postgres:18.6-trixie@sha256:edb0c08dc33befd0262ab3b5cf1c4f3f8cfd8b09e88c05b45adee29d6761ddb6` |
 | pgvector | 0.8.7 (`0.8.7-1.pgdg13+1`, PGDG) | na imagem `tcc-postgres` |
 | TimescaleDB | 2.31.0 Community (`2.31.0~debian13-1806`), licença `timescale` | na imagem `tcc-postgres` |
-| OpenSearch | a registrar | a registrar |
-| Qdrant | a registrar | a registrar |
+| OpenSearch | 3.8.0 | `opensearchproject/opensearch:3.8.0@sha256:fafe3fc3587088674669235575aa166228c48bdb940294a8cdbbc1da75236a40` |
+| Qdrant | 1.19.2 | `qdrant/qdrant:v1.19.2@sha256:b7b0444c4c351c970b98e90a6f89c2ee4287c65b44e52b4cb503fa5b2aa927ad` |
 | RabbitMQ | a registrar | a registrar |
 | InfluxDB | a registrar | a registrar |
 
@@ -288,6 +288,24 @@ comprimidos de 23 MB para 3,9 MB (razão 6,1), o que confirma a edição Communi
 colunas `total_autovacuum_time` (PostgreSQL 18), `pg_stat_wal` e
 `pg_stat_checkpointer` disponíveis. A telemetria do TimescaleDB vem em `basic` e
 é desligada na configuração do Eixo C (ADR-023).
+
+### Imagem do serviço de busca do Eixo A
+
+Construída a partir de `eixo-a-busca/servico/Dockerfile` (ADR-046) e verificada
+em 03/11/2026.
+
+| Item | Valor |
+|---|---|
+| Tag local | `tcc-busca:1` |
+| ID da imagem | `sha256:ca588fd6cb3b79c88fafc9e9ce2f05e63c32cc7c78165f937c2c476312efa4c8` |
+| Base | `python:3.14.4-slim-trixie@sha256:2ca02f32b4d9d893863367ce07ec1972819f476dd38d8612f2a9cb6a41cbb727` (Python 3.14.4, glibc 2.41) |
+| `uv` | `ghcr.io/astral-sh/uv:0.12.24@sha256:3af4716e991d6956a41e573eab705d0ee08500cd829ed30293eb8472f372c65a` |
+| Dependências | as principais do `uv.lock`, sem o grupo `embeddings` |
+
+Verificação: só os arquivos do serviço em `/app`, sem o torch, executando como o
+usuário 1000; 30 de 30 respostas idênticas à fusão em Python na consolidada e à
+fusão das buscas diretas na poliglota, com o mesmo código antes da última
+reconstrução; a imagem final respondeu nas duas arquiteturas.
 
 O ID de uma imagem construída localmente muda a cada reconstrução, mesmo com as
 mesmas versões, porque inclui datas de criação. A referência do que foi medido é
