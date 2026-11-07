@@ -51,5 +51,28 @@ O `pg_trgm` não entra na consulta medida. Ver ADR-040.
 
 ## Equivalência funcional
 
-Ambas as variantes expõem a mesma interface e são verificadas por um conjunto
-de testes de contrato antes de qualquer medição.
+As duas variantes expõem a mesma interface, `POST /buscar` e `GET /saude`, no
+serviço de `servico/` (ADR-046). Antes de qualquer medição, o teste de contrato
+confere, com a arquitetura no ar:
+
+- que o serviço está pronto;
+- o formato das respostas: 10 identificadores distintos do corpus e 10
+  pontuações, em ordem decrescente e com empates pelo menor identificador;
+- que pedidos inválidos são recusados com 400, e o método errado com 405;
+- que cada resposta é idêntica, em identificadores e pontuações exatas, à fusão
+  em Python dos dois ramos buscados direto nos motores, com o mesmo `ef` do
+  serviço. Na consolidada, isso compara a consulta SQL única com a fusão em
+  Python, e garante que a fórmula e o desempate são os mesmos nos dois lados.
+
+```bash
+TCC_DADOS_POSTGRES=~/tcc-dados/a/consolidada/postgres/atual \
+  docker compose -p tcc-a-consolidada -f eixo-a-busca/consolidada/compose.yaml up -d
+uv run python eixo-a-busca/servico/contrato.py consolidada --registro resultados/contrato/a-consolidada.json
+```
+
+As 100 consultas da amostra são fixas (semente no script), as mesmas nas duas
+arquiteturas. Resultado em 07/11/2026: as duas arquiteturas passaram em todas as
+verificações; os registros estão em `resultados/contrato/`. Nas mesmas consultas,
+as duas arquiteturas têm em média 3,9 dos 10 resultados em comum, efeito das
+funções de ordenação léxica diferentes (ADR-039) e do `ef` ainda não calibrado
+(ADR-038); a qualidade de cada uma é medida pelo nDCG@10.

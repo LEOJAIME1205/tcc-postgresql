@@ -3,3 +3,5 @@
 !uv.lock
 !.python-version
 !eixo-a-busca/servico/*.py
+# O teste de contrato roda no host, não na imagem.
+eixo-a-busca/servico/contrato.py

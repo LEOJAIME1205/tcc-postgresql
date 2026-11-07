@@ -297,15 +297,14 @@ em 03/11/2026.
 | Item | Valor |
 |---|---|
 | Tag local | `tcc-busca:1` |
-| ID da imagem | `sha256:ca588fd6cb3b79c88fafc9e9ce2f05e63c32cc7c78165f937c2c476312efa4c8` |
+| ID da imagem | `sha256:82bbd087272bb16a875b8922a21a9d929763c5a58e9098a99e98f43f2e6c7dc4` |
 | Base | `python:3.14.4-slim-trixie@sha256:2ca02f32b4d9d893863367ce07ec1972819f476dd38d8612f2a9cb6a41cbb727` (Python 3.14.4, glibc 2.41) |
 | `uv` | `ghcr.io/astral-sh/uv:0.12.24@sha256:3af4716e991d6956a41e573eab705d0ee08500cd829ed30293eb8472f372c65a` |
 | Dependências | as principais do `uv.lock`, sem o grupo `embeddings` |
 
-Verificação: só os arquivos do serviço em `/app`, sem o torch, executando como o
-usuário 1000; 30 de 30 respostas idênticas à fusão em Python na consolidada e à
-fusão das buscas diretas na poliglota, com o mesmo código antes da última
-reconstrução; a imagem final respondeu nas duas arquiteturas.
+Verificação: só os quatro arquivos do serviço em `/app` (o teste de contrato fica
+fora do contexto), sem o torch, executando como o usuário 1000; teste de contrato
+aprovado nas duas arquiteturas em 07/11/2026 (`resultados/contrato/`).
 
 O ID de uma imagem construída localmente muda a cada reconstrução, mesmo com as
 mesmas versões, porque inclui datas de criação. A referência do que foi medido é
