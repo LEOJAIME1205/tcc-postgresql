@@ -1,0 +1,8 @@
+# Contexto da imagem do gerador: só o lock, o gerador e os carregadores.
+*
+!pyproject.toml
+!uv.lock
+!.python-version
+!eixo-a-busca/cargas/gerador.py
+!eixo-a-busca/consolidada/carga.py
+!eixo-a-busca/poliglota/carga.py

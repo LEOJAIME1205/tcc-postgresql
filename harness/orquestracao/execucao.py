@@ -11,15 +11,18 @@ import signal
 import subprocess
 import sys
 import time
+import urllib.error
+import urllib.request
 from types import FrameType
 from typing import Any, Dict, List, Optional, Tuple, cast
 
 from harness.orquestracao import controles, dados, registros
-from harness.orquestracao.arquitetura import RAIZ, Arquitetura, ErroDescritor, ler_arquitetura
+from harness.orquestracao.arquitetura import RAIZ, Arquitetura, Coletor, ErroDescritor, ler_arquitetura
 from harness.orquestracao.compose import Compose
 from harness.orquestracao.plano import Execucao, Plano
 
 SENHA_POSTGRES: str = "tcc"
+PORTAS_HTTP: Dict[str, int] = {"opensearch": 9200, "qdrant": 6333}
 Processo = subprocess.Popen[bytes]
 
 
@@ -34,9 +37,12 @@ def interromper_uma_vez(_signum: int, _frame: Optional[FrameType]) -> None:
 
 
 def semente(pl: Plano, ex: Execucao) -> int:
-    """Semente própria da execução: reproduzível e diferente entre repetições."""
-    resumo = hashlib.sha256(f"{pl.semente}:{ex.sufixo()}".encode()).hexdigest()
-    return int(resumo[:8], 16)
+    """Semente da execução: reproduzível, diferente entre repetições e igual entre as
+    arquiteturas de um eixo na mesma configuração (ADR-032), para que o gerador mande a
+    mesma sequência de operações a todas elas."""
+    c = ex.configuracao
+    chave = f"{pl.semente}:{c.eixo}_{c.cenario}_c{c.concorrencia}_r{ex.repeticao:02d}"
+    return int(hashlib.sha256(chave.encode()).hexdigest()[:8], 16)
 
 
 def _docker(argumentos: List[str]) -> subprocess.CompletedProcess[str]:
@@ -50,6 +56,20 @@ def _esperar_banco(container: str, limite_s: float = 120.0) -> bool:
         if _docker(["exec", container, "pg_isready", "-q", "-h", "127.0.0.1",
                     "-U", "postgres"]).returncode == 0:
             return True
+        time.sleep(0.5)
+    return False
+
+
+def _esperar_http(url: str, limite_s: float = 120.0) -> bool:
+    """Espera o sistema responder 200 no endereço, como o coletor fará."""
+    prazo = time.monotonic() + limite_s
+    while time.monotonic() < prazo:
+        try:
+            with urllib.request.urlopen(url, timeout=2) as resposta:
+                if resposta.status == 200:
+                    return True
+        except (urllib.error.URLError, OSError):
+            pass
         time.sleep(0.5)
     return False
 
@@ -81,24 +101,36 @@ def _parar(processos: List[Processo]) -> None:
 
 def _iniciar_coletores_internos(arq: Arquitetura, cenario: str, pasta: str,
                                 processos: List[Processo]) -> Optional[str]:
-    """Espera cada banco e inicia o seu coletor; devolve o motivo da falha, se houver."""
+    """Espera cada sistema e inicia o seu coletor; devolve o motivo da falha, se houver."""
     for coletor in arq.coletores:
         container = arq.container(coletor.servico)
-        if not _esperar_banco(container):
-            return f"{coletor.servico} não aceitou conexões em 120 s"
-        conninfo = f"host={_ip(container)} dbname={coletor.banco} user=postgres password={SENHA_POSTGRES}"
-        argumentos = ["harness/metricas/postgres.py",
-                      os.path.join(pasta, f"metricas-{coletor.servico}.csv"), "--conninfo", conninfo]
-        if cenario == "longa":
-            argumentos.append("--pgstattuple")
+        saida = os.path.join(pasta, f"metricas-{coletor.servico}.csv")
+        if coletor.tipo == "postgres":
+            if not _esperar_banco(container):
+                return f"{coletor.servico} não aceitou conexões em 120 s"
+            conninfo = (f"host={_ip(container)} dbname={coletor.banco} user=postgres "
+                        f"password={SENHA_POSTGRES}")
+            argumentos = ["harness/metricas/postgres.py", saida, "--conninfo", conninfo]
+            if cenario == "longa":
+                argumentos.append("--pgstattuple")
+        else:
+            url = f"http://{_ip(container)}:{PORTAS_HTTP[coletor.tipo]}"
+            if not _esperar_http(url):
+                return f"{coletor.servico} não respondeu em 120 s"
+            argumentos = [f"harness/metricas/{coletor.tipo}.py", saida, "--url", url]
         processos.append(_iniciar_coletor(
             argumentos, os.path.join(pasta, "ferramenta", f"coletor-{coletor.servico}.log")))
     return None
 
 
+def _postgres(arq: Arquitetura) -> List[Coletor]:
+    """Os coletores de bancos PostgreSQL, os únicos com pg_stat_statements."""
+    return [c for c in arq.coletores if c.tipo == "postgres"]
+
+
 def _zerar_pg_stat_statements(arq: Arquitetura) -> None:
     """ADR-034. Num banco sem a extensão, o comando falha sem efeito."""
-    for coletor in arq.coletores:
+    for coletor in _postgres(arq):
         _docker(["exec", arq.container(coletor.servico), "psql", "-U", "postgres",
                  "-d", coletor.banco, "-tAc", "SELECT pg_stat_statements_reset()"])
 
@@ -152,7 +184,7 @@ def _capturar(arq: Arquitetura, inspecao: List[Dict[str, Any]], pasta: str) -> N
     """Instantâneos e logs dos containers, antes de a arquitetura ser desligada."""
     registros.gravar_json(os.path.join(pasta, "instantaneos", "docker-inspect.json"),
                           {"containers": inspecao})
-    for coletor in arq.coletores:
+    for coletor in _postgres(arq):
         r = _docker(["exec", arq.container(coletor.servico), "psql", "-U", "postgres",
                      "-d", coletor.banco, "-c",
                      "\\copy (SELECT * FROM pg_stat_statements) TO STDOUT WITH CSV HEADER"])

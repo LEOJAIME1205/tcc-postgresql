@@ -517,7 +517,7 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 
 **Efeito sobre a comparação.** Neutro. Protege as duas arquiteturas de cada eixo contra um viés de posição na janela.
 
-**Estado.** Aceita.
+**Estado.** Aceita. Revisada em 07/11/2026: a semente de cada execução, passada ao gerador, é derivada da semente do plano e da configuração sem a arquitetura (eixo, cenário, concorrência e repetição). Assim, a mesma configuração e repetição recebem a mesma semente nas arquiteturas de um eixo, e o gerador produz a mesma sequência de operações nelas (números aleatórios comuns), o que reduz a variância da comparação pareada. A ordem das execuções continua sorteada pela semente do plano. Antes, a semente incluía a arquitetura.
 
 ---
 
@@ -801,6 +801,45 @@ As sugestões que a documentação do OpenSearch trata como experimento não sã
 
 ---
 
+## ADR-048 — Gerador de carga do Eixo A
+
+**Contexto.** O contrato do gerador (`harness/README.md`) pede um programa que carregue os dados (`preparar`) e rode, numa invocação contínua, aquecimento e medição com um nível de concorrência, gravando cada operação no `operacoes.csv`. A proposta cita k6 ou Locust para os Eixos A e B e define o nível de concorrência como variável independente.
+
+**Decisão.**
+
+1. Ferramenta: gerador próprio em Python, com asyncio e `aiohttp`, no mesmo ambiente travado da ADR-031, em até 2 processos, um por núcleo físico do gerador (ADR-018), com os clientes divididos entre eles.
+2. Modelo de carga: laço fechado. N clientes, cada um com uma conexão HTTP persistente ao serviço de busca, mandam a próxima consulta assim que recebem a resposta, sem pausa. N é o nível de concorrência; a vazão é resultado.
+3. Níveis de concorrência: 1, 2, 4, 8, 16, 32 e 64, iguais nas duas arquiteturas, confirmados na calibração (Etapa 3.1), que precisa encontrar a saturação das duas dentro da faixa. O pool do serviço passa a 11 conexões por processo (64 ÷ 6, para cima), 66 conexões ao PostgreSQL. Ampliar a faixa vira ADR.
+4. Consultas: cada cliente percorre as 3.452 consultas da NQ numa ordem embaralhada pela semente da execução, começando em pontos diferentes da ordem e recomeçando ao fim. Com a revisão da ADR-032, a sequência é a mesma nas duas arquiteturas.
+5. Qualidade: recall@10 e nDCG@10 medidos numa passagem própria por arquitetura, com as 3.452 consultas, uma de cada vez, depois da calibração do `ef`. As execuções de carga gravam só latência e sucesso.
+6. Durações e erros: aquecimento de 120 s e medição de 300 s nas execuções curtas, confirmados na calibração. O gerador espera o `/saude` responder 200 antes de começar (até 5 min). Tempo limite de 60 s por requisição; erro e tempo esgotado são gravados com `ok` = 0, e a taxa de erro vai para o `gerador.json`. O gerador só termina com erro quando não consegue rodar.
+7. Imagem do gerador do Eixo A, com a base, o `uv` e o lock da imagem do serviço, contendo o gerador e os dois carregadores; os dados entram montados como somente leitura. O `preparar` roda o carregador da arquitetura e grava o registro da carga em `/saida`. Os descritores `arquitetura.toml` das duas arquiteturas incluem o serviço de busca entre os serviços sob teste.
+
+**Justificativa.** O gerador próprio grava o `operacoes.csv` no formato do harness, com instante Unix e relógio monotônico por operação, e cumpre o contrato numa invocação, sem conversão de saída; o k6 traria outra linguagem e formato, e o Locust agrega estatísticas e pesa mais por requisição. O laço fechado corresponde à variável independente da proposta e produz a curva de saturação. A mesma sequência de consultas nos dois lados compara as arquiteturas sob perguntas idênticas. A qualidade não depende da carga, porque os três motores devolvem sempre o mesmo resultado para a mesma consulta.
+
+**Efeito sobre a comparação.** Neutro: o mesmo gerador, a mesma sequência de consultas e os mesmos níveis nos dois lados. O laço fechado não mede a latência sob uma taxa fixa de chegada: perto da saturação, a arquitetura mais lenta recebe menos requisições por segundo, e a comparação se faz pela vazão e pela latência em cada nível; essa limitação é declarada. O desvio em relação à proposta (gerador próprio em vez de k6 ou Locust) é declarado. A calibração confere que o gerador não é o gargalo.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-049 — Coletores internos do OpenSearch e do Qdrant
+
+**Contexto.** A ADR-021 manda coletar estatísticas internas de todos os sistemas de dados com a mesma frequência, e o `harness/README.md` deixa o catálogo de cada sistema especializado para a etapa do seu eixo.
+
+**Decisão.** Um coletor por sistema, nos núcleos do gerador, com a mesma cadência do PostgreSQL: estatísticas a cada 10 s e tamanhos a cada 60 s.
+
+1. OpenSearch (`os_`), por `_nodes/stats`: buscas e tempo de busca acumulados, operações de indexação, heap da JVM usado, coletas de lixo (quantidade e tempo, geração nova e velha), memória do cache de consultas e número de segmentos; a cada 60 s, tamanho e documentos de cada índice, por `_cat/indices`.
+2. Qdrant (`qd_`), por `/metrics`: requisições e tempo acumulado por rota (gRPC e REST) e memória alocada e residente; a cada 60 s, pontos, vetores indexados e segmentos de cada coleção, pela API de coleções.
+
+**Justificativa.** Cobre, para os sistemas especializados, o que o coletor do PostgreSQL cobre: a atividade de busca, a memória própria do processo e o tamanho dos dados. Pedidos HTTP leves, a cada 10 s, como as consultas do coletor do PostgreSQL.
+
+**Efeito sobre a comparação.** Neutro, pela regra da ADR-021. O custo da coleta é medido no piloto.
+
+**Estado.** Aceita.
+
+---
+
 ## Registro de alterações
 
 | Data | Alteração |
@@ -824,4 +863,5 @@ As sugestões que a documentação do OpenSearch trata como experimento não sã
 | 03/11/2026 | ADR-037: memória e disco medidos nos dois motores da poliglota. ADR-039: diferença das listas de palavras vazias e dos radicalizadores declarada |
 | 03/11/2026 | ADR-046: serviço de busca do Eixo A. ADR-037: divisão definida (10 GiB OpenSearch, 9 GiB Qdrant, 1 GiB serviço). ADR-042 revisada: PostgreSQL com 19 GiB, `shared_buffers` 4864 MB e `effective_cache_size` 14592 MB |
 | 03/11/2026 | ADR-047: consultas do serviço ao PostgreSQL sem comandos preparados |
+| 07/11/2026 | ADR-048: gerador de carga do Eixo A. ADR-049: coletores internos do OpenSearch e do Qdrant. ADR-032 revisada: semente da execução sem a arquitetura |
 

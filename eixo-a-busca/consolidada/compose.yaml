@@ -33,9 +33,25 @@ services:
     memswap_limit: 1g
     environment:
       TCC_MOTOR: consolidada
-      TCC_CONEXOES: "16"
+      TCC_CONEXOES: "11"
       TCC_EF_BUSCA: "100"
       PGHOST: postgres
       PGUSER: postgres
       PGPASSWORD: tcc
       PGDATABASE: busca
+
+  gerador:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: gerador
+    image: tcc-gerador-busca:1
+    environment:
+      TCC_ARQUITETURA: consolidada
+      TCC_SERVICO: http://busca:8000
+      PGHOST: postgres
+      PGUSER: postgres
+      PGPASSWORD: tcc
+      PGDATABASE: busca
+    volumes:
+      - ../dados:/app/eixo-a-busca/dados:ro
+      - ${TCC_SAIDA:?defina TCC_SAIDA}:/saida

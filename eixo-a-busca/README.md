@@ -65,10 +65,13 @@ confere, com a arquitetura no ar:
   Python, e garante que a fórmula e o desempate são os mesmos nos dois lados.
 
 ```bash
-TCC_DADOS_POSTGRES=~/tcc-dados/a/consolidada/postgres/atual \
-  docker compose -p tcc-a-consolidada -f eixo-a-busca/consolidada/compose.yaml up -d
+TCC_DADOS_POSTGRES=~/tcc-dados/a/consolidada/postgres/atual TCC_SAIDA=/tmp \
+  docker compose -p tcc-a-consolidada -f eixo-a-busca/consolidada/compose.yaml up -d postgres busca
 uv run python eixo-a-busca/servico/contrato.py consolidada --registro resultados/contrato/a-consolidada.json
 ```
+
+Todo comando do Compose precisa das variáveis de dados e de `TCC_SAIDA`, mesmo
+quando não sobe o gerador: o Compose resolve o arquivo inteiro.
 
 As 100 consultas da amostra são fixas (semente no script), as mesmas nas duas
 arquiteturas. Resultado em 07/11/2026: as duas arquiteturas passaram em todas as
@@ -76,3 +79,35 @@ verificações; os registros estão em `resultados/contrato/`. Nas mesmas consul
 as duas arquiteturas têm em média 3,9 dos 10 resultados em comum, efeito das
 funções de ordenação léxica diferentes (ADR-039) e do `ef` ainda não calibrado
 (ADR-038); a qualidade de cada uma é medida pelo nDCG@10.
+
+## Carga e medição
+
+O gerador de `cargas/gerador.py` (ADR-048) cumpre o contrato do harness e roda
+na imagem `tcc-gerador-busca:1`, construída a partir da raiz do repositório:
+
+```bash
+docker build -f eixo-a-busca/servico/Dockerfile -t tcc-busca:1 .
+docker build -f eixo-a-busca/cargas/Dockerfile -t tcc-gerador-busca:1 .
+```
+
+- `preparar` roda o carregador da arquitetura (`consolidada/carga.py` ou
+  `poliglota/carga.py`) e grava o registro da carga em `carga.json`, no
+  diretório do preparo. É chamado pelo orquestrador:
+  `uv run python -m harness.orquestracao.executar preparar a <arquitetura>`.
+- `executar` mantém N clientes em laço fechado contra o serviço de busca, com as
+  3.452 consultas numa ordem embaralhada pela semente da execução, a mesma nas
+  duas arquiteturas (ADR-032). Grava o `operacoes.csv` (operação
+  `busca_hibrida`) e o `gerador.json`, com os instantes de aquecimento e medição,
+  a contagem de operações e os erros por tipo.
+- `qualidade` mede recall@10 e nDCG@10 das 3.452 consultas, uma de cada vez,
+  contra os julgamentos da NQ, e grava o resultado por consulta:
+
+```bash
+uv run python eixo-a-busca/cargas/gerador.py qualidade --url http://<ip do serviço>:8000 \
+  --saida resultados/qualidade/a-<arquitetura>.json --rotulo <arquitetura>
+```
+
+Os descritores `consolidada/arquitetura.toml` e `poliglota/arquitetura.toml`
+ligam cada arquitetura ao orquestrador: serviços sob teste (os motores e o
+serviço de busca), diretórios de dados e coletores internos (PostgreSQL na
+consolidada; OpenSearch e Qdrant na poliglota, ADR-049).

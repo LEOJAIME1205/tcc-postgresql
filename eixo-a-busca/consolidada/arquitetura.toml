@@ -1,0 +1,14 @@
+# Arquitetura consolidada do Eixo A: PostgreSQL, serviço de busca e gerador (ADR-046 e ADR-048).
+eixo = "a"
+arquitetura = "consolidada"
+compose = "compose.yaml"
+servicos_sob_teste = ["postgres", "busca"]
+servico_gerador = "gerador"
+
+[dados]
+TCC_DADOS_POSTGRES = "postgres"
+
+[[coletor]]
+tipo = "postgres"
+servico = "postgres"
+banco = "busca"

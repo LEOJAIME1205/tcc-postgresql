@@ -292,7 +292,28 @@ a cada 60 s, como no PostgreSQL. O catálogo de cada um é definido na etapa do
 seu eixo, com prefixo por sistema: `os_` (OpenSearch, `_nodes/stats`),
 `qd_` (Qdrant, `/metrics`), `rmq_` (RabbitMQ, API de gerenciamento; inclui a
 profundidade de cada fila), `influx_` (InfluxDB, `/metrics`) e `tsdb_`
-(TimescaleDB, tamanho de hypertables e compressão por chunk).
+(TimescaleDB, tamanho de hypertables e compressão por chunk). Os coletores por
+HTTP compartilham o laço de `harness/metricas/coleta.py`.
+
+OpenSearch (`harness/metricas/opensearch.py`, ADR-049):
+
+| Métrica | Rótulo | Fonte |
+|---|---|---|
+| `os_buscas_total`, `os_busca_ms_total` | | `_nodes/stats`, `indices.search` |
+| `os_indexacoes_total`, `os_indexacao_ms_total` | | `_nodes/stats`, `indices.indexing` |
+| `os_cache_consultas_bytes` | | `_nodes/stats`, `indices.query_cache` |
+| `os_segmentos` | | `_nodes/stats`, `indices.segments.count` |
+| `os_heap_usado_bytes` | | `_nodes/stats`, `jvm.mem` |
+| `os_gc_total`, `os_gc_ms_total` | coletor da JVM (`young`, `old`, `G1 Concurrent GC`) | `_nodes/stats`, `jvm.gc.collectors` |
+| `os_indice_bytes`, `os_documentos` (60 s) | índice | `_cat/indices`, tamanho primário e documentos |
+
+Qdrant (`harness/metricas/qdrant.py`, ADR-049):
+
+| Métrica | Rótulo | Fonte |
+|---|---|---|
+| `qd_requisicoes_total`, `qd_requisicao_s_total` | protocolo, método, rota e status (ex.: `grpc /qdrant.Points/Query 0`) | `/metrics`, `*_responses_duration_seconds_count` e `_sum` |
+| `qd_memoria_alocada_bytes`, `qd_memoria_residente_bytes` | | `/metrics`, `memory_allocated_bytes` e `memory_resident_bytes` |
+| `qd_pontos`, `qd_vetores_indexados`, `qd_segmentos` (60 s) | coleção | API de coleções, `points_count`, `indexed_vectors_count`, `segments_count` |
 
 **Gerador:** `tsbs_metricas_total` e `tsbs_linhas_total`, no Eixo C. Ver
 "Eixo C: adaptação do TSBS".
@@ -509,6 +530,11 @@ servico = "postgres"
 banco = "fila"
 ```
 
+Cada `[[coletor]]` tem um `tipo` (`postgres`, `opensearch` ou `qdrant`) e o
+`servico` onde o sistema roda, que precisa estar entre os serviços sob teste. O
+`banco` vale só para o tipo `postgres`. Os coletores HTTP leem o sistema pela
+porta padrão (9200 no OpenSearch, 6333 no Qdrant).
+
 Os diretórios de dados ficam em `~/tcc-dados/<eixo>/<arquitetura>/<subdiretório>/`,
 com `inicial/` e `atual/` (ADR-029). A variável de ambiente aponta para `atual/`
 e é definida em todo comando do Compose, inclusive no `down`.
@@ -597,8 +623,10 @@ processos próprio, para que um Ctrl+C no terminal não os derrube antes da hora
 A saída de cada um vai para `ferramenta/`, e eles são encerrados com `SIGTERM`
 antes de a arquitetura ser desligada.
 
-Cada execução recebe uma semente própria, derivada da semente do plano e do
-identificador da execução: reproduzível, e diferente entre repetições.
+Cada execução recebe uma semente derivada da semente do plano e da configuração
+sem a arquitetura (eixo, cenário, concorrência e repetição): reproduzível,
+diferente entre repetições e igual entre as arquiteturas de um eixo, para que o
+gerador mande a mesma sequência de operações a todas elas (ADR-032).
 
 1. Conferir os controles.
 2. Restaurar os diretórios de dados a partir de `inicial/`, com um container

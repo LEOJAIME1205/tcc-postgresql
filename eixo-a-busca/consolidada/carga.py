@@ -142,6 +142,8 @@ def main() -> int:
             print("A tabela passagens já existe: a carga parte de um banco vazio", file=sys.stderr)
             return 1
         conn.execute("CREATE EXTENSION IF NOT EXISTS vector")
+        # A biblioteca vem do shared_preload_libraries; a visão precisa da extensão (ADR-021).
+        conn.execute("CREATE EXTENSION IF NOT EXISTS pg_stat_statements")
         conn.execute(TABELA)
         register_vector(conn)
 

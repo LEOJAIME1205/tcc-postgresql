@@ -1,0 +1,19 @@
+# Arquitetura poliglota do Eixo A: OpenSearch, Qdrant, serviço de busca e gerador
+# (ADR-044, ADR-046, ADR-048 e ADR-049).
+eixo = "a"
+arquitetura = "poliglota"
+compose = "compose.yaml"
+servicos_sob_teste = ["opensearch", "qdrant", "busca"]
+servico_gerador = "gerador"
+
+[dados]
+TCC_DADOS_OPENSEARCH = "opensearch"
+TCC_DADOS_QDRANT = "qdrant"
+
+[[coletor]]
+tipo = "opensearch"
+servico = "opensearch"
+
+[[coletor]]
+tipo = "qdrant"
+servico = "qdrant"

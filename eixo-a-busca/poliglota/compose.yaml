@@ -46,7 +46,21 @@ services:
     memswap_limit: 1g
     environment:
       TCC_MOTOR: poliglota
-      TCC_CONEXOES: "16"
+      TCC_CONEXOES: "11"
       TCC_EF_BUSCA: "100"
       OPENSEARCH_HOST: opensearch
       QDRANT_HOST: qdrant
+
+  gerador:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: gerador
+    image: tcc-gerador-busca:1
+    environment:
+      TCC_ARQUITETURA: poliglota
+      TCC_SERVICO: http://busca:8000
+      OPENSEARCH_HOST: opensearch
+      QDRANT_HOST: qdrant
+    volumes:
+      - ../dados:/app/eixo-a-busca/dados:ro
+      - ${TCC_SAIDA:?defina TCC_SAIDA}:/saida

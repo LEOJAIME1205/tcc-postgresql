@@ -1,0 +1,36 @@
+{
+  "linhas": 2681468,
+  "duracoes_s": {
+    "copia": 128.4,
+    "chave_primaria": 1.0,
+    "indice_lexico": 9.7,
+    "indice_vetorial": 243.0,
+    "vacuum_analyze": 5.7
+  },
+  "tamanhos_bytes": {
+    "passagens": 3737649152,
+    "passagens_pkey": 60252160,
+    "passagens_lexico": 442613760,
+    "passagens_embedding": 5468905472,
+    "passagens_toast": 4015087616,
+    "total": 13725564928
+  },
+  "checkpoints": {
+    "por_tempo": 0,
+    "pedidos": 3
+  },
+  "parametros_construcao": {
+    "effective_cache_size": "14592MB",
+    "maintenance_work_mem": "8GB",
+    "max_parallel_maintenance_workers": "11",
+    "max_parallel_workers": "12",
+    "max_wal_size": "16GB",
+    "max_worker_processes": "16",
+    "shared_buffers": "4864MB",
+    "work_mem": "4MB"
+  },
+  "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+  "pgvector": "0.8.7",
+  "passagens_npy_sha256": "79f18857d21a8057aa67089ae0ed114572dff5df57f4bcbc38929c436c6b246a",
+  "concluido_em": "2026-11-07T21:51:45+0000"
+}

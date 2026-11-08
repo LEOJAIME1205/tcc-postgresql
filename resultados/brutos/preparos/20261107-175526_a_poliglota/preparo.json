@@ -1,0 +1,11 @@
+{
+  "eixo": "a",
+  "arquitetura": "poliglota",
+  "inicio": "2026-11-07T17:55:26-0300",
+  "fim": "2026-11-07T17:59:38-0300",
+  "refeito": false,
+  "tamanhos_bytes": {
+    "opensearch": 1265908248,
+    "qdrant": 4640463165
+  }
+}

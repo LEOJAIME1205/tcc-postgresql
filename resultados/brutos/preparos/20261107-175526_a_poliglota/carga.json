@@ -1,0 +1,22 @@
+{
+  "opensearch": {
+    "versao": "3.8.0",
+    "documentos": 2681468,
+    "bytes": 1265744728,
+    "segmentos": 5
+  },
+  "qdrant": {
+    "versao": "1.19.2",
+    "pontos": 2681468,
+    "vetores_indexados": 2681468,
+    "segmentos": 6
+  },
+  "duracoes_s": {
+    "opensearch_envio": 85.0,
+    "opensearch_pronto": 1.5,
+    "qdrant_envio": 63.7,
+    "qdrant_pronto": 78.1
+  },
+  "passagens_npy_sha256": "79f18857d21a8057aa67089ae0ed114572dff5df57f4bcbc38929c436c6b246a",
+  "concluido_em": "2026-11-07T20:59:35+0000"
+}

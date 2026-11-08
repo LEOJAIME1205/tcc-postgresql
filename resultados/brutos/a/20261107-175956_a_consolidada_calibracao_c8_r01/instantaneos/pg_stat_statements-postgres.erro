@@ -1,0 +1,3 @@
+ERROR:  relation "pg_stat_statements" does not exist
+LINE 1: COPY  ( SELECT * FROM pg_stat_statements ) TO STDOUT WITH CS...
+                              ^
