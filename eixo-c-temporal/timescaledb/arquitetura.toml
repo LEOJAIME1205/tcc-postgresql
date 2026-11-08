@@ -1,0 +1,14 @@
+# Eixo C, lado consolidado: TimescaleDB e o gerador com o TSBS (ADR-059 a ADR-064).
+eixo = "c"
+arquitetura = "timescaledb"
+compose = "compose.yaml"
+servicos_sob_teste = ["timescaledb"]
+servico_gerador = "gerador"
+
+[dados]
+TCC_DADOS_TIMESCALEDB = "timescaledb"
+
+[[coletor]]
+tipo = "timescaledb"
+servico = "timescaledb"
+banco = "benchmark"

@@ -1,0 +1,75 @@
+# Saída do timescaledb-tune 0.19.0 (imagem tcc-postgres:18.6-ts2.31.0-pgv0.8.7), 08/11/2026 (ADR-024)
+# timescaledb-tune --dry-run --memory=20GB --cpus=12 --pg-version=18 --yes
+Using postgresql.conf at this path:
+/var/lib/postgresql/18/docker/postgresql.conf
+
+shared_preload_libraries needs to be updated
+Current:
+Recommended:
+success: shared_preload_libraries will be updated
+
+Recommendations based on 20.00 GB of available memory and 12 CPUs for PostgreSQL 18
+Memory settings recommendations
+#shared_preload_libraries = ''
+shared_preload_libraries = 'timescaledb'
+
+Current:
+Recommended:
+shared_buffers = 128MB
+#effective_cache_size = 4GB
+#maintenance_work_mem = 64MB
+#work_mem = 4MB
+shared_buffers = 5GB
+effective_cache_size = 15GB
+maintenance_work_mem = 2047MB
+work_mem = 13653kB
+success: memory settings will be updated
+Parallelism settings recommendations
+
+Current:
+missing: timescaledb.max_background_workers
+Recommended:
+success: parallelism settings will be updated
+#max_worker_processes = 8
+#max_parallel_workers_per_gather = 2
+#max_parallel_workers = 8
+timescaledb.max_background_workers = 16
+max_worker_processes = 31
+max_parallel_workers_per_gather = 6
+max_parallel_workers = 12
+WAL settings recommendations
+Current:
+
+#wal_buffers = -1
+min_wal_size = 80MB
+Recommended:
+success: WAL settings will be updated
+Background writer settings recommendations
+success: background writer settings are already tuned
+Miscellaneous settings recommendations
+wal_buffers = 16MB
+min_wal_size = 512MB
+
+
+Current:
+Recommended:
+#default_statistics_target = 100
+#random_page_cost = 4.0
+#checkpoint_completion_target = 0.9
+#max_locks_per_transaction = 64
+#autovacuum_max_workers = 3
+#autovacuum_naptime = 1min
+#default_toast_compression = 'pglz'
+#jit = on
+#effective_io_concurrency = 16
+default_statistics_target = 100
+random_page_cost = 1.1
+checkpoint_completion_target = 0.9
+max_locks_per_transaction = 512
+autovacuum_max_workers = 10
+autovacuum_naptime = 10
+default_toast_compression = lz4
+jit = off
+effective_io_concurrency = 256
+success: miscellaneous settings will be updated
+Success, but not writing due to --dry-run flag

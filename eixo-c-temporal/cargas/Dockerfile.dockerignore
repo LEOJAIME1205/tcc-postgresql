@@ -1,0 +1,7 @@
+# Contexto da imagem do gerador do Eixo C: só o lock, o remendo do TSBS e o adaptador.
+*
+!pyproject.toml
+!uv.lock
+!.python-version
+!eixo-c-temporal/cargas/tsbs/pr255.patch
+!eixo-c-temporal/cargas/gerador.py

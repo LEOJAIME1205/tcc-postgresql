@@ -1,0 +1,30 @@
+# Eixo C, lado especializado: InfluxDB 1.13.1 com índice TSI (ADR-058 e ADR-063).
+services:
+  influxdb:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: sistema-sob-teste
+    image: influxdb:1.13.1@sha256:33fa5b045658ddd676f3f9a72c1f40eb92ad1582539a691cd36e578ce0a6f751
+    # A imagem roda como o usuário 1500 e não ajusta o dono do volume; o orquestrador cria os
+    # diretórios de dados com o usuário 1000, que é quem roda a janela.
+    user: "1000:1000"
+    mem_limit: 20g
+    memswap_limit: 20g
+    stop_grace_period: 2m
+    environment:
+      INFLUXDB_REPORTING_DISABLED: "true"
+      INFLUXDB_DATA_INDEX_VERSION: tsi1
+    volumes:
+      - ${TCC_DADOS_INFLUXDB:?defina TCC_DADOS_INFLUXDB}:/var/lib/influxdb
+
+  gerador:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: gerador
+    image: tcc-gerador-temporal:1
+    environment:
+      TCC_ARQUITETURA: influxdb
+      TCC_INFLUXDB: http://influxdb:8086
+    volumes:
+      - ../dados:/app/eixo-c-temporal/dados:ro
+      - ${TCC_SAIDA:?defina TCC_SAIDA}:/saida

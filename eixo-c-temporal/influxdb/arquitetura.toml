@@ -1,0 +1,13 @@
+# Eixo C, lado especializado: InfluxDB e o gerador com o TSBS (ADR-058 a ADR-064).
+eixo = "c"
+arquitetura = "influxdb"
+compose = "compose.yaml"
+servicos_sob_teste = ["influxdb"]
+servico_gerador = "gerador"
+
+[dados]
+TCC_DADOS_INFLUXDB = "influxdb"
+
+[[coletor]]
+tipo = "influxdb"
+servico = "influxdb"

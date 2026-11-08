@@ -1,0 +1,16 @@
+# Janela de teste do Eixo C, arquitetura influxdb: valida o adaptador do TSBS, os coletores e o
+# resumo pelo orquestrador. Sem valor de medição. Uma janela por arquitetura, para cada uma
+# caber em menos de uma hora. aquecimento_s é o trecho inicial da carga descartado da vazão e
+# aquecimento_s + medicao_s o prazo máximo da carga (ADR-065).
+nome = "teste-eixo-c-influxdb"
+semente = 20261108
+espaco_livre_min_gib = 100
+
+[[configuracao]]
+eixo = "c"
+arquitetura = "influxdb"
+cenario = "calibracao"
+concorrencias = [8]
+repeticoes = 1
+aquecimento_s = 10
+medicao_s = 3590

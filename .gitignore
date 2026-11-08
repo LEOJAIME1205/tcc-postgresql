@@ -8,6 +8,8 @@ resultados/brutos/**/*.parquet
 eixo-a-busca/dados/*
 !eixo-a-busca/dados/.gitkeep
 !eixo-a-busca/dados/README.md
+eixo-c-temporal/dados/*
+!eixo-c-temporal/dados/README.md
 *.npy
 *.bin
 

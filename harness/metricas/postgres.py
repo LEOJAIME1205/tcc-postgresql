@@ -1,4 +1,4 @@
-"""Coletor de métricas internas do PostgreSQL."""
+"""Coletor de métricas internas do PostgreSQL; com --timescaledb, também das hypertables (ADR-064)."""
 
 import argparse
 import csv
@@ -82,6 +82,23 @@ def ler_estatisticas(conexao: Conexao) -> List[Metrica]:
             ])
     return linhas
 
+SQL_TIMESCALEDB: LiteralString = """
+    SELECT h.hypertable_schema || '.' || h.hypertable_name,
+           d.table_bytes, d.index_bytes, d.toast_bytes, d.total_bytes, h.num_chunks,
+           c.number_compressed_chunks, c.before_compression_total_bytes,
+           c.after_compression_total_bytes
+    FROM timescaledb_information.hypertables h
+    CROSS JOIN LATERAL hypertable_detailed_size(
+        format('%I.%I', h.hypertable_schema, h.hypertable_name)::regclass) d
+    LEFT JOIN LATERAL hypertable_compression_stats(
+        format('%I.%I', h.hypertable_schema, h.hypertable_name)::regclass) c ON true
+"""
+METRICAS_TIMESCALEDB: Tuple[str, ...] = (
+    "tsdb_tabela_bytes", "tsdb_indices_bytes", "tsdb_toast_bytes", "tsdb_total_bytes",
+    "tsdb_chunks", "tsdb_chunks_comprimidos", "tsdb_antes_compressao_bytes",
+    "tsdb_depois_compressao_bytes",
+)
+
 
 def ler_tamanhos(conexao: Conexao) -> List[Metrica]:
     """Tamanho de cada tabela e dos seus índices, a cada 60 s."""
@@ -102,6 +119,17 @@ def ler_pgstattuple(conexao: Conexao) -> List[Metrica]:
         for tabela, mortas_pct, livre_pct in cur.execute(SQL_PGSTATTUPLE).fetchall():
             linhas.append(("postgres", "pg_tuplas_mortas_pct", str(tabela), float(mortas_pct)))
             linhas.append(("postgres", "pg_espaco_livre_pct", str(tabela), float(livre_pct)))
+    return linhas
+
+
+def ler_timescaledb(conexao: Conexao) -> List[Metrica]:
+    """Tamanho, chunks e compressão de cada hypertable, a cada 60 s; vazios ficam de fora."""
+    linhas: List[Metrica] = []
+    with conexao.cursor() as cur:
+        for tabela, *valores in cur.execute(SQL_TIMESCALEDB).fetchall():
+            for metrica, valor in zip(METRICAS_TIMESCALEDB, valores):
+                if valor is not None:
+                    linhas.append(("timescaledb", metrica, str(tabela), int(valor)))
     return linhas
 
 
@@ -131,10 +159,13 @@ def main() -> None:
                    help="ex.: 'host=172.18.0.2 dbname=postgres user=postgres password=tcc'")
     p.add_argument("--pgstattuple", action="store_true",
                    help="amostra pgstattuple_approx a cada 5 min (cenário longa)")
+    p.add_argument("--timescaledb", action="store_true",
+                   help="tamanhos e compressão das hypertables a cada 60 s (ADR-064)")
     args = p.parse_args()
     saida: str = args.saida
     conninfo: str = args.conninfo
     com_pgstattuple: bool = args.pgstattuple
+    com_timescaledb: bool = args.timescaledb
 
     os.sched_setaffinity(0, CPUS_COLETA)
 
@@ -166,6 +197,8 @@ def main() -> None:
                 leitores: List[Tuple[str, Leitor]] = [("estatísticas", ler_estatisticas)]
                 if volta % VOLTAS_TAMANHOS == 0:
                     leitores.append(("tamanhos", ler_tamanhos))
+                    if com_timescaledb:
+                        leitores.append(("timescaledb", ler_timescaledb))
                 if com_pgstattuple and volta % VOLTAS_PGSTATTUPLE == 0:
                     leitores.append(("pgstattuple", ler_pgstattuple))
 
