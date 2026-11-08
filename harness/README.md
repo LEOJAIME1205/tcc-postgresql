@@ -330,6 +330,32 @@ com o usuário padrão da imagem (ADR-052):
 O RabbitMQ atualiza as estatísticas da API a cada 5 s; os contadores de uma
 fila aparecem como 0 até a primeira operação de cada tipo.
 
+TimescaleDB (`harness/metricas/postgres.py --timescaledb`, ADR-064), além do
+catálogo do PostgreSQL, a cada 60 s, uma linha por hypertable:
+
+| Métrica | Rótulo | Fonte |
+|---|---|---|
+| `tsdb_tabela_bytes`, `tsdb_indices_bytes`, `tsdb_toast_bytes`, `tsdb_total_bytes` | hypertable | `hypertable_detailed_size` |
+| `tsdb_chunks` | hypertable | `timescaledb_information.hypertables`, `num_chunks` |
+| `tsdb_chunks_comprimidos`, `tsdb_antes_compressao_bytes`, `tsdb_depois_compressao_bytes` | hypertable | `hypertable_compression_stats`; ausentes antes da primeira compressão |
+
+InfluxDB 1.x (`harness/metricas/influxdb.py`, ADR-064), pelo `/debug/vars`,
+somando as instâncias de cada grupo (uma por shard); nomes conferidos na 1.13.1:
+
+| Métrica | Fonte |
+|---|---|
+| `influx_pontos_escritos_total`, `influx_erros_escrita_total`, `influx_pontos_descartados_total` | `write` (`pointReq`, `writeError`, `writeDrop`) |
+| `influx_pontos_gravados_total` | `localStore` (`pointsWritten`) |
+| `influx_requisicoes_escrita_total`, `influx_consultas_total`, `influx_consulta_ns_total` | `httpd` (`writeReq`, `queryReq`, `queryReqDurationNs`) |
+| `influx_consultas_executadas_total`, `influx_consulta_execucao_ns_total` | `queryExecutor` (`queriesExecuted`, `queryDurationNs`) |
+| `influx_cache_bytes`, `influx_cache_compactacao_ms_total` | `tsm1_cache` (`memBytes`, `WALCompactionTimeMs`) |
+| `influx_compactacoes_cache_total`, `influx_compactacoes_nivel1_total` a `nivel3`, `influx_compactacoes_otimizacao_total`, `influx_compactacoes_completas_total` | `tsm1_engine` |
+| `influx_compactacoes_ativas` | `tsm1_engine`, soma dos campos `*Active` |
+| `influx_tsm_bytes` | `tsm1_filestore` (`diskBytes`) |
+| `influx_heap_bytes`, `influx_memoria_go_bytes` | `runtime` (`HeapInUse`, `Sys`) |
+| `influx_series` (rótulo: banco) | `database` (`numSeries`) |
+| `influx_dados_bytes` (60 s) | `du -sb /var/lib/influxdb` dentro do container |
+
 **Gerador:** `tsbs_metricas_total` e `tsbs_linhas_total`, no Eixo C. Ver
 "Eixo C: adaptação do TSBS".
 
@@ -355,36 +381,51 @@ gravados como número pronto.
 
 ### Eixo C: adaptação do TSBS
 
-O TSBS não registra operações individuais. O Eixo C segue as regras abaixo,
-baseadas no código-fonte da ferramenta (`load/loader.go`,
-`pkg/query/benchmarker.go` e `pkg/query/stat_processor.go`):
+O TSBS não registra operações individuais, e o Eixo C não grava
+`operacoes.csv`. O adaptador `eixo-c-temporal/cargas/gerador.py` cumpre o
+contrato do gerador com as regras abaixo (ADR-061 e ADR-065), baseadas no
+código-fonte da ferramenta (`load/loader.go`, `pkg/query/benchmarker.go` e
+`pkg/query/stat_processor.go`) e conferidas com o TSBS compilado:
 
+- **Execução.** Cada `executar` carrega o arquivo inteiro com N trabalhadores
+  (`--workers`, lote de 10.000 linhas), depois comprime todos os chunks e roda
+  `ANALYZE` no TimescaleDB, ou espera as compactações do InfluxDB pararem, e
+  por fim roda as consultas. No plano, `aquecimento_s` é o trecho inicial da
+  carga descartado da vazão, e `aquecimento_s` + `medicao_s` é o prazo máximo da
+  carga; se ela não terminar, a execução falha.
 - **Ingestão.** `tsbs_load` roda com `--reporting-period=1s` e
-  `--results-file`. A cada segundo, ele imprime na saída padrão uma linha com o
-  tempo Unix em segundos, a taxa do período e o total acumulado de métricas e
-  de linhas. O adaptador grava os totais em `metricas-gerador.csv` como
+  `--results-file`. A cada segundo, imprime uma linha com o tempo Unix em
+  segundos, a taxa do período e o total acumulado de métricas e de linhas. O
+  adaptador grava os totais em `metricas-gerador.csv` como
   `tsbs_metricas_total` e `tsbs_linhas_total` (origem `gerador`), com `ts_ms`
   igual ao tempo da linha multiplicado por 1000. Os totais vêm em notação
   exponencial com 7 algarismos significativos, precisão suficiente para
-  calcular taxas.
-- **Consultas.** Cada tipo de consulta padrão roda numa invocação própria de
-  `tsbs_run_queries`, com `--results-file`. O JSON traz, por tipo de consulta,
-  mínimo, p50, p95, p99, p99,9, máximo e taxa, calculados pelo próprio TSBS a
-  partir de um histograma HDR. O adaptador copia esses valores para
-  `resumo.json`, em microssegundos (`consulta_latencia_us`, com rótulo
-  `<tipo>:p50`, `<tipo>:p95` e assim por diante). É uma exceção declarada ao
-  princípio 2: no Eixo C, os percentis das consultas são calculados pela
-  ferramenta, não pela análise.
+  calcular taxas. O `gerador.json` marca o início da carga, o fim do
+  aquecimento e o fim da carga. A carga é conferida pelo total do resumo do
+  TSBS, que precisa ser igual ao número de métricas geradas.
+- **Consultas.** Cada tipo roda em duas invocações de `tsbs_run_queries`, com
+  1 trabalhador: o aquecimento, com 5 consultas de outra semente, e a medição,
+  com as 20 consultas medidas. O adaptador copia para `resumo.json`, em
+  microssegundos, a métrica `consulta_latencia_us` com os rótulos
+  `<tipo>:min`, `<tipo>:media`, `<tipo>:desvio`, `<tipo>:p50` e `<tipo>:max`,
+  lidos da saída padrão, e `<tipo>:p95`, `<tipo>:p99` e `<tipo>:p999`, lidos do
+  JSON (que vem em milissegundos). O `q0` do JSON sai sempre 0, e por isso o
+  mínimo vem da saída padrão. É uma exceção declarada ao princípio 2: no Eixo
+  C, os percentis das consultas são calculados pela ferramenta, não pela
+  análise.
+- **Valores únicos.** O `resumo.json` traz também `carga_s`, `carga_metricas`
+  e `carga_linhas`; no TimescaleDB, `compressao_s`, `analyze_s`,
+  `chunks_comprimidos` e o espaço antes e depois da compressão; no InfluxDB,
+  `espera_compactacao_s` e `tsm_bytes`.
 - **Arquivo HDR.** A opção `--hdr-latencies` não é usada. O código não esvazia
   o buffer de escrita antes de terminar, e o arquivo pode sair incompleto.
-- **Aquecimento.** As consultas de aquecimento rodam numa invocação separada,
-  antes da medição. O JSON dela fica em `ferramenta/` e não entra no resumo. Os
-  limites de tempo ficam no manifesto, como nos outros eixos.
 - **Deriva.** Nos cenários `mista` e `longa`, as consultas rodam em lotes
   periódicos, cada um com o seu JSON. A série de percentis por lote, com o
-  instante de cada lote, mostra a deriva.
+  instante de cada lote, mostra a deriva. A definir na Fase 3.
 
-As saídas originais (`stdout` e os JSON) ficam em `ferramenta/`.
+As saídas originais ficam em `ferramenta/`: `tsbs-carga.txt` e
+`tsbs-carga.json` da carga, e `consultas/<tipo>.txt` e `.json` de cada tipo,
+com os de aquecimento prefixados por `aquecimento-`.
 
 ### instantaneos/ e ferramenta/
 
@@ -462,9 +503,11 @@ de descompactado. O tamanho real dos pacotes é estimado no piloto (Etapa 2.5).
 
 ### Pendências
 
-1. Confirmar na Etapa 2.4, com o TSBS instalado, as saídas descritas em
-   "Eixo C: adaptação do TSBS" e a unidade dos percentis no JSON.
-2. Medir o custo da coleta no piloto (ADR-021, item 6).
+1. Medir o custo da coleta no piloto (ADR-021, item 6).
+
+As saídas do TSBS descritas em "Eixo C: adaptação do TSBS" foram conferidas em
+08/11/2026, com o TSBS compilado (ADR-059): os percentis do JSON vêm em
+milissegundos.
 
 ## Protocolo de execução
 
@@ -547,12 +590,16 @@ servico = "postgres"
 banco = "fila"
 ```
 
-Cada `[[coletor]]` tem um `tipo` (`postgres`, `opensearch`, `qdrant` ou
-`rabbitmq`) e o `servico` onde o sistema roda, que precisa estar entre os
-serviços sob teste. O `banco` vale só para o tipo `postgres`. Os coletores HTTP
-leem o sistema pela porta padrão: 9200 no OpenSearch, 6333 no Qdrant e 15672 na
-API de gerenciamento do RabbitMQ, com o usuário padrão da imagem. O coletor do
-RabbitMQ recebe também o nome do container, para medir o diretório de dados.
+Cada `[[coletor]]` tem um `tipo` (`postgres`, `timescaledb`, `opensearch`,
+`qdrant`, `rabbitmq` ou `influxdb`) e o `servico` onde o sistema roda, que
+precisa estar entre os serviços sob teste. O `banco` vale só para os tipos
+`postgres` e `timescaledb`; o `timescaledb` é o coletor do PostgreSQL com a
+opção `--timescaledb`, que acrescenta as métricas das hypertables. Os coletores
+HTTP leem o sistema pela porta padrão: 9200 no OpenSearch, 6333 no Qdrant,
+15672 na API de gerenciamento do RabbitMQ (com o usuário padrão da imagem) e
+8086 no InfluxDB, cuja prontidão é conferida em `/ping?verbose=true`. Os
+coletores do RabbitMQ e do InfluxDB recebem também o nome do container, para
+medir o diretório de dados.
 
 Os diretórios de dados ficam em `~/tcc-dados/<eixo>/<arquitetura>/<subdiretório>/`,
 com `inicial/` e `atual/` (ADR-029). A variável de ambiente aponta para `atual/`

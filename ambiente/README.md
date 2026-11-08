@@ -269,7 +269,7 @@ Todas as imagens fixadas por digest. Ver ADR-011.
 | OpenSearch | 3.8.0 | `opensearchproject/opensearch:3.8.0@sha256:fafe3fc3587088674669235575aa166228c48bdb940294a8cdbbc1da75236a40` |
 | Qdrant | 1.19.2 | `qdrant/qdrant:v1.19.2@sha256:b7b0444c4c351c970b98e90a6f89c2ee4287c65b44e52b4cb503fa5b2aa927ad` |
 | RabbitMQ | 4.4.0 (Erlang/OTP 29), imagem com o plugin de gerenciamento | `rabbitmq:4.4.0-management@sha256:af6f50d38098d8bd52fef7f3fa85015dd8b2bf6def58e995bf584ae9ba0f6407` |
-| InfluxDB | a registrar | a registrar |
+| InfluxDB | 1.13.1 (OSS, motor TSM, índice TSI) | `influxdb:1.13.1@sha256:33fa5b045658ddd676f3f9a72c1f40eb92ad1582539a691cd36e578ce0a6f751` |
 
 ### Imagem do PostgreSQL usada nos três eixos
 
@@ -318,6 +318,19 @@ pacotes). Usadas na janela de teste `teste-eixo-b`.
 | Tag local | `tcc-gerador-fila:1` | `tcc-relay:1` |
 | ID da imagem | `sha256:91aca4dfc4f74dbc84e7796b8069394e271adf2190b64ab3a3d4be8c8ca3c3d9` | `sha256:69903774f532132a4dedca8c0cb97573fde9f969f4b0752bfcfff968dff581ec` |
 | Conteúdo em `/app` | `gerador.py` e os três `esquema.sql` | `relay.py`, executado como o usuário 1000 |
+
+### Imagem do gerador do Eixo C
+
+Construída em 08/11/2026 a partir de `eixo-c-temporal/cargas/Dockerfile`
+(ADR-059 e ADR-065), em duas etapas: o TSBS compilado e o adaptador em Python.
+
+| Item | Valor |
+|---|---|
+| Tag local | `tcc-gerador-temporal:1` |
+| ID da imagem | `sha256:8058d4ca72bbecd9b036c6a1c1be727e2de111184245b356030c0f65f6d359c0` |
+| Compilação do TSBS | `golang:1.27.2-trixie@sha256:47667934874913a449b96faa7ef4777fa285d9ec29126ee80ed61c45b7cccf0e`, commit `8323e59c74027b108f4ad5ec5d3e498b0101a02e` com `pr255.patch`, `GOFLAGS=-mod=mod` |
+| Programas em `/opt/tsbs` | `tsbs_generate_data`, `tsbs_generate_queries`, `tsbs_load_timescaledb`, `tsbs_load_influx`, `tsbs_run_queries_timescaledb`, `tsbs_run_queries_influx` e `alteracoes.txt` (o `git diff --stat` do remendo) |
+| Base e `uv` | os mesmos das imagens dos outros eixos |
 
 As imagens do Eixo A foram construídas com o lock anterior, sem o `aio-pika`.
 Reconstruí-las a partir do lock atual acrescenta os três pacotes do cliente do

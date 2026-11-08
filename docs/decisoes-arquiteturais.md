@@ -385,7 +385,31 @@ As métricas locais de cada sistema, como o `/metrics` do Qdrant, continuam disp
 
 **Efeito sobre a comparação.** Em relação aos padrões de fábrica, favorece o lado consolidado do Eixo C, de forma legítima pela ADR-010 e compensada pelo tratamento simétrico do InfluxDB. O PostgreSQL do Eixo C fica com configuração mais completa que o dos Eixos A e B, que não têm ferramenta equivalente e seguem a documentação do PostgreSQL para memória (ADR-003). Como as comparações são feitas dentro de cada eixo, a diferença entre eixos é declarada, e não corrigida.
 
-**Estado.** Aceita. A execução depende da definição do orçamento de memória dos containers.
+**Estado.** Aceita. Executada em 08/11/2026 com o `timescaledb-tune` 0.19.0 da imagem da ADR-022: `--dry-run --memory=20GB --cpus=12 --pg-version=18`. Saída completa em `eixo-c-temporal/timescaledb/timescaledb-tune.txt`. Valores congelados na composição do Eixo C (ADR-063):
+
+| Parâmetro | Valor |
+|---|---|
+| `shared_buffers` | 5GB |
+| `effective_cache_size` | 15GB |
+| `maintenance_work_mem` | 2047MB |
+| `work_mem` | 13653kB |
+| `timescaledb.max_background_workers` | 16 |
+| `max_worker_processes` | 31 |
+| `max_parallel_workers_per_gather` | 6 |
+| `max_parallel_workers` | 12 |
+| `wal_buffers` | 16MB |
+| `min_wal_size` | 512MB |
+| `default_statistics_target` | 100 |
+| `random_page_cost` | 1.1 |
+| `checkpoint_completion_target` | 0.9 |
+| `max_locks_per_transaction` | 512 |
+| `autovacuum_max_workers` | 10 |
+| `autovacuum_naptime` | 10 |
+| `default_toast_compression` | lz4 |
+| `jit` | off |
+| `effective_io_concurrency` | 256 |
+
+A ferramenta não recomendou `max_wal_size` nem mudou os parâmetros do *background writer*.
 
 ---
 
@@ -905,7 +929,8 @@ O commit que avisa toma um bloqueio global e espera o próprio `fsync` (cerca de
 4. Consumo com confirmação manual, uma por mensagem, e *prefetch* de 100 por consumidor.
 5. Conexões separadas para publicação e consumo, uma de cada por processo, com um canal por produtor ou consumidor.
 6. Limite de memória absoluto (`vm_memory_high_watermark.absolute`) em 60% do limite do container: 4915 MiB na ingênua (8 GiB) e 4300 MiB na *outbox* (7 GiB).
-7. Demais parâmetros no padrão. Sem telemetria: conferido em 07/11/2026, nenhuma conexão de saída do container.
+7. Limite de 65.536 descritores de arquivo (`nofile`) no container, acima do mínimo de 50 mil do checklist de produção.
+8. Demais parâmetros no padrão. Sem telemetria: conferido em 07/11/2026, nenhuma conexão de saída do container.
 
 **Justificativa.**
 - A documentação das filas quorum recomenda confirmação do publicador e confirmação manual do consumidor, e diz que a fila grava tudo em disco antes de agir. A confirmação só sai depois disso, como o commit do PostgreSQL só retorna depois do WAL em disco.
@@ -916,9 +941,11 @@ O commit que avisa toma um bloqueio global e espera o próprio `fsync` (cerca de
 **Efeito sobre a comparação.**
 - A fila quorum foi feita para replicação, e a documentação avisa que, com menos de três nós, ela não dá todas as suas garantias. A replicação está fora do escopo (proposta, seção 4.4). Num nó único resta a gravação em disco antes da confirmação, que é a garantia equivalente ao commit.
 - Uma fila clássica durável, com mensagens persistentes, também confirmaria depois de gravar em disco e pode ser mais rápida num nó único. Se for, a escolha desfavorece as configurações com RabbitMQ. A alternativa fica declarada e não medida.
-- O limite de memória corrige um defeito de detecção que prejudicaria o RabbitMQ. Os demais itens são neutros.
+- O limite de memória corrige um defeito de detecção que prejudicaria o RabbitMQ.
+- O limite de descritores favorece o RabbitMQ em relação ao padrão do Docker, de forma legítima, pelo mesmo raciocínio da ADR-028: sem ele, o sistema roda abaixo do mínimo que o próprio mantenedor pede. Na escala do experimento, com poucas conexões, o efeito esperado é nulo.
+- Os demais itens são neutros.
 
-**Estado.** Aceita.
+**Estado.** Aceita. Revisada em 08/11/2026, com aprovação do Léo: item 7 acrescentado. Na janela `teste-eixo-b`, o RabbitMQ avisou no log "Available file handles: 1024. Please consider increasing system limits", o padrão do Docker. O checklist de produção pede pelo menos 50 mil descritores, inclusive em desenvolvimento. O valor de 65.536 é o mesmo do OpenSearch no Eixo A (ADR-044).
 
 ---
 
@@ -1064,6 +1091,174 @@ O commit que avisa toma um bloqueio global e espera o próprio `fsync` (cerca de
 
 ---
 
+## ADR-058 — InfluxDB 1.13.1 com índice TSI
+
+**Contexto.** O lado especializado do Eixo C é o InfluxDB, carregado e consultado pelo TSBS (ADR-008). Há três linhas mantidas: 1.x (motor TSM), 2.x (TSM, com token obrigatório) e 3 Core (Parquet). A proposta pede versões estáveis correntes. Fatos levantados em 08/11/2026 no código do TSBS (commit `8323e59`) e na documentação da InfluxData:
+- o TSBS escreve por `POST /write?db=...` e consulta por `POST /query` com InfluxQL, a API da 1.x, e não envia token;
+- a 2.x exige token na API de compatibilidade v1 e não aceita `CREATE DATABASE`;
+- o 3 Core aceita a API v1, mas, pelo código da 3.12.1, devolve erros de consulta dentro de respostas HTTP 200, que o TSBS mede como sucesso, e responde 429 quando o buffer enche, que o TSBS trata como erro fatal. A própria InfluxData indica o Core para dados recentes: ele consulta no máximo 432 arquivos (cerca de 72 horas de dados), não compacta além do primeiro nível e encaminha consultas históricas para o Enterprise.
+
+**Decisão.**
+
+1. InfluxDB OSS 1.13.1, publicada em setembro de 2026 e a última com pelo menos duas semanas de publicação (a 1.13.2 é de 30/10/2026). Imagem oficial fixada por digest, nó único, sem autenticação (o padrão da 1.x), só na rede interna (ADR-026).
+2. Índice TSI (`index-version = "tsi1"`), que a documentação da 1.x recomenda "para a maioria dos usuários" e para produção. O padrão do arquivo, `inmem`, é indicado por ela para conjuntos pequenos e testes.
+3. Envio de estatísticas de uso desligado (`reporting-disabled = true`), pela ADR-023.
+
+**Justificativa.** É a linha com que o TSBS funciona sem alteração e que tem o mesmo modelo de uso do outro lado: um servidor que guarda e consulta todo o histórico. Usar o 3 Core exigiria adaptar o TSBS e mediria um produto que o próprio fabricante não indica para consultas sobre o histórico.
+
+**Efeito sobre a comparação.**
+- Se o InfluxDB 3 ingerir ou consultar mais rápido, a escolha desfavorece o lado especializado. Fica declarado, com as razões acima.
+- O índice TSI pode ser mais lento que o `inmem` com poucas séries; seguir a recomendação do fabricante pode desfavorecer o InfluxDB nesse caso.
+- Desligar o envio de estatísticas é neutro (ADR-023).
+
+**Estado.** Aceita. Imagem `influxdb:1.13.1@sha256:33fa5b045658ddd676f3f9a72c1f40eb92ad1582539a691cd36e578ce0a6f751`, conferida em 08/11/2026: `InfluxDB 1.13.1 (git: f0281924)`, com `reporting-disabled = false` e `index-version = "inmem"` no padrão.
+
+---
+
+## ADR-059 — TSBS compilado do código-fonte, com uma correção de compatibilidade
+
+**Contexto.** O TSBS não tem versões publicadas. O último commit do `master` é de 27/05/2026 (`8323e59`, só integração contínua); a última mudança de código, de 21/09/2023. O carregador do TimescaleDB chama `create_hypertable` com o parâmetro `replication_factor`, que deixou de existir no TimescaleDB 2.14 (fim do multinó), e por isso falha com o TimescaleDB 2.31 da ADR-022. A correção está no PR #255, ainda aberto.
+
+**Decisão.**
+
+1. Compilar o TSBS do commit `8323e59c74027b108f4ad5ec5d3e498b0101a02e`, numa etapa de construção da imagem do gerador, com Go 1.27.2 (imagem oficial `golang:1.27.2-trixie`, fixada por digest).
+2. Uma única alteração no código: o PR #255, que só reescreve a chamada de `create_hypertable` sem o `replication_factor`, guardado em `eixo-c-temporal/cargas/tsbs/pr255.patch`.
+3. Compilar com `GOFLAGS=-mod=mod`. O Go atual confere o grafo de módulos com mais rigor que o Go 1.14 do `go.mod`, e o `go.sum` não tinha a entrada de uma dependência indireta (`github.com/tklauser/numcpus`). Assim o Go acrescenta essa entrada, na versão que a dependência pede, conferida no banco de checksums público, sem mudar o `go.mod`.
+4. Só os seis programas usados: `tsbs_generate_data`, `tsbs_generate_queries`, `tsbs_load_timescaledb`, `tsbs_load_influx`, `tsbs_run_queries_timescaledb` e `tsbs_run_queries_influx`.
+
+**Justificativa.** Sem a correção, o TSBS não carrega dados no TimescaleDB atual; a mudança não altera o que é gravado nem como. Fixar o commit, o compilador e o remendo torna os programas reprodutíveis.
+
+**Efeito sobre a comparação.** Neutro: a correção vale só para a criação da hypertable e é a mesma que o mantenedor tem para revisar. O remendo fica declarado no artigo.
+
+**Estado.** Aceita. Compilação conferida em 08/11/2026: os seis programas gerados; `go.mod` sem mudança e uma linha a mais no `go.sum`.
+
+---
+
+## ADR-060 — Dados do Eixo C
+
+**Contexto.** A ADR-008 manda usar os cenários padrão do TSBS, e a ADR-025 deixa a relação entre dados e memória para a etapa de cada eixo.
+
+**Decisão.**
+
+1. Caso de uso `cpu-only`, que tem as mesmas consultas do `devops` e é o mais usado nas comparações publicadas com o TSBS.
+2. 4.000 hosts, intervalo de 10 s, de 2016-01-01T00:00:00Z a 2016-01-04T00:00:00Z (os três dias do exemplo do README do TSBS): 103,68 milhões de linhas e 1,04 bilhão de métricas.
+3. Gerados uma única vez com semente fixa, um arquivo por formato (TimescaleDB e InfluxDB), comprimidos com gzip, fora do repositório, com o SHA-256 registrado. As consultas são geradas uma vez por formato: as medidas com a semente dos dados e as de aquecimento com outra (ADR-061).
+4. O teste de longa duração tem volume próprio, decidido na Etapa 3.4.
+
+**Justificativa.** Escala e intervalo padrão evitam escolher um volume que favoreça um dos lados. Gerar uma vez separa o custo da geração da medida e garante os mesmos dados nos dois sistemas.
+
+**Efeito sobre a comparação.** Neutro. Sem compressão, o volume ocupa cerca de 20 GB no PostgreSQL, perto dos 20 GiB do container: o fim de cada carga já acontece com o cache cheio, o que é declarado no artigo. Cada carga grava menos que os 62 GB do cache pSLC do SSD (ADR-004).
+
+**Estado.** Aceita. Revisada em 08/11/2026, com aprovação do Léo: a versão anterior usava 1 dia (o padrão do código do TSBS). Medido em desenvolvimento com 8 trabalhadores: o dia inteiro carregava em 31 s no TimescaleDB e em 71 s no InfluxDB, e os efeitos de início pesariam na vazão. Com 3 dias, a carga dura de cerca de 90 s a 215 s nesse nível.
+
+---
+
+## ADR-061 — Carga e consultas do Eixo C
+
+**Contexto.** O TSBS tem padrões próprios para lote, trabalhadores e compressão de rede, e a proposta define o nível de concorrência como variável independente.
+
+**Decisão.**
+
+1. Nível de concorrência: o número de trabalhadores do `tsbs_load` (1, 2, 4, 8, 16 e 32), como nos outros eixos, confirmado na calibração.
+2. Lote de 10.000 linhas, o padrão do TSBS e dentro da faixa de 5 a 10 mil que a InfluxData recomenda.
+3. Gzip ligado na escrita do InfluxDB, o padrão do TSBS e recomendação da InfluxData. O TimescaleDB recebe por `COPY`, o padrão do TSBS.
+4. Consultas: todos os tipos do caso `cpu-only`, 20 por tipo em cada execução, com 1 trabalhador (o padrão do TSBS). São as mesmas 20 em todas as execuções e nas duas arquiteturas. Antes de cada tipo, uma invocação de aquecimento com 5 consultas geradas com outra semente, que não entra no resumo (`harness/README.md`).
+5. Opções das consultas do TimescaleDB iguais às da carga (`--timescale-use-tags`, `--timescale-use-json` e `--timescale-use-time-bucket` nos padrões).
+
+**Justificativa.** São os padrões da ferramenta e as recomendações do fabricante do lado especializado (ADR-008 e ADR-010).
+
+**Efeito sobre a comparação.** Neutro: os mesmos parâmetros e as mesmas consultas nos dois lados, sem seleção de tipos. Com 20 consultas por execução, os percentis altos de uma execução saem de poucas amostras; a análise usa a média por tipo em cada execução e a dispersão entre as repetições.
+
+**Estado.** Aceita. Revisada em 08/11/2026, com aprovação do Léo: a versão anterior previa 1.000 consultas por tipo. Medido em desenvolvimento (1 dia de dados, TimescaleDB comprimido): uma consulta de cada tipo soma 4,3 s no TimescaleDB e 24,6 s no InfluxDB, em que o `high-cpu-all` sozinho leva 12,7 s. Com 1.000 por tipo, seriam 71 min e 6,8 h de consultas por execução. Com 20, cerca de 1,5 min e 9 min. O encaixe das consultas na execução está na ADR-065.
+
+---
+
+## ADR-062 — Compressão do TimescaleDB depois da carga
+
+**Contexto.** O TSBS não liga a compressão do TimescaleDB, e o InfluxDB comprime sempre (TSM). A proposta mede razão de compressão e espaço por ponto. Uma política de compressão durante a carga não funciona com os dados do TSBS: como as datas são de 2016, ela comprimiria cada chunk logo depois de criado.
+
+**Decisão.**
+
+1. A ingestão é medida sem compressão, como no TSBS.
+2. Depois da carga, todos os chunks são comprimidos com a configuração da documentação do TimescaleDB: segmentação por `tags_id` e ordenação por `time DESC` (colunas pelas quais as consultas filtram e ordenam).
+3. O tempo de compressão e o espaço antes e depois são reportados.
+4. As consultas rodam sobre os dados comprimidos.
+
+**Justificativa.** É a configuração que o mantenedor recomenda para séries temporais (ADR-010). Comprimir depois da carga evita uma interação artificial com as datas antigas do TSBS.
+
+**Efeito sobre a comparação.** A ingestão do TimescaleDB não paga a compressão, enquanto o InfluxDB compacta em segundo plano durante a carga. Por isso o artigo compara também a soma do tempo de carga com o de compressão.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-063 — Configuração e memória dos sistemas do Eixo C
+
+**Contexto.** A ADR-024 manda rodar o `timescaledb-tune` uma vez, com recursos explícitos, e dar ao InfluxDB tratamento simétrico. A ADR-025 fixa 20 GiB para o sistema sob teste.
+
+**Decisão.**
+
+1. Cada arquitetura tem um container: TimescaleDB com 20 GiB e `/dev/shm` de 1 GiB (ADR-028); InfluxDB com 20 GiB.
+2. TimescaleDB: os valores do `timescaledb-tune` 0.19.0 (ADR-024), mais `pg_stat_statements` (ADR-021) e `timescaledb.telemetry_level = off` (ADR-023).
+3. InfluxDB: o arquivo da imagem, com o índice TSI e o envio de estatísticas desligado (ADR-058). O resto no padrão: cache de 1 GB, compactações em até metade dos núcleos, `wal-fsync-delay` de 0 s e o banco `_internal` ligado (o TSBS depende dele para listar os bancos).
+4. Ajustes só quando o próprio sistema avisar, pela regra da ADR-055, valendo para o sistema avisado.
+
+**Justificativa.** Configuração de referência dos dois fabricantes, com o mesmo orçamento de memória.
+
+**Efeito sobre a comparação.** O TimescaleDB recebe a configuração da ferramenta do fabricante, mais completa que a dos Eixos A e B (ADR-024). O InfluxDB recebe as recomendações do seu fabricante. O banco `_internal` grava estatísticas a cada 10 s dentro do InfluxDB, um custo pequeno e real dele.
+
+**Estado.** Aceita. Na implementação, o InfluxDB passou a rodar com o usuário 1000: a imagem roda como o usuário 1500 e não ajusta o dono do volume, que o orquestrador cria com o usuário 1000. É uma mudança operacional, sem efeito no comportamento do banco.
+
+---
+
+## ADR-064 — Coletores do TimescaleDB e do InfluxDB
+
+**Contexto.** A ADR-021 manda coletar as estatísticas internas de todos os sistemas com a mesma frequência, e o `harness/README.md` prevê os prefixos `tsdb_` e `influx_`.
+
+**Decisão.**
+
+1. TimescaleDB: o coletor do PostgreSQL (ADR-021) e, a cada 60 s, o coletor `tsdb_`, com o tamanho da hypertable (tabela, índices e total), o número de chunks, os chunks comprimidos e o espaço antes e depois da compressão, pelas funções do TimescaleDB.
+2. InfluxDB: coletor `influx_`, a cada 10 s, pelo `/debug/vars` da 1.x (pontos escritos, erros de escrita, cache do TSM, compactações, séries e memória do processo). A cada 60 s, o tamanho do diretório de dados (`du` dentro do container), como no RabbitMQ (ADR-057). O `harness/README.md` previa o `/metrics`, que é do 2.x.
+
+**Justificativa.** Cobre, nos dois lados, a atividade de escrita, a memória e o espaço em disco, que são as variáveis do eixo.
+
+**Efeito sobre a comparação.** Neutro, pela regra da ADR-021. O custo da coleta é medido no piloto.
+
+**Estado.** Aceita. Testada nas janelas `teste-eixo-c-timescaledb` e `teste-eixo-c-influxdb` em 08/11/2026: todas as métricas gravadas. Durante a compressão do TimescaleDB, uma leitura de tamanhos esbarrou nos bloqueios dos chunks e foi cancelada pelo `lock_timeout` de 1 s do coletor, que é o comportamento previsto: o coletor não espera bloqueios e lê de novo na volta seguinte.
+
+---
+
+## ADR-065 — Execução do Eixo C e limite do gerador
+
+**Contexto.** O contrato do gerador recebe aquecimento e medição em segundos, mas o Eixo C mede a carga de um conjunto fixo (ADR-060), seguida da compressão (ADR-062) e das consultas (ADR-061). Medido em desenvolvimento em 08/11/2026, com 8 trabalhadores: no InfluxDB, o limite é o próprio banco (9,5 dos 12 núcleos, gerador em 1,5); no TimescaleDB, é o cliente do TSBS, que monta os `COPY` (gerador em 3,6 das suas 4 CPUs lógicas, PostgreSQL em 3,4 núcleos). Comprimir os dados com zstd em vez de gzip rendeu só 5%, e 16 trabalhadores, 12%.
+
+**Decisão.**
+
+1. Cada execução do Eixo C, no `executar` do gerador:
+   1. carga do arquivo inteiro com N trabalhadores, lido do gzip por um pipe;
+   2. no TimescaleDB, compressão de todos os chunks (ADR-062) e `ANALYZE` da tabela, como a documentação do PostgreSQL pede depois de cargas em massa; no InfluxDB, espera até nenhuma compactação estar em andamento, sem forçar a compactação completa, que o padrão só faz 4 h depois da última escrita;
+   3. as consultas da ADR-061.
+2. A vazão é a da série por segundo do TSBS, do fim do aquecimento ao fim da carga. No plano, `aquecimento_s` é de 10 s, e `medicao_s` é o tempo máximo da carga: se ela não terminar nesse prazo, a execução falha, porque as consultas precisam dos dados inteiros.
+3. A divisão de núcleos da ADR-018 se mantém. A vazão do TimescaleDB é reportada como limite inferior sempre que o gerador passar de 85% da sua CPU com o sistema sob teste folgado, condição lida da telemetria de containers de cada execução.
+4. Além da vazão, a análise reporta a eficiência de cada sistema: CPU do sistema sob teste e bytes gravados por milhão de métricas, medidas que não dependem do limite do gerador.
+5. O adaptador grava `metricas-gerador.csv` (série da carga), `resumo.json` (tempos de carga, compressão e espera, espaço antes e depois e percentis das consultas, em microssegundos) e as saídas originais do TSBS em `ferramenta/`, como descreve o `harness/README.md`.
+
+**Justificativa.** A carga do conjunto inteiro é o método padrão do TSBS e deixa os dados completos para as consultas. Dar mais núcleos ao gerador tiraria núcleos do sistema sob teste, e o InfluxDB já usa quase todos. A eficiência por métrica compara os dois sistemas mesmo quando o gerador limita um deles.
+
+**Efeito sobre a comparação.** Quando o gerador limita o TimescaleDB, a vazão medida fica abaixo da capacidade dele, e a diferença para o InfluxDB é subestimada: o limite desfavorece o lado consolidado e fica declarado. A espera pelas compactações do InfluxDB sem a compactação completa deixa as consultas sobre arquivos de nível 1 e 2, o estado normal logo depois de uma carga; o espaço medido nesse momento pode ser maior que o final. O `ANALYZE` do TimescaleDB não tem contraparte no InfluxDB, que não usa estatísticas de planejamento.
+
+**Estado.** Aceita. Adaptador testado em desenvolvimento em 08/11/2026, com os 3 dias de dados e 8 trabalhadores, sem protocolo:
+
+| | TimescaleDB | InfluxDB |
+|---|---|---|
+| Carga | 94,8 s (10,9 milhões de métricas/s) | 211,7 s (4,9 milhões/s) |
+| Depois da carga | compressão em 108 s (20,5 GB para 947 MB); `ANALYZE` em 0,1 s | espera das compactações em 4 s |
+| Consultas (15 tipos × 20) | 90 s | 676 s |
+
+Conferido também que nenhuma consulta do InfluxDB volta com erro no corpo da resposta, e que as duas bases devolvem as mesmas contagens e somas para as mesmas consultas.
+
+---
+
 ## Registro de alterações
 
 | Data | Alteração |
@@ -1090,3 +1285,6 @@ O commit que avisa toma um bloqueio global e espera o próprio `fsync` (cerca de
 | 07/11/2026 | ADR-048: gerador de carga do Eixo A. ADR-049: coletores internos do OpenSearch e do Qdrant. ADR-032 revisada: semente da execução sem a arquitetura |
 | 07/11/2026 | ADR-050 a ADR-057: operação, mensagem e esquema do Eixo B; retirada e aviso na fila consolidada; RabbitMQ; relay da *outbox*; gerador e modelo de carga; divisão da memória e configuração; verificação de equivalência; coletor do RabbitMQ |
 | 08/11/2026 | ADR-051 e ADR-053 revisadas: espera por consulta a cada 100 ms no lugar do `pg_notify`, depois de medido o teto do aviso; ADR-050 ajustada |
+| 08/11/2026 | ADR-052 revisada: limite de 65.536 descritores de arquivo no RabbitMQ |
+| 08/11/2026 | ADR-058 a ADR-064: InfluxDB 1.13.1 com TSI, TSBS compilado com a correção do PR #255, dados, carga e consultas, compressão depois da carga, configuração e coletores do Eixo C. ADR-024 executada |
+| 08/11/2026 | ADR-060 e ADR-061 revisadas (3 dias de dados; 20 consultas por tipo). ADR-065: execução do Eixo C e limite do gerador |
