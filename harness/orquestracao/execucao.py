@@ -22,7 +22,10 @@ from harness.orquestracao.compose import Compose
 from harness.orquestracao.plano import Execucao, Plano
 
 SENHA_POSTGRES: str = "tcc"
-PORTAS_HTTP: Dict[str, int] = {"opensearch": 9200, "qdrant": 6333, "rabbitmq": 15672}
+PORTAS_HTTP: Dict[str, int] = {"opensearch": 9200, "qdrant": 6333, "rabbitmq": 15672, "influxdb": 8086}
+PRONTIDAO: Dict[str, str] = {"influxdb": "/ping?verbose=true"}  # a raiz do InfluxDB responde 404
+TIPOS_POSTGRES: Tuple[str, ...] = ("postgres", "timescaledb")
+COM_TAMANHO_POR_DU: Tuple[str, ...] = ("rabbitmq", "influxdb")  # ADR-057 e ADR-064
 Processo = subprocess.Popen[bytes]
 
 
@@ -61,12 +64,12 @@ def _esperar_banco(container: str, limite_s: float = 120.0) -> bool:
 
 
 def _esperar_http(url: str, limite_s: float = 120.0) -> bool:
-    """Espera o sistema responder 200 no endereço, como o coletor fará."""
+    """Espera o sistema responder com sucesso (2xx) no endereço, como o coletor fará."""
     prazo = time.monotonic() + limite_s
     while time.monotonic() < prazo:
         try:
             with urllib.request.urlopen(url, timeout=2) as resposta:
-                if resposta.status == 200:
+                if 200 <= resposta.status < 300:
                     return True
         except (urllib.error.URLError, OSError):
             pass
@@ -105,7 +108,7 @@ def _iniciar_coletores_internos(arq: Arquitetura, cenario: str, pasta: str,
     for coletor in arq.coletores:
         container = arq.container(coletor.servico)
         saida = os.path.join(pasta, f"metricas-{coletor.servico}.csv")
-        if coletor.tipo == "postgres":
+        if coletor.tipo in TIPOS_POSTGRES:
             if not _esperar_banco(container):
                 return f"{coletor.servico} não aceitou conexões em 120 s"
             conninfo = (f"host={_ip(container)} dbname={coletor.banco} user=postgres "
@@ -113,13 +116,15 @@ def _iniciar_coletores_internos(arq: Arquitetura, cenario: str, pasta: str,
             argumentos = ["harness/metricas/postgres.py", saida, "--conninfo", conninfo]
             if cenario == "longa":
                 argumentos.append("--pgstattuple")
+            if coletor.tipo == "timescaledb":
+                argumentos.append("--timescaledb")  # tamanhos e compressão das hypertables (ADR-064)
         else:
             url = f"http://{_ip(container)}:{PORTAS_HTTP[coletor.tipo]}"
-            if not _esperar_http(url):
+            if not _esperar_http(url + PRONTIDAO.get(coletor.tipo, "")):
                 return f"{coletor.servico} não respondeu em 120 s"
             argumentos = [f"harness/metricas/{coletor.tipo}.py", saida, "--url", url]
-            if coletor.tipo == "rabbitmq":
-                argumentos += ["--container", container]  # tamanho dos dados por du (ADR-057)
+            if coletor.tipo in COM_TAMANHO_POR_DU:
+                argumentos += ["--container", container]
         processos.append(_iniciar_coletor(
             argumentos, os.path.join(pasta, "ferramenta", f"coletor-{coletor.servico}.log")))
     return None
@@ -127,7 +132,7 @@ def _iniciar_coletores_internos(arq: Arquitetura, cenario: str, pasta: str,
 
 def _postgres(arq: Arquitetura) -> List[Coletor]:
     """Os coletores de bancos PostgreSQL, os únicos com pg_stat_statements."""
-    return [c for c in arq.coletores if c.tipo == "postgres"]
+    return [c for c in arq.coletores if c.tipo in TIPOS_POSTGRES]
 
 
 def _zerar_pg_stat_statements(arq: Arquitetura) -> None:

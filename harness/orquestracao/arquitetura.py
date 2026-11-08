@@ -14,7 +14,8 @@ PASTAS_EIXO: Dict[str, str] = {
     "c": "eixo-c-temporal",
     "t": "harness/teste",
 }
-TIPOS_COLETOR: Set[str] = {"postgres", "opensearch", "qdrant", "rabbitmq"}
+TIPOS_COLETOR: Set[str] = {"postgres", "timescaledb", "opensearch", "qdrant", "rabbitmq", "influxdb"}
+TIPOS_COM_BANCO: Set[str] = {"postgres", "timescaledb"}
 CHAVES_DESCRITOR: Set[str] = {
     "eixo", "arquitetura", "compose", "servicos_sob_teste",
     "servico_gerador", "dados", "coletor",
@@ -121,10 +122,10 @@ def _coletores(dados: Dict[str, Any], servicos: List[str], onde: str) -> Tuple[C
         servico = _texto(tabela, "servico", local)
         if servico not in servicos:
             raise ErroDescritor(f"{local}: o serviço '{servico}' não está entre os serviços sob teste")
-        if tipo == "postgres":
+        if tipo in TIPOS_COM_BANCO:
             banco = _texto(tabela, "banco", local)
         elif "banco" in tabela:
-            raise ErroDescritor(f"{local}: 'banco' só se aplica a coletores do tipo postgres")
+            raise ErroDescritor(f"{local}: 'banco' só se aplica a coletores do tipo postgres ou timescaledb")
         else:
             banco = ""
         coletores.append(Coletor(tipo, servico, banco))
