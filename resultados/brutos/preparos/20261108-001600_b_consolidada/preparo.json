@@ -1,0 +1,10 @@
+{
+  "eixo": "b",
+  "arquitetura": "consolidada",
+  "inicio": "2026-11-08T00:16:00-0300",
+  "fim": "2026-11-08T00:16:02-0300",
+  "refeito": false,
+  "tamanhos_bytes": {
+    "postgres": 48700743
+  }
+}

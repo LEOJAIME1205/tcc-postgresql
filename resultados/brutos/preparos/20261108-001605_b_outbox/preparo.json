@@ -1,0 +1,11 @@
+{
+  "eixo": "b",
+  "arquitetura": "outbox",
+  "inicio": "2026-11-08T00:16:05-0300",
+  "fim": "2026-11-08T00:16:09-0300",
+  "refeito": false,
+  "tamanhos_bytes": {
+    "postgres": 48701619,
+    "rabbitmq": 105318
+  }
+}

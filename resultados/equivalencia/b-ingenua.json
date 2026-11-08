@@ -1,0 +1,58 @@
+{
+  "arquitetura": "ingenua",
+  "concluido_em": "2026-11-08T01:04:11-0300",
+  "produtores": 8,
+  "consumidores": 8,
+  "semente": 20261108,
+  "duracao_s": 60.0,
+  "eventos": [
+    {
+      "t_s": 0.0,
+      "evento": "8 produtores e 8 consumidores iniciados"
+    },
+    {
+      "t_s": 15.0,
+      "evento": "produtores derrubados (SIGKILL)"
+    },
+    {
+      "t_s": 17.0,
+      "evento": "produtores religados"
+    },
+    {
+      "t_s": 35.0,
+      "evento": "produtores derrubados (SIGKILL)"
+    },
+    {
+      "t_s": 37.0,
+      "evento": "produtores religados"
+    },
+    {
+      "t_s": 60.0,
+      "evento": "produtores encerrados (SIGTERM)"
+    },
+    {
+      "t_s": 74.2,
+      "evento": "fila vazia"
+    }
+  ],
+  "esvaziou": true,
+  "pedidos": 159914,
+  "consumidos": 159907,
+  "consumidos_distintos": 159907,
+  "perdidos": 7,
+  "orfaos": 0,
+  "duplicatas": 0,
+  "maximo_de_entregas": 1,
+  "exemplos_perdidos": [
+    42954,
+    42955,
+    42956,
+    42957,
+    42958,
+    42959,
+    94193
+  ],
+  "exemplos_orfaos": [],
+  "criterio": "sem garantia: o teste registra as perdas da escrita dupla",
+  "aprovado": null
+}

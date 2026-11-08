@@ -1,0 +1,22 @@
+{
+  "janela": "20261108-0016",
+  "atualizado": "2026-11-08T01:00:03-0300",
+  "execucoes": [
+    {
+      "ordem": 1,
+      "execucao": "b_consolidada_calibracao_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261108-001638_b_consolidada_calibracao_c8_r01"
+      ]
+    },
+    {
+      "ordem": 2,
+      "execucao": "b_outbox_calibracao_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261108-003824_b_outbox_calibracao_c8_r01"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,767 @@
+{
+  "containers": [
+    {
+      "Id": "906505e12533297f0e03046d946f57060ef867468d4903f0077847a1dbd547e3",
+      "Created": "2026-11-08T03:58:27.033461033Z",
+      "Path": "docker-entrypoint.sh",
+      "Args": [
+        "rabbitmq-server"
+      ],
+      "State": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 67333,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-11-08T03:58:27.068417561Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "Image": "sha256:af6f50d38098d8bd52fef7f3fa85015dd8b2bf6def58e995bf584ae9ba0f6407",
+      "ResolvConfPath": "/var/lib/docker/containers/906505e12533297f0e03046d946f57060ef867468d4903f0077847a1dbd547e3/resolv.conf",
+      "HostnamePath": "/var/lib/docker/containers/906505e12533297f0e03046d946f57060ef867468d4903f0077847a1dbd547e3/hostname",
+      "HostsPath": "/var/lib/docker/containers/906505e12533297f0e03046d946f57060ef867468d4903f0077847a1dbd547e3/hosts",
+      "LogPath": "/var/lib/docker/containers/906505e12533297f0e03046d946f57060ef867468d4903f0077847a1dbd547e3/906505e12533297f0e03046d946f57060ef867468d4903f0077847a1dbd547e3-json.log",
+      "Name": "/tcc-b-outbox-rabbitmq-1",
+      "RestartCount": 0,
+      "Driver": "overlayfs",
+      "Platform": "linux",
+      "MountLabel": "",
+      "ProcessLabel": "",
+      "AppArmorProfile": "docker-default",
+      "ExecIDs": null,
+      "HostConfig": {
+        "Binds": [
+          "/home/leojaime/tcc/tcc-postgresql/eixo-b-fila/outbox/rabbitmq.conf:/etc/rabbitmq/conf.d/20-tcc.conf:ro",
+          "/home/leojaime/tcc-dados/b/outbox/rabbitmq/atual:/var/lib/rabbitmq:rw"
+        ],
+        "ContainerIDFile": "",
+        "LogConfig": {
+          "Type": "json-file",
+          "Config": {
+            "max-file": "5",
+            "max-size": "100m"
+          }
+        },
+        "NetworkMode": "tcc-b-outbox_default",
+        "PortBindings": {},
+        "RestartPolicy": {
+          "Name": "no",
+          "MaximumRetryCount": 0
+        },
+        "AutoRemove": false,
+        "VolumeDriver": "",
+        "VolumesFrom": null,
+        "ConsoleSize": [
+          0,
+          0
+        ],
+        "CapAdd": null,
+        "CapDrop": null,
+        "CgroupnsMode": "private",
+        "Dns": null,
+        "DnsOptions": null,
+        "DnsSearch": null,
+        "ExtraHosts": [],
+        "GroupAdd": null,
+        "IpcMode": "private",
+        "Cgroup": "",
+        "Links": null,
+        "OomScoreAdj": 0,
+        "PidMode": "",
+        "Privileged": false,
+        "PublishAllPorts": false,
+        "ReadonlyRootfs": false,
+        "SecurityOpt": null,
+        "UTSMode": "",
+        "UsernsMode": "",
+        "ShmSize": 67108864,
+        "Runtime": "runc",
+        "Isolation": "",
+        "CpuShares": 0,
+        "Memory": 7516192768,
+        "NanoCpus": 0,
+        "CgroupParent": "",
+        "BlkioWeight": 0,
+        "BlkioWeightDevice": null,
+        "BlkioDeviceReadBps": null,
+        "BlkioDeviceWriteBps": null,
+        "BlkioDeviceReadIOps": null,
+        "BlkioDeviceWriteIOps": null,
+        "CpuPeriod": 0,
+        "CpuQuota": 0,
+        "CpuRealtimePeriod": 0,
+        "CpuRealtimeRuntime": 0,
+        "CpusetCpus": "0-5,8-13",
+        "CpusetMems": "",
+        "Devices": null,
+        "DeviceCgroupRules": null,
+        "DeviceRequests": null,
+        "MemoryReservation": 0,
+        "MemorySwap": 7516192768,
+        "MemorySwappiness": null,
+        "OomKillDisable": null,
+        "PidsLimit": null,
+        "Ulimits": null,
+        "CpuCount": 0,
+        "CpuPercent": 0,
+        "IOMaximumIOps": 0,
+        "IOMaximumBandwidth": 0,
+        "MaskedPaths": [
+          "/proc/acpi",
+          "/proc/asound",
+          "/proc/interrupts",
+          "/proc/kcore",
+          "/proc/keys",
+          "/proc/latency_stats",
+          "/proc/sched_debug",
+          "/proc/scsi",
+          "/proc/timer_list",
+          "/proc/timer_stats",
+          "/sys/devices/virtual/powercap",
+          "/sys/firmware"
+        ],
+        "ReadonlyPaths": [
+          "/proc/bus",
+          "/proc/fs",
+          "/proc/irq",
+          "/proc/sys",
+          "/proc/sysrq-trigger"
+        ]
+      },
+      "Storage": {
+        "RootFS": {
+          "Snapshot": {
+            "Name": "overlayfs"
+          }
+        }
+      },
+      "Mounts": [
+        {
+          "Type": "bind",
+          "Source": "/home/leojaime/tcc-dados/b/outbox/rabbitmq/atual",
+          "Destination": "/var/lib/rabbitmq",
+          "Mode": "rw",
+          "RW": true,
+          "Propagation": "rprivate"
+        },
+        {
+          "Type": "bind",
+          "Source": "/home/leojaime/tcc/tcc-postgresql/eixo-b-fila/outbox/rabbitmq.conf",
+          "Destination": "/etc/rabbitmq/conf.d/20-tcc.conf",
+          "Mode": "ro",
+          "RW": false,
+          "Propagation": "rprivate"
+        }
+      ],
+      "Config": {
+        "Hostname": "rabbitmq",
+        "Domainname": "",
+        "User": "",
+        "AttachStdin": false,
+        "AttachStdout": true,
+        "AttachStderr": true,
+        "ExposedPorts": {
+          "15671/tcp": {},
+          "15672/tcp": {},
+          "15691/tcp": {},
+          "15692/tcp": {},
+          "25672/tcp": {},
+          "4369/tcp": {},
+          "5671/tcp": {},
+          "5672/tcp": {}
+        },
+        "Tty": false,
+        "OpenStdin": false,
+        "StdinOnce": false,
+        "Env": [
+          "PATH=/opt/rabbitmq/sbin:/opt/erlang/bin:/opt/openssl/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "ERLANG_INSTALL_PATH_PREFIX=/opt/erlang",
+          "OPENSSL_INSTALL_PATH_PREFIX=/opt/openssl",
+          "RABBITMQ_DATA_DIR=/var/lib/rabbitmq",
+          "RABBITMQ_VERSION=4.4.0",
+          "RABBITMQ_PGP_KEY_ID=0x0A9AF2115F4687BD29803A206B73A36E6026DFCA",
+          "RABBITMQ_HOME=/opt/rabbitmq",
+          "HOME=/var/lib/rabbitmq",
+          "LANG=C.UTF-8",
+          "LANGUAGE=C.UTF-8",
+          "LC_ALL=C.UTF-8",
+          "RUNNING_UNDER_SYSTEMD=true"
+        ],
+        "Cmd": [
+          "rabbitmq-server"
+        ],
+        "Image": "rabbitmq:4.4.0-management@sha256:af6f50d38098d8bd52fef7f3fa85015dd8b2bf6def58e995bf584ae9ba0f6407",
+        "Volumes": {
+          "/var/lib/rabbitmq": {}
+        },
+        "WorkingDir": "",
+        "Entrypoint": [
+          "docker-entrypoint.sh"
+        ],
+        "Labels": {
+          "com.docker.compose.config-hash": "cff7124cb038db00c0c743585ace311cace1f1546590e80f30e6f360dcda92ad",
+          "com.docker.compose.container-number": "1",
+          "com.docker.compose.depends_on": "",
+          "com.docker.compose.image": "sha256:9f48a2c0a501c5a7cf520d69eb3369ba85e614a195dde071f3dfa20077e54d26",
+          "com.docker.compose.oneoff": "False",
+          "com.docker.compose.project": "tcc-b-outbox",
+          "com.docker.compose.project.config_files": "/home/leojaime/tcc/tcc-postgresql/eixo-b-fila/outbox/compose.yaml",
+          "com.docker.compose.project.working_dir": "/home/leojaime/tcc/tcc-postgresql/eixo-b-fila/outbox",
+          "com.docker.compose.service": "rabbitmq",
+          "com.docker.compose.version": "5.6.1",
+          "org.opencontainers.image.created": "2026-10-25T10:26:07.538865+00:00",
+          "org.opencontainers.image.description": "The Ubuntu container image maintained by Canonical\n\nUbuntu is a Debian-based Linux operating system that runs from the desktop to the cloud, to all your internet connected things.\nIt is the world's most popular operating system across public clouds and OpenStack clouds.\nIt is the number one platform for containers; from Docker to Kubernetes to LXD, Ubuntu can run your containers at scale.\nFast, secure and simple, Ubuntu powers millions of PCs worldwide.\n",
+          "org.opencontainers.image.title": "ubuntu",
+          "org.opencontainers.image.version": "26.04"
+        },
+        "StopTimeout": 120
+      },
+      "NetworkSettings": {
+        "SandboxID": "1c9dd9d6ee04fe075398b3c0158b2b2058e2e5809dc65904e7b0d9839e380c68",
+        "SandboxKey": "/var/run/docker/netns/1c9dd9d6ee04",
+        "Ports": {
+          "15671/tcp": null,
+          "15672/tcp": null,
+          "15691/tcp": null,
+          "15692/tcp": null,
+          "25672/tcp": null,
+          "4369/tcp": null,
+          "5671/tcp": null,
+          "5672/tcp": null
+        },
+        "Networks": {
+          "tcc-b-outbox_default": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": [
+              "tcc-b-outbox-rabbitmq-1",
+              "rabbitmq"
+            ],
+            "DriverOpts": null,
+            "GwPriority": 0,
+            "NetworkID": "f2e90e4d60e52b55762e904461331cd160188d0f6e6c636651fb2410ad4d1c63",
+            "EndpointID": "ef62ee88f78423cbf6367c88231ca31ce4f8720649225d24d06a04936c8e1306",
+            "Gateway": "172.18.0.1",
+            "IPAddress": "172.18.0.2",
+            "MacAddress": "76:9d:5a:85:6a:c5",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "DNSNames": [
+              "tcc-b-outbox-rabbitmq-1",
+              "rabbitmq",
+              "906505e12533"
+            ]
+          }
+        }
+      },
+      "ImageManifestDescriptor": {
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "digest": "sha256:9f48a2c0a501c5a7cf520d69eb3369ba85e614a195dde071f3dfa20077e54d26",
+        "size": 3261,
+        "annotations": {
+          "com.docker.official-images.bashbrew.arch": "amd64",
+          "org.opencontainers.image.base.digest": "sha256:184d4ae2a5d7fd4cbe1ad7165d1fb6c1377735ed2744c6be478deed5e8f0ba88",
+          "org.opencontainers.image.base.name": "rabbitmq:4.4",
+          "org.opencontainers.image.created": "2026-10-27T00:31:15Z",
+          "org.opencontainers.image.revision": "4ad287295317ea1d9a577396fa28466a1bbf3430",
+          "org.opencontainers.image.source": "https://github.com/docker-library/rabbitmq.git#4ad287295317ea1d9a577396fa28466a1bbf3430:4.4/ubuntu/management",
+          "org.opencontainers.image.url": "https://hub.docker.com/_/rabbitmq",
+          "org.opencontainers.image.version": "4.4.0-management"
+        },
+        "platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        }
+      }
+    },
+    {
+      "Id": "6bc18d847e63466d66f747105cd7d65eb6445a09f2c184336d52bc65c26f7c61",
+      "Created": "2026-11-08T03:58:27.031797685Z",
+      "Path": "docker-entrypoint.sh",
+      "Args": [
+        "postgres",
+        "-c",
+        "shared_preload_libraries=pg_stat_statements",
+        "-c",
+        "shared_buffers=3072MB",
+        "-c",
+        "effective_cache_size=9216MB",
+        "-c",
+        "work_mem=4MB"
+      ],
+      "State": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 67495,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-11-08T03:58:27.132722361Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "Image": "sha256:3c71fe3d3acb92bc6b4c2a1dfce722e9eff10c352252a6450051cd04880067ec",
+      "ResolvConfPath": "/var/lib/docker/containers/6bc18d847e63466d66f747105cd7d65eb6445a09f2c184336d52bc65c26f7c61/resolv.conf",
+      "HostnamePath": "/var/lib/docker/containers/6bc18d847e63466d66f747105cd7d65eb6445a09f2c184336d52bc65c26f7c61/hostname",
+      "HostsPath": "/var/lib/docker/containers/6bc18d847e63466d66f747105cd7d65eb6445a09f2c184336d52bc65c26f7c61/hosts",
+      "LogPath": "/var/lib/docker/containers/6bc18d847e63466d66f747105cd7d65eb6445a09f2c184336d52bc65c26f7c61/6bc18d847e63466d66f747105cd7d65eb6445a09f2c184336d52bc65c26f7c61-json.log",
+      "Name": "/tcc-b-outbox-postgres-1",
+      "RestartCount": 0,
+      "Driver": "overlayfs",
+      "Platform": "linux",
+      "MountLabel": "",
+      "ProcessLabel": "",
+      "AppArmorProfile": "docker-default",
+      "ExecIDs": null,
+      "HostConfig": {
+        "Binds": [
+          "/home/leojaime/tcc-dados/b/outbox/postgres/atual:/var/lib/postgresql:rw"
+        ],
+        "ContainerIDFile": "",
+        "LogConfig": {
+          "Type": "json-file",
+          "Config": {
+            "max-file": "5",
+            "max-size": "100m"
+          }
+        },
+        "NetworkMode": "tcc-b-outbox_default",
+        "PortBindings": {},
+        "RestartPolicy": {
+          "Name": "no",
+          "MaximumRetryCount": 0
+        },
+        "AutoRemove": false,
+        "VolumeDriver": "",
+        "VolumesFrom": null,
+        "ConsoleSize": [
+          0,
+          0
+        ],
+        "CapAdd": null,
+        "CapDrop": null,
+        "CgroupnsMode": "private",
+        "Dns": null,
+        "DnsOptions": null,
+        "DnsSearch": null,
+        "ExtraHosts": [],
+        "GroupAdd": null,
+        "IpcMode": "private",
+        "Cgroup": "",
+        "Links": null,
+        "OomScoreAdj": 0,
+        "PidMode": "",
+        "Privileged": false,
+        "PublishAllPorts": false,
+        "ReadonlyRootfs": false,
+        "SecurityOpt": null,
+        "UTSMode": "",
+        "UsernsMode": "",
+        "ShmSize": 1073741824,
+        "Runtime": "runc",
+        "Isolation": "",
+        "CpuShares": 0,
+        "Memory": 12884901888,
+        "NanoCpus": 0,
+        "CgroupParent": "",
+        "BlkioWeight": 0,
+        "BlkioWeightDevice": null,
+        "BlkioDeviceReadBps": null,
+        "BlkioDeviceWriteBps": null,
+        "BlkioDeviceReadIOps": null,
+        "BlkioDeviceWriteIOps": null,
+        "CpuPeriod": 0,
+        "CpuQuota": 0,
+        "CpuRealtimePeriod": 0,
+        "CpuRealtimeRuntime": 0,
+        "CpusetCpus": "0-5,8-13",
+        "CpusetMems": "",
+        "Devices": null,
+        "DeviceCgroupRules": null,
+        "DeviceRequests": null,
+        "MemoryReservation": 0,
+        "MemorySwap": 12884901888,
+        "MemorySwappiness": null,
+        "OomKillDisable": null,
+        "PidsLimit": null,
+        "Ulimits": null,
+        "CpuCount": 0,
+        "CpuPercent": 0,
+        "IOMaximumIOps": 0,
+        "IOMaximumBandwidth": 0,
+        "MaskedPaths": [
+          "/proc/acpi",
+          "/proc/asound",
+          "/proc/interrupts",
+          "/proc/kcore",
+          "/proc/keys",
+          "/proc/latency_stats",
+          "/proc/sched_debug",
+          "/proc/scsi",
+          "/proc/timer_list",
+          "/proc/timer_stats",
+          "/sys/devices/virtual/powercap",
+          "/sys/firmware"
+        ],
+        "ReadonlyPaths": [
+          "/proc/bus",
+          "/proc/fs",
+          "/proc/irq",
+          "/proc/sys",
+          "/proc/sysrq-trigger"
+        ]
+      },
+      "Storage": {
+        "RootFS": {
+          "Snapshot": {
+            "Name": "overlayfs"
+          }
+        }
+      },
+      "Mounts": [
+        {
+          "Type": "bind",
+          "Source": "/home/leojaime/tcc-dados/b/outbox/postgres/atual",
+          "Destination": "/var/lib/postgresql",
+          "Mode": "rw",
+          "RW": true,
+          "Propagation": "rprivate"
+        }
+      ],
+      "Config": {
+        "Hostname": "6bc18d847e63",
+        "Domainname": "",
+        "User": "",
+        "AttachStdin": false,
+        "AttachStdout": true,
+        "AttachStderr": true,
+        "ExposedPorts": {
+          "5432/tcp": {}
+        },
+        "Tty": false,
+        "OpenStdin": false,
+        "StdinOnce": false,
+        "Env": [
+          "POSTGRES_DB=fila",
+          "POSTGRES_PASSWORD=tcc",
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/postgresql/18/bin",
+          "GOSU_VERSION=1.19",
+          "LANG=en_US.utf8",
+          "PG_MAJOR=18",
+          "PG_VERSION=18.6-1.pgdg13+2",
+          "PGDATA=/var/lib/postgresql/18/docker"
+        ],
+        "Cmd": [
+          "postgres",
+          "-c",
+          "shared_preload_libraries=pg_stat_statements",
+          "-c",
+          "shared_buffers=3072MB",
+          "-c",
+          "effective_cache_size=9216MB",
+          "-c",
+          "work_mem=4MB"
+        ],
+        "Image": "tcc-postgres:18.6-ts2.31.0-pgv0.8.7",
+        "Volumes": {
+          "/var/lib/postgresql": {}
+        },
+        "WorkingDir": "",
+        "Entrypoint": [
+          "docker-entrypoint.sh"
+        ],
+        "Labels": {
+          "com.docker.compose.config-hash": "8b7d20d4636fa99af0a02f0c32cfbc882491ebb8b4c984ca939feb660e5ad0e4",
+          "com.docker.compose.container-number": "1",
+          "com.docker.compose.depends_on": "",
+          "com.docker.compose.image": "sha256:d079565c71a8b25b2381a3466ea086dcfa1f01ca4228f10aa24e45b951b2b85e",
+          "com.docker.compose.oneoff": "False",
+          "com.docker.compose.project": "tcc-b-outbox",
+          "com.docker.compose.project.config_files": "/home/leojaime/tcc/tcc-postgresql/eixo-b-fila/outbox/compose.yaml",
+          "com.docker.compose.project.working_dir": "/home/leojaime/tcc/tcc-postgresql/eixo-b-fila/outbox",
+          "com.docker.compose.service": "postgres",
+          "com.docker.compose.version": "5.6.1"
+        },
+        "StopSignal": "SIGINT",
+        "StopTimeout": 120
+      },
+      "NetworkSettings": {
+        "SandboxID": "ebccf83baf15cd98d0483bd9f9df8ab196d8bf87607b674714f15f3256ce01d3",
+        "SandboxKey": "/var/run/docker/netns/ebccf83baf15",
+        "Ports": {
+          "5432/tcp": null
+        },
+        "Networks": {
+          "tcc-b-outbox_default": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": [
+              "tcc-b-outbox-postgres-1",
+              "postgres"
+            ],
+            "DriverOpts": null,
+            "GwPriority": 0,
+            "NetworkID": "f2e90e4d60e52b55762e904461331cd160188d0f6e6c636651fb2410ad4d1c63",
+            "EndpointID": "9fbc5c09394e4893da19317bf103f7b3d3cee7d4f71b457d5d7318fa0d3028ff",
+            "Gateway": "172.18.0.1",
+            "IPAddress": "172.18.0.3",
+            "MacAddress": "1e:f3:a5:0e:c8:ac",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "DNSNames": [
+              "tcc-b-outbox-postgres-1",
+              "postgres",
+              "6bc18d847e63"
+            ]
+          }
+        }
+      },
+      "ImageManifestDescriptor": {
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "digest": "sha256:d079565c71a8b25b2381a3466ea086dcfa1f01ca4228f10aa24e45b951b2b85e",
+        "size": 3149,
+        "platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        }
+      }
+    },
+    {
+      "Id": "fd244ba1d568486c185c131a389e1d54240db5b9ec885faeff7b4b25e7aa7ac4",
+      "Created": "2026-11-08T03:58:27.031055665Z",
+      "Path": "/opt/venv/bin/python",
+      "Args": [
+        "/app/relay.py"
+      ],
+      "State": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 67575,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-11-08T03:58:27.194818992Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "Image": "sha256:69903774f532132a4dedca8c0cb97573fde9f969f4b0752bfcfff968dff581ec",
+      "ResolvConfPath": "/var/lib/docker/containers/fd244ba1d568486c185c131a389e1d54240db5b9ec885faeff7b4b25e7aa7ac4/resolv.conf",
+      "HostnamePath": "/var/lib/docker/containers/fd244ba1d568486c185c131a389e1d54240db5b9ec885faeff7b4b25e7aa7ac4/hostname",
+      "HostsPath": "/var/lib/docker/containers/fd244ba1d568486c185c131a389e1d54240db5b9ec885faeff7b4b25e7aa7ac4/hosts",
+      "LogPath": "/var/lib/docker/containers/fd244ba1d568486c185c131a389e1d54240db5b9ec885faeff7b4b25e7aa7ac4/fd244ba1d568486c185c131a389e1d54240db5b9ec885faeff7b4b25e7aa7ac4-json.log",
+      "Name": "/tcc-b-outbox-relay-1",
+      "RestartCount": 0,
+      "Driver": "overlayfs",
+      "Platform": "linux",
+      "MountLabel": "",
+      "ProcessLabel": "",
+      "AppArmorProfile": "docker-default",
+      "ExecIDs": null,
+      "HostConfig": {
+        "Binds": null,
+        "ContainerIDFile": "",
+        "LogConfig": {
+          "Type": "json-file",
+          "Config": {
+            "max-file": "5",
+            "max-size": "100m"
+          }
+        },
+        "NetworkMode": "tcc-b-outbox_default",
+        "PortBindings": {},
+        "RestartPolicy": {
+          "Name": "no",
+          "MaximumRetryCount": 0
+        },
+        "AutoRemove": false,
+        "VolumeDriver": "",
+        "VolumesFrom": null,
+        "ConsoleSize": [
+          0,
+          0
+        ],
+        "CapAdd": null,
+        "CapDrop": null,
+        "CgroupnsMode": "private",
+        "Dns": null,
+        "DnsOptions": null,
+        "DnsSearch": null,
+        "ExtraHosts": [],
+        "GroupAdd": null,
+        "IpcMode": "private",
+        "Cgroup": "",
+        "Links": null,
+        "OomScoreAdj": 0,
+        "PidMode": "",
+        "Privileged": false,
+        "PublishAllPorts": false,
+        "ReadonlyRootfs": false,
+        "SecurityOpt": null,
+        "UTSMode": "",
+        "UsernsMode": "",
+        "ShmSize": 67108864,
+        "Runtime": "runc",
+        "Isolation": "",
+        "CpuShares": 0,
+        "Memory": 1073741824,
+        "NanoCpus": 0,
+        "CgroupParent": "",
+        "BlkioWeight": 0,
+        "BlkioWeightDevice": null,
+        "BlkioDeviceReadBps": null,
+        "BlkioDeviceWriteBps": null,
+        "BlkioDeviceReadIOps": null,
+        "BlkioDeviceWriteIOps": null,
+        "CpuPeriod": 0,
+        "CpuQuota": 0,
+        "CpuRealtimePeriod": 0,
+        "CpuRealtimeRuntime": 0,
+        "CpusetCpus": "0-5,8-13",
+        "CpusetMems": "",
+        "Devices": null,
+        "DeviceCgroupRules": null,
+        "DeviceRequests": null,
+        "MemoryReservation": 0,
+        "MemorySwap": 1073741824,
+        "MemorySwappiness": null,
+        "OomKillDisable": null,
+        "PidsLimit": null,
+        "Ulimits": null,
+        "CpuCount": 0,
+        "CpuPercent": 0,
+        "IOMaximumIOps": 0,
+        "IOMaximumBandwidth": 0,
+        "MaskedPaths": [
+          "/proc/acpi",
+          "/proc/asound",
+          "/proc/interrupts",
+          "/proc/kcore",
+          "/proc/keys",
+          "/proc/latency_stats",
+          "/proc/sched_debug",
+          "/proc/scsi",
+          "/proc/timer_list",
+          "/proc/timer_stats",
+          "/sys/devices/virtual/powercap",
+          "/sys/firmware"
+        ],
+        "ReadonlyPaths": [
+          "/proc/bus",
+          "/proc/fs",
+          "/proc/irq",
+          "/proc/sys",
+          "/proc/sysrq-trigger"
+        ]
+      },
+      "Storage": {
+        "RootFS": {
+          "Snapshot": {
+            "Name": "overlayfs"
+          }
+        }
+      },
+      "Mounts": [],
+      "Config": {
+        "Hostname": "fd244ba1d568",
+        "Domainname": "",
+        "User": "1000:1000",
+        "AttachStdin": false,
+        "AttachStdout": true,
+        "AttachStderr": true,
+        "Tty": false,
+        "OpenStdin": false,
+        "StdinOnce": false,
+        "Env": [
+          "PGDATABASE=fila",
+          "TCC_LOTE=100",
+          "TCC_RABBITMQ=amqp://guest:guest@rabbitmq:5672/",
+          "PGHOST=postgres",
+          "TCC_TRABALHADORES=2",
+          "PGPASSWORD=tcc",
+          "PGUSER=postgres",
+          "TCC_INTERVALO_MS=100",
+          "TCC_ESPERA=consulta",
+          "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "PYTHON_VERSION=3.14.4",
+          "PYTHON_SHA256=d923c51303e38e249136fc1bdf3568d56ecb03214efdef48516176d3d7faaef8",
+          "UV_PROJECT_ENVIRONMENT=/opt/venv",
+          "UV_PYTHON_DOWNLOADS=never",
+          "UV_COMPILE_BYTECODE=1",
+          "UV_LINK_MODE=copy"
+        ],
+        "Cmd": null,
+        "Image": "tcc-relay:1",
+        "Volumes": null,
+        "WorkingDir": "/app",
+        "Entrypoint": [
+          "/opt/venv/bin/python",
+          "/app/relay.py"
+        ],
+        "Labels": {
+          "com.docker.compose.config-hash": "5645e83fc41cfa00ac7c0137c3f91a13e383270d550245d915a0a40a20302f31",
+          "com.docker.compose.container-number": "1",
+          "com.docker.compose.depends_on": "",
+          "com.docker.compose.image": "sha256:9047c6d73344d1ac3ba0d0948bc106298876f8b5822c682400ea7e25a20cc1ea",
+          "com.docker.compose.oneoff": "False",
+          "com.docker.compose.project": "tcc-b-outbox",
+          "com.docker.compose.project.config_files": "/home/leojaime/tcc/tcc-postgresql/eixo-b-fila/outbox/compose.yaml",
+          "com.docker.compose.project.working_dir": "/home/leojaime/tcc/tcc-postgresql/eixo-b-fila/outbox",
+          "com.docker.compose.service": "relay",
+          "com.docker.compose.version": "5.6.1"
+        }
+      },
+      "NetworkSettings": {
+        "SandboxID": "500637f99b022686ac798511b2af9c314c4f8e4614d7ae7e269e96a50d1b45ed",
+        "SandboxKey": "/var/run/docker/netns/500637f99b02",
+        "Ports": {},
+        "Networks": {
+          "tcc-b-outbox_default": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": [
+              "tcc-b-outbox-relay-1",
+              "relay"
+            ],
+            "DriverOpts": null,
+            "GwPriority": 0,
+            "NetworkID": "f2e90e4d60e52b55762e904461331cd160188d0f6e6c636651fb2410ad4d1c63",
+            "EndpointID": "04d8d16e763392d60e0afd5a25bbd32c8481c7226522eca5de1f875056cc1af2",
+            "Gateway": "172.18.0.1",
+            "IPAddress": "172.18.0.4",
+            "MacAddress": "e2:3b:50:06:75:cc",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "DNSNames": [
+              "tcc-b-outbox-relay-1",
+              "relay",
+              "fd244ba1d568"
+            ]
+          }
+        }
+      },
+      "ImageManifestDescriptor": {
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "digest": "sha256:9047c6d73344d1ac3ba0d0948bc106298876f8b5822c682400ea7e25a20cc1ea",
+        "size": 2195,
+        "platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        }
+      }
+    }
+  ]
+}

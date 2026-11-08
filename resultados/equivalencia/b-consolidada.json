@@ -1,0 +1,50 @@
+{
+  "arquitetura": "consolidada",
+  "concluido_em": "2026-11-08T01:02:47-0300",
+  "produtores": 8,
+  "consumidores": 8,
+  "semente": 20261108,
+  "duracao_s": 60.0,
+  "eventos": [
+    {
+      "t_s": 0.0,
+      "evento": "8 produtores e 8 consumidores iniciados"
+    },
+    {
+      "t_s": 15.0,
+      "evento": "produtores derrubados (SIGKILL)"
+    },
+    {
+      "t_s": 17.0,
+      "evento": "produtores religados"
+    },
+    {
+      "t_s": 35.0,
+      "evento": "produtores derrubados (SIGKILL)"
+    },
+    {
+      "t_s": 37.0,
+      "evento": "produtores religados"
+    },
+    {
+      "t_s": 60.0,
+      "evento": "produtores encerrados (SIGTERM)"
+    },
+    {
+      "t_s": 68.0,
+      "evento": "fila vazia"
+    }
+  ],
+  "esvaziou": true,
+  "pedidos": 624065,
+  "consumidos": 624065,
+  "consumidos_distintos": 624065,
+  "perdidos": 0,
+  "orfaos": 0,
+  "duplicatas": 0,
+  "maximo_de_entregas": 1,
+  "exemplos_perdidos": [],
+  "exemplos_orfaos": [],
+  "criterio": "nenhum pedido perdido, nenhuma mensagem órfã, nenhuma duplicata",
+  "aprovado": true
+}

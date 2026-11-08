@@ -1,0 +1,13 @@
+{
+  "arquitetura": "outbox",
+  "esquema": "outbox/esquema.sql",
+  "esquema_sha256": "626c959c17f2ef7d4e7d4a30e871f5afb55648c290662a1f77a5d4ecd4828e66",
+  "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+  "rabbitmq": "4.4.0",
+  "fila": {
+    "nome": "tarefas",
+    "tipo": "quorum",
+    "duravel": true
+  },
+  "concluido_em": "2026-11-08T03:16:07+0000"
+}

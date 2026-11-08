@@ -1,0 +1,13 @@
+{
+  "arquitetura": "ingenua",
+  "esquema": "ingenua/esquema.sql",
+  "esquema_sha256": "d663c601006c3a85cd26c1cf5a495b9cfabb20b43b370a003243f50b4277bdf5",
+  "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+  "rabbitmq": "4.4.0",
+  "fila": {
+    "nome": "tarefas",
+    "tipo": "quorum",
+    "duravel": true
+  },
+  "concluido_em": "2026-11-08T03:16:04+0000"
+}

@@ -1,0 +1,24 @@
+# Janela de teste do Eixo A: uma execução curta de cada arquitetura, para validar o
+# caminho completo (restauração, repouso, coletores, serviço, gerador, manifesto).
+# Não entra na análise.
+nome = "teste-eixo-a"
+semente = 20261107
+espaco_livre_min_gib = 100
+
+[[configuracao]]
+eixo = "a"
+arquitetura = "consolidada"
+cenario = "calibracao"
+concorrencias = [8]
+repeticoes = 1
+aquecimento_s = 30
+medicao_s = 60
+
+[[configuracao]]
+eixo = "a"
+arquitetura = "poliglota"
+cenario = "calibracao"
+concorrencias = [8]
+repeticoes = 1
+aquecimento_s = 30
+medicao_s = 60
