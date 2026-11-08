@@ -1,0 +1,7 @@
+{
+  "arquitetura": "timescaledb",
+  "banco": "benchmark",
+  "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+  "timescaledb": "2.31.0",
+  "concluido_em": "2026-11-08T20:18:14+0000"
+}

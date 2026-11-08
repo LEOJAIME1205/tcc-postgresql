@@ -1,0 +1,6 @@
+{
+  "arquitetura": "influxdb",
+  "banco": "benchmark",
+  "influxdb": "1.13.1",
+  "concluido_em": "2026-11-08T20:18:16+0000"
+}

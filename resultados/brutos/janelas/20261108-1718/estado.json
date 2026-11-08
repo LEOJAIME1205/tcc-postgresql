@@ -1,0 +1,14 @@
+{
+  "janela": "20261108-1718",
+  "atualizado": "2026-11-08T17:43:37-0300",
+  "execucoes": [
+    {
+      "ordem": 1,
+      "execucao": "c_timescaledb_calibracao_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261108-171857_c_timescaledb_calibracao_c8_r01"
+      ]
+    }
+  ]
+}

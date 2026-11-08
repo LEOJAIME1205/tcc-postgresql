@@ -1,0 +1,29 @@
+{
+  "ferramenta": "tcc-gerador-temporal",
+  "versao": "1 (TSBS 8323e59c74027b108f4ad5ec5d3e498b0101a02e com pr255.patch (ADR-059), psycopg 3.3.6, Python 3.14.4)",
+  "aquecimento_inicio_ms": 1794171878235,
+  "medicao_inicio_ms": 1794171888235,
+  "medicao_fim_ms": 1794172085566,
+  "processo_fim_ms": 1794172763472,
+  "parametros": {
+    "arquitetura": "influxdb",
+    "trabalhadores": 8,
+    "lote": 10000,
+    "gzip": true,
+    "semente_execucao": 2731706718,
+    "semente_dados": 20261108,
+    "caso_de_uso": "cpu-only",
+    "escala": 4000,
+    "inicio": "2016-01-01T00:00:00Z",
+    "fim": "2016-01-04T00:00:00Z",
+    "consultas_por_tipo": 20,
+    "aquecimento_por_tipo": 5,
+    "aquecimento_s": 10,
+    "limite_carga_s": 3600
+  },
+  "fases_s": {
+    "pos_carga_s": 8.008,
+    "consultas_s": 669.896
+  },
+  "erro": null
+}

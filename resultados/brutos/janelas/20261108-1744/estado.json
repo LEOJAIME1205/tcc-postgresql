@@ -1,0 +1,14 @@
+{
+  "janela": "20261108-1744",
+  "atualizado": "2026-11-08T18:19:24-0300",
+  "execucoes": [
+    {
+      "ordem": 1,
+      "execucao": "c_influxdb_calibracao_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261108-174426_c_influxdb_calibracao_c8_r01"
+      ]
+    }
+  ]
+}
