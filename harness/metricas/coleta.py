@@ -5,6 +5,7 @@ tamanhos a cada 60 s, uma linha por métrica em metricas-<serviço>.csv, nos nú
 gerador. Uma leitura que falha é avisada no log e tentada de novo na volta seguinte.
 """
 
+import base64
 import csv
 import json
 import os
@@ -31,13 +32,17 @@ def avisar(mensagem: str) -> None:
     print(f"[{time.strftime('%H:%M:%S')}] {mensagem}", file=sys.stderr, flush=True)
 
 
-def ler_texto(url: str) -> str:
-    with urllib.request.urlopen(url, timeout=TEMPO_LIMITE_S) as resposta:
+def ler_texto(url: str, credencial: Optional[str] = None) -> str:
+    """Corpo da resposta; `credencial`, no formato usuário:senha, vai por autenticação básica."""
+    pedido = urllib.request.Request(url)
+    if credencial is not None:
+        pedido.add_header("Authorization", "Basic " + base64.b64encode(credencial.encode()).decode())
+    with urllib.request.urlopen(pedido, timeout=TEMPO_LIMITE_S) as resposta:
         return resposta.read().decode("utf-8")
 
 
-def ler_json(url: str) -> Any:
-    return json.loads(ler_texto(url))
+def ler_json(url: str, credencial: Optional[str] = None) -> Any:
+    return json.loads(ler_texto(url, credencial))
 
 
 def rodar(saida: str, base: str, estatisticas: Leitor, tamanhos: Leitor) -> None:

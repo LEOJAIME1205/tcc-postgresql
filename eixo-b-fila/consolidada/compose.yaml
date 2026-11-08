@@ -1,0 +1,36 @@
+# Fila consolidada do Eixo B: PostgreSQL com a tabela de tarefas (ADR-050, ADR-051 e ADR-055).
+services:
+  postgres:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: postgres
+    environment:
+      POSTGRES_DB: fila
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - shared_buffers=5120MB
+      - -c
+      - effective_cache_size=15360MB
+      - -c
+      - work_mem=4MB
+    volumes:
+      - ${TCC_DADOS_POSTGRES:?defina TCC_DADOS_POSTGRES}:/var/lib/postgresql
+
+  gerador:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: gerador
+    image: tcc-gerador-fila:1
+    environment:
+      TCC_ARQUITETURA: consolidada
+      TCC_ESPERA: consulta
+      TCC_INTERVALO_MS: "100"
+      PGHOST: postgres
+      PGUSER: postgres
+      PGPASSWORD: tcc
+      PGDATABASE: fila
+    volumes:
+      - ${TCC_SAIDA:?defina TCC_SAIDA}:/saida

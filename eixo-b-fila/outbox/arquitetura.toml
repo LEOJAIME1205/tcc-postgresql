@@ -1,0 +1,20 @@
+# Configuração com outbox do Eixo B: PostgreSQL, RabbitMQ, relay e gerador
+# (ADR-050, ADR-052 a ADR-054 e ADR-057).
+eixo = "b"
+arquitetura = "outbox"
+compose = "compose.yaml"
+servicos_sob_teste = ["postgres", "rabbitmq", "relay"]
+servico_gerador = "gerador"
+
+[dados]
+TCC_DADOS_POSTGRES = "postgres"
+TCC_DADOS_RABBITMQ = "rabbitmq"
+
+[[coletor]]
+tipo = "postgres"
+servico = "postgres"
+banco = "fila"
+
+[[coletor]]
+tipo = "rabbitmq"
+servico = "rabbitmq"

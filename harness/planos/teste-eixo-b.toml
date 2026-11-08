@@ -1,0 +1,24 @@
+# Janela de teste do Eixo B: valida o gerador, o relay e os coletores pelo orquestrador.
+# Sem valor de medição. A ingênua fica para o piloto (Etapa 2.5), para a janela caber em
+# menos de uma hora; o coletor do RabbitMQ e o gerador poliglota são validados na outbox.
+nome = "teste-eixo-b"
+semente = 20261108
+espaco_livre_min_gib = 100
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "consolidada"
+cenario = "calibracao"
+concorrencias = [8]
+repeticoes = 1
+aquecimento_s = 30
+medicao_s = 60
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "outbox"
+cenario = "calibracao"
+concorrencias = [8]
+repeticoes = 1
+aquecimento_s = 30
+medicao_s = 60

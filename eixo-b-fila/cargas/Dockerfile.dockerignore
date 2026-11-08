@@ -1,0 +1,9 @@
+# Contexto da imagem do gerador do Eixo B: só o lock, o gerador e os três esquemas.
+*
+!pyproject.toml
+!uv.lock
+!.python-version
+!eixo-b-fila/cargas/gerador.py
+!eixo-b-fila/consolidada/esquema.sql
+!eixo-b-fila/ingenua/esquema.sql
+!eixo-b-fila/outbox/esquema.sql

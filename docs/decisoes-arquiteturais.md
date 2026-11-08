@@ -840,6 +840,230 @@ As sugestões que a documentação do OpenSearch trata como experimento não sã
 
 ---
 
+## ADR-050 — Operação de negócio, mensagem e esquema do Eixo B
+
+**Contexto.** A proposta pede mensagens sintéticas com carga útil de tamanho controlado (seção 6.2), e a ADR-006 fixa as três configurações do Eixo B: consolidada, ingênua e *outbox*. Falta definir o que cada enfileiramento grava e o formato da mensagem, iguais nas três.
+
+**Decisão.**
+
+1. Operação de negócio: cada enfileiramento grava um pedido na tabela `pedidos` (identificador gerado pelo banco, cliente, valor e instante de criação) e enfileira uma tarefa que se refere a ele. Cliente e valor vêm de um gerador pseudoaleatório com a semente da execução.
+2. Mensagem: 16 bytes de cabeçalho, com o instante Unix em microssegundos e o relógio monotônico em nanossegundos do início do enfileiramento, seguidos de 1 KiB de carga útil, sorteada uma vez por execução pela semente. São os mesmos bytes nas três configurações. O identificador do pedido viaja ao lado da mensagem, na coluna `pedido` das tabelas e no `message_id` do RabbitMQ, e é a chave de idempotência (ADR-056).
+3. Enfileiramento em cada configuração:
+   - consolidada: um único comando SQL grava o pedido e a tarefa (`tarefas`), numa só transação;
+   - ingênua: o `INSERT` do pedido é confirmado, a mensagem é publicada no RabbitMQ em seguida, e o enfileiramento espera a confirmação do broker;
+   - *outbox*: o mesmo comando da consolidada, gravando na tabela de saída (`saida`) em vez de `tarefas`; o relay publica depois (ADR-053).
+4. Esquemas em `esquema.sql` na pasta de cada arquitetura, aplicados pelo `preparar`. `tarefas` e `saida` têm a mesma estrutura (identificador gerado pelo banco, pedido e mensagem), sem chave estrangeira para `pedidos`.
+
+**Justificativa.** O pedido torna real o problema da escrita dupla, que é o que distingue as três configurações. A carga útil fixa por execução não muda o custo: nenhum dos sistemas comprime valores desse tamanho nas configurações usadas (o PostgreSQL só comprime acima de cerca de 2 KB). O relógio monotônico do host é o mesmo em todos os processos e permite medir a latência fim a fim sem depender de ajustes do relógio Unix. O comando único é a forma mais direta de gravar as duas linhas numa transação com uma ida ao banco, e vale igualmente para a consolidada e para a *outbox*.
+
+**Efeito sobre a comparação.** Neutro entre a consolidada e a *outbox*, que gravam no PostgreSQL exatamente o mesmo: pedido e linha de 1 KiB. A ingênua faz uma ida ao banco e outra ao broker por enfileiramento, característica da própria arquitetura. A ausência de chave estrangeira vale para as duas tabelas.
+
+**Estado.** Aceita. Revisada em 08/11/2026: o comando de enfileiramento deixou de chamar `pg_notify` (revisão da ADR-051).
+
+---
+
+## ADR-051 — Retirada e espera na fila consolidada
+
+**Contexto.** A fila consolidada usa `SELECT ... FOR UPDATE SKIP LOCKED` (ADR-006). Falta definir o comando de retirada, a confirmação e o que o consumidor faz quando a fila está vazia.
+
+**Decisão.**
+
+1. Retirada: `DELETE FROM tarefas WHERE id = (SELECT id FROM tarefas ORDER BY id FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING pedido, mensagem`, em modo *autocommit*. Cada tarefa é uma transação, e o commit do `DELETE` é a confirmação. A ordem pelo identificador mantém a fila na ordem de chegada, como a fila do RabbitMQ.
+2. Consumo sem processamento além da retirada e da confirmação, para isolar o mecanismo de fila (QS2). O mesmo vale para o RabbitMQ (ADR-054).
+3. Espera por consulta periódica: um consumidor que encontra a fila vazia tenta de novo depois de 100 ms. O enfileiramento não avisa (`pg_notify`).
+4. O teto do aviso é medido uma vez na calibração, com o modo de espera por aviso do gerador (`TCC_ESPERA=aviso`), e reportado como achado. Nesse modo, o enfileiramento chama `pg_notify`, e uma conexão por processo escuta o canal e acorda um consumidor ocioso por aviso.
+
+**Justificativa.** A documentação do PostgreSQL apresenta o `SKIP LOCKED` como o meio de evitar contenção de bloqueio quando vários consumidores acessam uma tabela usada como fila. O `DELETE ... RETURNING` retira e confirma numa ida ao banco. O intervalo de 100 ms é o padrão de duas filas de referência sobre PostgreSQL: o PGMQ (`read_with_poll`, `poll_interval_ms` = 100) e o Solid Queue, a fila padrão do Rails (`polling_interval` de 0,1 s nos trabalhadores, também com `FOR UPDATE SKIP LOCKED`). O aviso foi descartado depois de medido (ver o estado).
+
+**Efeito sobre a comparação.**
+- A espera por consulta acrescenta até 100 ms à latência fim a fim das tarefas que chegam com a fila vazia, e cada consumidor ocioso faz até 10 consultas vazias por segundo. Desfavorece a consolidada em relação a um mecanismo de aviso sem custo, que o PostgreSQL não tem. A mesma regra vale para o relay da *outbox* (ADR-053).
+- O teto do aviso é uma limitação real do PostgreSQL como fila e entra no artigo como achado. A configuração medida é a que as filas de referência usam.
+- Com consumo vazio, a confirmação no próprio commit equivale à confirmação manual do RabbitMQ. Com um processamento real, o consumidor do PostgreSQL precisaria abrir a transação, processar e confirmar, uma ida ao banco a mais por tarefa, enquanto a confirmação do RabbitMQ é assíncrona e não espera resposta. Medir sem processamento favorece a consolidada em relação a esse cenário.
+
+**Estado.** Aceita. Revisada em 08/11/2026, com aprovação do Léo. A versão anterior acordava os consumidores por `pg_notify` no enfileiramento e `LISTEN` no gerador. Medido em 07/11/2026, num PostgreSQL de desenvolvimento com o esquema da *outbox*, comando de enfileiramento repetido por 8 s em cada nível:
+
+| Clientes | Com `pg_notify` | Sem `pg_notify` |
+|---|---|---|
+| 1 | 1.303/s | 1.659/s |
+| 4 | 1.811/s | 5.014/s |
+| 16 | 1.890/s | 19.315/s |
+| 32 | 1.737/s | 34.480/s |
+
+O commit que avisa toma um bloqueio global e espera o próprio `fsync` (cerca de 0,7 ms no P510, ver `ambiente/README.md`), sem dividir a gravação com os outros commits. Na consolidada completa, com 32 produtores e 32 consumidores, o aviso deu 1.734 tarefas/s, com o PostgreSQL em 0,3 núcleo; a consulta a cada 100 ms consumiu 13 mil tarefas/s, com o PostgreSQL saturado em 10,4 núcleos. A latência fim a fim com 4 clientes foi de 2,9 ms com aviso e de 3,3 ms com consulta.
+
+---
+
+## ADR-052 — RabbitMQ no Eixo B
+
+**Contexto.** As configurações ingênua e *outbox* usam o RabbitMQ como broker. A ADR-010 manda seguir as recomendações do mantenedor, e a ADR-011, fixar a imagem por digest. A garantia do lado do broker precisa equivaler ao commit do PostgreSQL: mensagem confirmada é mensagem em disco.
+
+**Decisão.**
+
+1. Versão 4.4.0, publicada em 19/10/2026, a primeira da série 4.4 e a última com pelo menos duas semanas de publicação em 07/11/2026, mesma regra da ADR-036. Imagem oficial com o plugin de gerenciamento, fixada por digest. Nó único, com nome de máquina fixo (`rabbitmq`). Usuário padrão da imagem (`guest`, que a própria imagem libera na rede), só na rede interna (ADR-026).
+2. Uma fila `tarefas`, do tipo quorum, durável, declarada no preparo. Mensagens persistentes.
+3. Publicação com confirmação (*publisher confirms*): cada enfileiramento espera a confirmação do broker.
+4. Consumo com confirmação manual, uma por mensagem, e *prefetch* de 100 por consumidor.
+5. Conexões separadas para publicação e consumo, uma de cada por processo, com um canal por produtor ou consumidor.
+6. Limite de memória absoluto (`vm_memory_high_watermark.absolute`) em 60% do limite do container: 4915 MiB na ingênua (8 GiB) e 4300 MiB na *outbox* (7 GiB).
+7. Demais parâmetros no padrão. Sem telemetria: conferido em 07/11/2026, nenhuma conexão de saída do container.
+
+**Justificativa.**
+- A documentação das filas quorum recomenda confirmação do publicador e confirmação manual do consumidor, e diz que a fila grava tudo em disco antes de agir. A confirmação só sai depois disso, como o commit do PostgreSQL só retorna depois do WAL em disco.
+- A faixa de *prefetch* de 100 a 300 é a que a documentação de confirmações indica como a de melhor vazão. O checklist de produção pede conexões separadas para publicação e consumo.
+- O nome de máquina fixo é necessário porque o nome do nó e o diretório de dados dependem dele. Sem isso, a restauração da ADR-029 não acharia os dados.
+- O limite absoluto segue a documentação de memória, que o recomenda em containers porque o RabbitMQ nem sempre detecta o limite do cgroup. Conferido em 07/11/2026: o 4.4.0 calculou o limite relativo padrão (0,6) sobre a memória da máquina, 19,3 GB, ignorando o limite de 8 GiB do container, e seria encerrado pelo kernel antes de acionar o próprio alarme. Os 60% preservam a proporção do padrão.
+
+**Efeito sobre a comparação.**
+- A fila quorum foi feita para replicação, e a documentação avisa que, com menos de três nós, ela não dá todas as suas garantias. A replicação está fora do escopo (proposta, seção 4.4). Num nó único resta a gravação em disco antes da confirmação, que é a garantia equivalente ao commit.
+- Uma fila clássica durável, com mensagens persistentes, também confirmaria depois de gravar em disco e pode ser mais rápida num nó único. Se for, a escolha desfavorece as configurações com RabbitMQ. A alternativa fica declarada e não medida.
+- O limite de memória corrige um defeito de detecção que prejudicaria o RabbitMQ. Os demais itens são neutros.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-053 — Relay da *outbox*
+
+**Contexto.** Na *outbox*, um processo relay lê a tabela de saída e publica no RabbitMQ (ADR-006). O passo 2.3.3 pede tratamento de reentrega, e o README do eixo pede a vazão do relay medida isoladamente, porque ele pode virar o gargalo.
+
+**Decisão.**
+
+1. Processo Python com asyncio, `psycopg` e `aio-pika` (os mesmos do gerador, ADR-054), num container próprio dentro do sistema sob teste, com 1 GiB (ADR-055). Imagem própria, só com o relay.
+2. Cada trabalhador repete, numa transação:
+   - `DELETE FROM saida WHERE id = ANY(ARRAY(SELECT id FROM saida ORDER BY id LIMIT 100 FOR UPDATE SKIP LOCKED)) RETURNING ...`;
+   - publicação das linhas retiradas, na ordem do identificador, com confirmação do broker;
+   - commit.
+
+   Se a publicação falhar, a transação é desfeita e as linhas voltam à tabela.
+3. Dois trabalhadores, cada um com a sua conexão ao PostgreSQL e o seu canal no RabbitMQ. Um trabalhador que encontra a tabela vazia tenta de novo depois de 100 ms, a mesma regra dos consumidores da consolidada (ADR-051).
+4. Reentrega: um relay que cai depois de publicar e antes do commit publica de novo as mesmas linhas quando volta. A entrega é pelo menos uma vez, e o identificador do pedido no `message_id` permite reconhecer a repetição (ADR-056).
+5. Vazão isolada, medida antes da calibração com `eixo-b-fila/cargas/relay_isolado.py`:
+   - a tabela de saída recebe 1 milhão de linhas com o relay parado;
+   - o relay é ligado com os consumidores ativos;
+   - a vazão é o número de linhas dividido pelo tempo até a tabela e a fila esvaziarem.
+
+   Se a vazão da *outbox* na calibração chegar perto da vazão isolada, o relay é o gargalo, e o número de trabalhadores sobe por revisão desta ADR.
+
+**Justificativa.** É o relay por consulta periódica descrito na literatura do padrão (Richardson, 2018), com `SKIP LOCKED` para permitir mais de um trabalhador. O commit depois da confirmação garante que nenhuma linha some sem ter sido publicada. Lotes de 100 linhas dividem o custo do commit e da confirmação. A alternativa seria a captura pelo log de transações, como faz o Debezium, ao custo de mais um sistema na arquitetura.
+
+**Efeito sobre a comparação.** O relay é uma peça a mais que só a *outbox* tem, e o seu custo de CPU e memória é um custo real dela. O lote e os dois trabalhadores são escolha do autor, não recomendação de um mantenedor. É a medida da vazão isolada que impede o relay de distorcer a comparação. A espera de até 100 ms com a tabela vazia soma-se à latência fim a fim da *outbox*.
+
+**Estado.** Aceita. Revisada em 08/11/2026, junto com a ADR-051: a espera por aviso (`LISTEN`, com `pg_notify` no enfileiramento) foi trocada pela consulta a cada 100 ms. O modo por aviso continua disponível no relay (`TCC_ESPERA=aviso`) para a medida do teto na calibração. Primeira medida, sem valor de calibração (07/11/2026, banco recém-preparado, 32 produtores e 32 consumidores): o relay publicou cerca de 15,6 mil mensagens/s, sempre em lotes cheios, com as conexões esperando a confirmação do RabbitMQ, enquanto os produtores gravavam 24,6 mil linhas/s; nesse nível, o relay é o gargalo.
+
+---
+
+## ADR-054 — Gerador e modelo de carga do Eixo B
+
+**Contexto.** O contrato do gerador (`harness/README.md`) vale para os três eixos, e o catálogo de operações do Eixo B já define `enfileira`, `consome` e `fim_a_fim`. A pergunta QS2 pede a vazão sustentável e a latência fim a fim.
+
+**Decisão.**
+
+1. Ferramenta: gerador próprio em Python, como o do Eixo A (ADR-048), com asyncio sobre `uvloop`, `psycopg` 3.3.6 e `aio-pika` 10.1.1, no ambiente travado da ADR-031. Até 2 processos, um por núcleo físico do gerador, com produtores e consumidores divididos entre eles.
+2. Modelo de carga: o nível de concorrência N corresponde a N produtores e N consumidores, todos em laço fechado e sem pausa. Cada produtor e cada consumidor tem a sua conexão ao PostgreSQL ou o seu canal no RabbitMQ (ADR-052).
+3. Níveis: 1, 2, 4, 8, 16 e 32, iguais nas três arquiteturas, confirmados na calibração. Com 32, a consolidada usa 64 conexões, dentro do `max_connections` padrão (100) com o coletor e o relay. Ampliar a faixa vira ADR.
+4. Operações gravadas no `operacoes.csv`:
+   - `enfileira`: do início ao commit, e, na ingênua, até a confirmação do broker;
+   - `consome`: no PostgreSQL, o `DELETE` com o commit; no RabbitMQ, da entrega da mensagem ao gerador até o envio da confirmação;
+   - `fim_a_fim`: do início do enfileiramento ao fim do consumo, com `ts_us` igual ao instante do enfileiramento e a latência pelo relógio monotônico que viaja na mensagem (ADR-050).
+
+   As retiradas que encontram a fila vazia não são operações e vão contadas no `gerador.json`.
+5. Vazão sustentável: a maior vazão de consumo em que a fila não cresce durante a medição. A profundidade vem da diferença acumulada entre enfileiramentos e consumos do `operacoes.csv`, conferida pelas métricas dos sistemas (tuplas vivas de `tarefas` e de `saida`, mensagens prontas e pendentes no RabbitMQ).
+6. Durações e erros como no Eixo A: 120 s de aquecimento e 300 s de medição, confirmados na calibração. O gerador espera os sistemas aceitarem conexões antes de começar. Cada operação tem tempo limite de 60 s. Os erros são gravados com `ok` = 0 e seguidos de uma pausa de 0,1 s.
+7. Cada processo grava as operações em disco durante a execução, e o `operacoes.csv` é ordenado ao fim, porque o volume do eixo e o teste de longa duração não cabem em memória.
+8. Imagem `tcc-gerador-fila:1`, com o gerador e os três esquemas. O `preparar` aplica o esquema da arquitetura e, nas poliglotas, declara a fila.
+
+**Justificativa.** O mesmo gerador nas três arquiteturas, com a mesma semente (ADR-032), manda a mesma sequência de pedidos e a mesma carga útil. Produtores e consumidores em igual número correspondem a um serviço que produz e consome tarefas na mesma escala. A profundidade calculada das operações vale igualmente para as três arquiteturas, inclusive para a *outbox*, em que a fila é a soma da tabela de saída e da fila do broker. O limite de 32 respeita o padrão do PostgreSQL sem ADR de desvio.
+
+**Efeito sobre a comparação.**
+- Neutro quanto ao gerador e à sequência de operações.
+- A latência de `consome` mede coisas diferentes nos dois mecanismos. No PostgreSQL, o consumidor busca cada tarefa numa ida ao banco. No RabbitMQ, o broker empurra até 100 mensagens por consumidor antes da confirmação. Por isso `consome` não é comparada entre arquiteturas, e a comparação usa a vazão e a latência fim a fim.
+- O laço fechado tem a limitação já declarada na ADR-048.
+- A latência fim a fim inclui a de `enfileira`, igualmente nas três.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-055 — Divisão da memória e configuração dos sistemas no Eixo B
+
+**Contexto.** A ADR-025 fixa 20 GiB para o sistema sob teste em cada arquitetura. A consolidada concentra o orçamento no PostgreSQL; as poliglotas o dividem. A ADR-010 proíbe tuning além das recomendações dos mantenedores.
+
+**Decisão.**
+
+1. Divisão:
+   - consolidada: PostgreSQL com 20 GiB;
+   - ingênua: PostgreSQL com 12 GiB e RabbitMQ com 8 GiB;
+   - *outbox*: PostgreSQL com 12 GiB, RabbitMQ com 7 GiB e relay com 1 GiB.
+2. PostgreSQL:
+   - pela regra da ADR-042, `shared_buffers` em 25% da memória do container e `effective_cache_size` no restante: 5120 MB e 15360 MB na consolidada, 3072 MB e 9216 MB nas poliglotas;
+   - `work_mem` de 4 MB (o padrão, declarado);
+   - `pg_stat_statements` carregado (ADR-021), `/dev/shm` de 1 GiB (ADR-028);
+   - todo o resto no padrão, inclusive `synchronous_commit`, `max_wal_size`, `max_connections` e o autovacuum.
+3. RabbitMQ: padrão, com o limite de memória da ADR-052.
+4. Ajustes guiados pelos próprios sistemas, na calibração. Um aviso do sistema muda a configuração por revisão desta ADR, antes das execuções curtas, em todas as arquiteturas que usam aquele sistema:
+   - no PostgreSQL, "checkpoints are occurring too frequently": o `max_wal_size` sobe até o aviso parar;
+   - no RabbitMQ, alarme de memória ou de disco.
+5. A divisão é conferida no piloto, pela memória própria de cada container sob carga, como na ADR-037.
+
+**Justificativa.** O PostgreSQL da consolidada faz o trabalho dos dois sistemas e recebe o orçamento inteiro. Nas poliglotas, o PostgreSQL guarda só os pedidos e, na *outbox*, a tabela de saída. O RabbitMQ recebe a maior fatia que ainda deixa ao PostgreSQL o bastante para o cache de dados. O `shared_buffers` em 25% é o valor inicial indicado pela documentação do PostgreSQL, já usado no Eixo A. Ajustar só pelo aviso do próprio sistema mantém a regra da ADR-010 e não depende da familiaridade do autor com cada um.
+
+**Efeito sobre a comparação.**
+- Neutro por construção (ADR-003).
+- O PostgreSQL da consolidada tem mais memória que o das poliglotas. O efeito deve ser pequeno, porque os dados quentes de uma fila são poucos, e a análise usa a memória medida de cada container.
+- Os ajustes guiados por aviso valem para todas as arquiteturas que usam o sistema avisado.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-056 — Verificação de equivalência do Eixo B
+
+**Contexto.** O README do eixo e o passo 2.3.4 exigem um teste que derrube o relay no meio da carga e confirme que nenhuma mensagem se perde nas configurações com garantia. Sem ele, a equivalência entre a consolidada e a *outbox* seria só alegação.
+
+**Decisão.**
+
+1. Script `eixo-b-fila/cargas/equivalencia.py`, no host, com a arquitetura no ar e recém-preparada. Produtores e consumidores rodam em processos próprios.
+2. Carga com 8 produtores e 8 consumidores por 60 s. Falhas provocadas com `SIGKILL`:
+   - nos produtores, aos 15 s e aos 35 s, nas três configurações, com reinício 2 s depois;
+   - na *outbox*, também no container do relay, aos 25 s, religado 5 s depois.
+3. Depois da carga, o script espera a fila esvaziar: tabela de tarefas ou de saída vazia e fila do RabbitMQ sem mensagens prontas nem pendentes. Então compara os pedidos gravados (tabela `pedidos`, a fonte da verdade) com os identificadores que os consumidores registraram.
+4. Critério:
+   - na consolidada e na *outbox*, nenhum pedido sem mensagem consumida e nenhuma mensagem de pedido inexistente;
+   - duplicatas contadas: zero esperado na consolidada; possíveis na *outbox*, que entrega pelo menos uma vez;
+   - na ingênua, perdas esperadas, e o teste registra quantas, para demonstrar a escrita dupla.
+5. Idempotência no consumidor (passo 2.3.3): a chave é o identificador do pedido (`message_id`). Como o consumo não tem efeito (ADR-051), a idempotência se reduz a reconhecer a repetição, o que o verificador faz.
+6. Registro em `resultados/equivalencia/b-<arquitetura>.json`.
+
+**Justificativa.** Matar os produtores enquanto esperam o banco reproduz o caso da escrita dupla: o PostgreSQL confirma o pedido, mas a publicação não acontece. Na consolidada e na *outbox*, o pedido e a tarefa (ou a linha de saída) entram juntos. Matar o relay entre a publicação e o commit reproduz o caso da reentrega. A tabela de pedidos como referência não depende de nenhum registro do próprio gerador.
+
+**Efeito sobre a comparação.**
+- Nenhum sobre as medições, que não usam o script.
+- Os consumidores não são derrubados, porque a equivalência em questão é a da gravação com o enfileiramento.
+- Numa aplicação real, o consumidor da *outbox* precisaria guardar de forma durável os identificadores já processados para descartar as repetições. Na consolidada, isso não é necessário, porque a retirada e o processamento podem estar na mesma transação. Esse custo não é medido, e a omissão favorece a *outbox*.
+
+**Estado.** Aceita.
+
+---
+
+## ADR-057 — Coletor interno do RabbitMQ
+
+**Contexto.** A ADR-021 manda coletar as estatísticas internas de todos os sistemas com a mesma frequência, e o `harness/README.md` prevê o prefixo `rmq_`, lido pela API de gerenciamento, com a profundidade de cada fila.
+
+**Decisão.** Coletor nos núcleos do gerador, com a cadência dos outros:
+
+1. A cada 10 s, pela API de gerenciamento:
+   - por fila: mensagens prontas e pendentes de confirmação, bytes das mensagens, memória do processo da fila, e publicações, entregas, confirmações e reentregas acumuladas;
+   - do nó: memória usada e alarmes de memória e de disco.
+2. A cada 60 s, o tamanho do diretório de dados (`du` dentro do container), para comparar o espaço em disco da fila quorum com o das tabelas no PostgreSQL.
+
+**Justificativa.** Cobre o que o coletor do PostgreSQL cobre: a atividade da fila, a profundidade, a memória e o espaço em disco. A documentação avisa que filas quorum podem ocupar muito espaço em disco, e o teste de longa duração precisa desse dado para comparar com a inflação das tabelas. O RabbitMQ atualiza as estatísticas da API a cada 5 s, abaixo do intervalo da coleta.
+
+**Efeito sobre a comparação.** Neutro, pela regra da ADR-021. O `du` roda dentro do container do RabbitMQ, como as consultas de tamanho rodam dentro do PostgreSQL. O custo da coleta é medido no piloto.
+
+**Estado.** Aceita. Testada na janela `teste-eixo-b` em 08/11/2026: todas as métricas gravadas, limite de memória lido em 4300 MiB, como configurado. O RabbitMQ 4.4.0 avisa no log que a coleta de métricas da API de gerenciamento (`management_metrics_collection`) está obsoleta, mas ainda é permitida por padrão. Se uma versão futura a desligar, o coletor passa ao endpoint Prometheus, que a imagem já traz ligado.
+
+---
+
 ## Registro de alterações
 
 | Data | Alteração |
@@ -864,4 +1088,5 @@ As sugestões que a documentação do OpenSearch trata como experimento não sã
 | 03/11/2026 | ADR-046: serviço de busca do Eixo A. ADR-037: divisão definida (10 GiB OpenSearch, 9 GiB Qdrant, 1 GiB serviço). ADR-042 revisada: PostgreSQL com 19 GiB, `shared_buffers` 4864 MB e `effective_cache_size` 14592 MB |
 | 03/11/2026 | ADR-047: consultas do serviço ao PostgreSQL sem comandos preparados |
 | 07/11/2026 | ADR-048: gerador de carga do Eixo A. ADR-049: coletores internos do OpenSearch e do Qdrant. ADR-032 revisada: semente da execução sem a arquitetura |
-
+| 07/11/2026 | ADR-050 a ADR-057: operação, mensagem e esquema do Eixo B; retirada e aviso na fila consolidada; RabbitMQ; relay da *outbox*; gerador e modelo de carga; divisão da memória e configuração; verificação de equivalência; coletor do RabbitMQ |
+| 08/11/2026 | ADR-051 e ADR-053 revisadas: espera por consulta a cada 100 ms no lugar do `pg_notify`, depois de medido o teto do aviso; ADR-050 ajustada |

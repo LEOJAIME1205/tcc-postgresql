@@ -1,0 +1,51 @@
+# Configuração ingênua do Eixo B: pedidos no PostgreSQL e publicação direta no RabbitMQ
+# (ADR-050, ADR-052 e ADR-055). Referência de teto de desempenho, sem garantia contra a escrita dupla.
+services:
+  postgres:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: postgres
+    mem_limit: 12g
+    memswap_limit: 12g
+    environment:
+      POSTGRES_DB: fila
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - shared_buffers=3072MB
+      - -c
+      - effective_cache_size=9216MB
+      - -c
+      - work_mem=4MB
+    volumes:
+      - ${TCC_DADOS_POSTGRES:?defina TCC_DADOS_POSTGRES}:/var/lib/postgresql
+
+  rabbitmq:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: sistema-sob-teste
+    image: rabbitmq:4.4.0-management@sha256:af6f50d38098d8bd52fef7f3fa85015dd8b2bf6def58e995bf584ae9ba0f6407
+    hostname: rabbitmq
+    mem_limit: 8g
+    memswap_limit: 8g
+    stop_grace_period: 2m
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/conf.d/20-tcc.conf:ro
+      - ${TCC_DADOS_RABBITMQ:?defina TCC_DADOS_RABBITMQ}:/var/lib/rabbitmq
+
+  gerador:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: gerador
+    image: tcc-gerador-fila:1
+    environment:
+      TCC_ARQUITETURA: ingenua
+      TCC_RABBITMQ: amqp://guest:guest@rabbitmq:5672/
+      PGHOST: postgres
+      PGUSER: postgres
+      PGPASSWORD: tcc
+      PGDATABASE: fila
+    volumes:
+      - ${TCC_SAIDA:?defina TCC_SAIDA}:/saida

@@ -1,0 +1,6 @@
+# Contexto da imagem do relay: só o lock e o relay.
+*
+!pyproject.toml
+!uv.lock
+!.python-version
+!eixo-b-fila/outbox/relay.py

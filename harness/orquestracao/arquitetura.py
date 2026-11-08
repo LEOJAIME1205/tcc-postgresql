@@ -14,7 +14,7 @@ PASTAS_EIXO: Dict[str, str] = {
     "c": "eixo-c-temporal",
     "t": "harness/teste",
 }
-TIPOS_COLETOR: Set[str] = {"postgres", "opensearch", "qdrant"}
+TIPOS_COLETOR: Set[str] = {"postgres", "opensearch", "qdrant", "rabbitmq"}
 CHAVES_DESCRITOR: Set[str] = {
     "eixo", "arquitetura", "compose", "servicos_sob_teste",
     "servico_gerador", "dados", "coletor",

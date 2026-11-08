@@ -268,7 +268,7 @@ Todas as imagens fixadas por digest. Ver ADR-011.
 | TimescaleDB | 2.31.0 Community (`2.31.0~debian13-1806`), licença `timescale` | na imagem `tcc-postgres` |
 | OpenSearch | 3.8.0 | `opensearchproject/opensearch:3.8.0@sha256:fafe3fc3587088674669235575aa166228c48bdb940294a8cdbbc1da75236a40` |
 | Qdrant | 1.19.2 | `qdrant/qdrant:v1.19.2@sha256:b7b0444c4c351c970b98e90a6f89c2ee4287c65b44e52b4cb503fa5b2aa927ad` |
-| RabbitMQ | a registrar | a registrar |
+| RabbitMQ | 4.4.0 (Erlang/OTP 29), imagem com o plugin de gerenciamento | `rabbitmq:4.4.0-management@sha256:af6f50d38098d8bd52fef7f3fa85015dd8b2bf6def58e995bf584ae9ba0f6407` |
 | InfluxDB | a registrar | a registrar |
 
 ### Imagem do PostgreSQL usada nos três eixos
@@ -305,6 +305,23 @@ em 03/11/2026.
 Verificação: só os quatro arquivos do serviço em `/app` (o teste de contrato fica
 fora do contexto), sem o torch, executando como o usuário 1000; teste de contrato
 aprovado nas duas arquiteturas em 07/11/2026 (`resultados/contrato/`).
+
+### Imagens do Eixo B
+
+Construídas em 08/11/2026 a partir da raiz do repositório, com a mesma base e o
+mesmo `uv` da imagem do serviço de busca, e o lock com o `aio-pika` 10.1.1 (102
+pacotes). Usadas na janela de teste `teste-eixo-b`.
+
+| Item | Gerador (ADR-054) | Relay da outbox (ADR-053) |
+|---|---|---|
+| Dockerfile | `eixo-b-fila/cargas/Dockerfile` | `eixo-b-fila/outbox/Dockerfile` |
+| Tag local | `tcc-gerador-fila:1` | `tcc-relay:1` |
+| ID da imagem | `sha256:91aca4dfc4f74dbc84e7796b8069394e271adf2190b64ab3a3d4be8c8ca3c3d9` | `sha256:69903774f532132a4dedca8c0cb97573fde9f969f4b0752bfcfff968dff581ec` |
+| Conteúdo em `/app` | `gerador.py` e os três `esquema.sql` | `relay.py`, executado como o usuário 1000 |
+
+As imagens do Eixo A foram construídas com o lock anterior, sem o `aio-pika`.
+Reconstruí-las a partir do lock atual acrescenta os três pacotes do cliente do
+RabbitMQ, que o código do Eixo A não importa.
 
 O ID de uma imagem construída localmente muda a cada reconstrução, mesmo com as
 mesmas versões, porque inclui datas de criação. A referência do que foi medido é

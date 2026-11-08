@@ -22,7 +22,7 @@ from harness.orquestracao.compose import Compose
 from harness.orquestracao.plano import Execucao, Plano
 
 SENHA_POSTGRES: str = "tcc"
-PORTAS_HTTP: Dict[str, int] = {"opensearch": 9200, "qdrant": 6333}
+PORTAS_HTTP: Dict[str, int] = {"opensearch": 9200, "qdrant": 6333, "rabbitmq": 15672}
 Processo = subprocess.Popen[bytes]
 
 
@@ -118,6 +118,8 @@ def _iniciar_coletores_internos(arq: Arquitetura, cenario: str, pasta: str,
             if not _esperar_http(url):
                 return f"{coletor.servico} não respondeu em 120 s"
             argumentos = [f"harness/metricas/{coletor.tipo}.py", saida, "--url", url]
+            if coletor.tipo == "rabbitmq":
+                argumentos += ["--container", container]  # tamanho dos dados por du (ADR-057)
         processos.append(_iniciar_coletor(
             argumentos, os.path.join(pasta, "ferramenta", f"coletor-{coletor.servico}.log")))
     return None

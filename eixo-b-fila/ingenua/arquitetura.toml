@@ -1,0 +1,19 @@
+# Configuração ingênua do Eixo B: PostgreSQL, RabbitMQ e gerador (ADR-050, ADR-052, ADR-054 e ADR-057).
+eixo = "b"
+arquitetura = "ingenua"
+compose = "compose.yaml"
+servicos_sob_teste = ["postgres", "rabbitmq"]
+servico_gerador = "gerador"
+
+[dados]
+TCC_DADOS_POSTGRES = "postgres"
+TCC_DADOS_RABBITMQ = "rabbitmq"
+
+[[coletor]]
+tipo = "postgres"
+servico = "postgres"
+banco = "fila"
+
+[[coletor]]
+tipo = "rabbitmq"
+servico = "rabbitmq"

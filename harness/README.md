@@ -205,9 +205,9 @@ primeira linha, sem separador de milhar. Valor ausente é campo vazio, booleano
 | Eixo | `operacao` | O que mede |
 |---|---|---|
 | A | `busca_hibrida` | Consulta híbrida completa, da requisição à lista fundida |
-| B | `enfileira` | Gravação do dado de negócio e enfileiramento, até a confirmação |
-| B | `consome` | Retirada, processamento e confirmação de uma tarefa |
-| B | `fim_a_fim` | Do enfileiramento ao fim do consumo. `ts_us` é o instante do enfileiramento, que viaja na carga útil da mensagem |
+| B | `enfileira` | Gravação do dado de negócio e enfileiramento, até a confirmação (o commit; na ingênua, também a confirmação do broker) |
+| B | `consome` | Retirada e confirmação de uma tarefa: no PostgreSQL, o `DELETE` com o commit; no RabbitMQ, da entrega ao gerador até o envio da confirmação. Não é comparada entre arquiteturas (ADR-054) |
+| B | `fim_a_fim` | Do enfileiramento ao fim do consumo. `ts_us` é o instante do enfileiramento e a latência vem do relógio monotônico do host, os dois na carga útil da mensagem (ADR-050) |
 | T | `transacao_pgbench` | Uma transação do script padrão do `pgbench`, só na arquitetura de teste. Em transações que falham, o `pgbench` não informa a latência: `latencia_us` fica vazio e `ts_us` é o instante do fim |
 
 O Eixo C não grava `operacoes.csv`, porque o TSBS não registra operações
@@ -315,6 +315,21 @@ Qdrant (`harness/metricas/qdrant.py`, ADR-049):
 | `qd_memoria_alocada_bytes`, `qd_memoria_residente_bytes` | | `/metrics`, `memory_allocated_bytes` e `memory_resident_bytes` |
 | `qd_pontos`, `qd_vetores_indexados`, `qd_segmentos` (60 s) | coleção | API de coleções, `points_count`, `indexed_vectors_count`, `segments_count` |
 
+RabbitMQ (`harness/metricas/rabbitmq.py`, ADR-057), pela API de gerenciamento
+com o usuário padrão da imagem (ADR-052):
+
+| Métrica | Rótulo | Fonte |
+|---|---|---|
+| `rmq_mensagens_prontas`, `rmq_mensagens_pendentes` | fila | `/api/queues`, `messages_ready` e `messages_unacknowledged` |
+| `rmq_mensagens_bytes`, `rmq_fila_memoria_bytes` | fila | `/api/queues`, `message_bytes` e `memory` |
+| `rmq_publicadas_total`, `rmq_entregues_total`, `rmq_confirmadas_total`, `rmq_reentregues_total` | fila | `/api/queues`, `message_stats` (`publish`, `deliver_get`, `ack`, `redeliver`) |
+| `rmq_memoria_bytes`, `rmq_limite_memoria_bytes` | | `/api/nodes`, `mem_used` e `mem_limit` |
+| `rmq_alarme_memoria`, `rmq_alarme_disco` | | `/api/nodes`, `mem_alarm` e `disk_free_alarm` (0 ou 1) |
+| `rmq_dados_bytes` (60 s) | | `du -sb /var/lib/rabbitmq` dentro do container |
+
+O RabbitMQ atualiza as estatísticas da API a cada 5 s; os contadores de uma
+fila aparecem como 0 até a primeira operação de cada tipo.
+
 **Gerador:** `tsbs_metricas_total` e `tsbs_linhas_total`, no Eixo C. Ver
 "Eixo C: adaptação do TSBS".
 
@@ -416,6 +431,8 @@ Cada variável dependente da proposta (seção 6.2) e de onde ela sai:
 | Latência p50, p95 e p99 | `operacoes.csv`, operações com `ts_us` dentro da medição; consultas do Eixo C em `resumo.json`, com percentis do TSBS |
 | Vazão | `operacoes.csv`, operações `ok` divididas pela duração da medição; no Eixo C, diferença de `tsbs_metricas_total` |
 | Latência fim a fim | `operacoes.csv`, `operacao = fim_a_fim` |
+| Vazão sustentável da fila (Eixo B) | `operacoes.csv`: maior vazão de `consome` em que a profundidade, `enfileira` menos `consome` acumulados, não cresce na medição; conferida por `pg_tuplas_vivas` de `tarefas` e `saida` e por `rmq_mensagens_prontas` e `rmq_mensagens_pendentes` (ADR-054) |
+| Espaço em disco da fila quorum | `rmq_dados_bytes`, comparado com `pg_tabela_bytes` e `pg_indices_bytes` |
 | Taxa de ingestão sustentável | `tsbs_metricas_total` por intervalo, nas execuções de calibração |
 | recall@10 e nDCG@10 | `ferramenta/ranking.trec` e julgamentos de relevância |
 | WAL por operação lógica | Diferença de `pg_wal_bytes_total` dividida pelas operações `ok` |
@@ -530,10 +547,12 @@ servico = "postgres"
 banco = "fila"
 ```
 
-Cada `[[coletor]]` tem um `tipo` (`postgres`, `opensearch` ou `qdrant`) e o
-`servico` onde o sistema roda, que precisa estar entre os serviços sob teste. O
-`banco` vale só para o tipo `postgres`. Os coletores HTTP leem o sistema pela
-porta padrão (9200 no OpenSearch, 6333 no Qdrant).
+Cada `[[coletor]]` tem um `tipo` (`postgres`, `opensearch`, `qdrant` ou
+`rabbitmq`) e o `servico` onde o sistema roda, que precisa estar entre os
+serviços sob teste. O `banco` vale só para o tipo `postgres`. Os coletores HTTP
+leem o sistema pela porta padrão: 9200 no OpenSearch, 6333 no Qdrant e 15672 na
+API de gerenciamento do RabbitMQ, com o usuário padrão da imagem. O coletor do
+RabbitMQ recebe também o nome do container, para medir o diretório de dados.
 
 Os diretórios de dados ficam em `~/tcc-dados/<eixo>/<arquitetura>/<subdiretório>/`,
 com `inicial/` e `atual/` (ADR-029). A variável de ambiente aponta para `atual/`
