@@ -324,7 +324,7 @@ montagem, impossíveis sob virtualização.
 
 **Efeito sobre a comparação.** Desfavorece o PostgreSQL em pequena medida: ele recebe duas sondas sem equivalente do outro lado, o `pgstattuple_approx` no teste de longa duração e o custo contínuo do `pg_stat_statements`. No Eixo B, as três configurações gravam o dado de negócio no PostgreSQL, então essas sondas valem para todas elas. O custo total é medido no piloto e reportado.
 
-**Estado.** Aceita.
+**Estado.** Aceita. O item 6 é executado como define a ADR-066 (08/11/2026): sem coleta interna, o `pg_stat_statements` continua carregado, mas sem rastrear. Executado na janela `20261108-2233` (fila consolidada do Eixo B, c = 8, 3 execuções com coleta e 3 sem): nenhuma diferença de vazão, latência ou CPU superou a variação entre repetições. A maior diferença foi de 0,88 desvio padrão, no p95 do consumo. A vazão de enfileiramento diferiu em −0,06% e a CPU do PostgreSQL em −0,6%. Os intervalos ficam como estão. Análise em `harness/analise/custo_coleta.py`; tabelas em `resultados/processados/custo-coleta-20261108-2233-*.csv`.
 
 ---
 
@@ -429,7 +429,11 @@ A ferramenta não recomendou `max_wal_size` nem mudou os parâmetros do *backgro
 
 **Efeito sobre a comparação.** Neutro entre as arquiteturas de cada eixo, por construção. Registra-se que a poliglota divide o orçamento (ADR-003). O valor define o regime medido junto com o tamanho dos dados: dados menores que 20 GiB colocam o sistema em regime de memória. A relação entre dados e memória é decidida na etapa de cada eixo. Na estimativa de custo em nuvem, 20 GiB não corresponde a um tamanho comum de instância, e a equivalência adotada é declarada no artigo.
 
-**Estado.** Aceita.
+**Estado.** Aceita. Item 5 revisto com o piloto e o custo da coleta (09/11/2026, 13 execuções com 8 clientes). Nenhum container teve OOM.
+- **Memória própria (anônima):** no aquecimento e na medição dos Eixos A e B, e na carga do Eixo C, o gerador usou de 0,11 a 0,28 GiB. Os maiores valores vieram depois: 0,91 GiB nas consultas do InfluxDB e 1,04 GiB na ordenação do `operacoes.csv` do Eixo B, que tem buffer fixo de 1 GiB (`sort -S 1G`).
+- **Pico total:** 3,55 GiB, no gerador do InfluxDB. Desses, 2,59 GiB eram cache do arquivo de dados, que o kernel recupera.
+
+O limite de 4 GiB fica. O piloto só usou 8 clientes; o gerador com 32 é conferido na calibração.
 
 ---
 
@@ -1259,6 +1263,29 @@ Conferido também que nenhuma consulta do InfluxDB volta com erro no corpo da re
 
 ---
 
+## ADR-066 — Piloto e medida do custo da coleta
+
+**Contexto.** A Etapa 2.5 pede uma execução curta de todos os eixos para validar a coleta de ponta a ponta. A ADR-021 (item 6) manda medir no piloto o custo da coleta interna e do `pg_stat_statements`, comparando a mesma execução com e sem eles, e a ADR-025 (item 5) manda rever o limite de memória do gerador com o uso real.
+
+**Decisão.**
+
+1. Piloto: uma execução de cada uma das 7 arquiteturas, com 8 clientes e as durações reais (120 s de aquecimento e 300 s de medição nos Eixos A e B; a carga inteira no Eixo C, ADR-065), numa janela própria (`harness/planos/piloto.toml`).
+2. Custo da coleta: a fila consolidada do Eixo B com 8 clientes, que é a arquitetura com mais comandos por segundo no PostgreSQL. São 3 execuções com coleta e 3 sem, sorteadas em blocos com a mesma semente por repetição, numa janela própria (`harness/planos/custo-coleta.toml`).
+3. Sem coleta interna, o orquestrador não inicia os coletores internos, não zera nem captura o `pg_stat_statements` e, logo depois de subir cada PostgreSQL, aplica `pg_stat_statements.track = none` com `ALTER SYSTEM` e `pg_reload_conf()`. A biblioteca continua carregada. A telemetria de host e containers continua, porque não passa pelo sistema sob teste. A opção vale por configuração do plano (`coleta_interna = false`), e o identificador dessas execuções termina em `_semcoleta`.
+4. Ordem: o piloto vem antes da calibração (Etapa 3.1).
+
+**Justificativa.** O pior caso para o custo da observação é o PostgreSQL com o maior número de comandos curtos por segundo: se o custo for pequeno ali, é pequeno nos demais. Desligar o rastreamento remove o trabalho do `pg_stat_statements` a cada comando sem precisar mudar as composições. O `ALTER SYSTEM` grava no diretório de dados, que é restaurado antes de cada execução (ADR-029), então não passa de uma execução para outra.
+
+**Efeito sobre a comparação.** Nenhum sobre as medições: o piloto não entra na análise. Com a biblioteca carregada e o rastreamento desligado, sobra o custo da chamada ao módulo, que é desprezível; a medida pode subestimar o custo de carregar a biblioteca, o que fica declarado.
+
+**Estado.** Aceita. Opção testada em 08/11/2026 com a arquitetura de teste do harness (eixo `t`): a execução sem coleta gravou só a telemetria de host, e o log do PostgreSQL registrou `pg_stat_statements.track` em `none`. A execução seguinte, com coleta, teve o coletor e o `pg_stat_statements` normais, sem herdar o `ALTER SYSTEM`, porque os dados são restaurados.
+
+**Execução (08 e 09/11/2026).**
+- **Piloto** (janela `20261108-1846`, 3 h 16 min): as 7 execuções terminaram `ok`, sem erros no gerador. Todos os coletores gravaram séries completas, e os resultados repetem os de desenvolvimento.
+- **Custo da coleta** (janela `20261108-2233`, 2 h 43 min): as 6 execuções terminaram `ok`. O resultado está na ADR-021, e a revisão da memória do gerador, na ADR-025.
+
+---
+
 ## Registro de alterações
 
 | Data | Alteração |
@@ -1288,3 +1315,5 @@ Conferido também que nenhuma consulta do InfluxDB volta com erro no corpo da re
 | 08/11/2026 | ADR-052 revisada: limite de 65.536 descritores de arquivo no RabbitMQ |
 | 08/11/2026 | ADR-058 a ADR-064: InfluxDB 1.13.1 com TSI, TSBS compilado com a correção do PR #255, dados, carga e consultas, compressão depois da carga, configuração e coletores do Eixo C. ADR-024 executada |
 | 08/11/2026 | ADR-060 e ADR-061 revisadas (3 dias de dados; 20 consultas por tipo). ADR-065: execução do Eixo C e limite do gerador |
+| 08/11/2026 | ADR-066: piloto e medida do custo da coleta |
+| 09/11/2026 | ADR-021, ADR-025 e ADR-066: resultados do piloto e do custo da coleta; intervalos de coleta e limite de memória do gerador mantidos |

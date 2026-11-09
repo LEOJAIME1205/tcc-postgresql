@@ -8,7 +8,10 @@ evitar instrumentação divergente entre eles.
 - `orquestracao/` — composições base, definição de `cpuset` e limites de recurso
 - `metricas/` — coletores de `pg_stat_*`, `pgstattuple`, `pg_stat_statements`,
   métricas dos serviços especializados e telemetria de host
-- `analise/` — scripts de consolidação, tratamento estatístico e geração de figuras
+- `analise/` — scripts de consolidação, tratamento estatístico e geração de
+  figuras. Por ora, `custo_coleta.py` (ADR-021, item 6):
+  `uv run python -m harness.analise.custo_coleta <id-janela>`, com saída em
+  `resultados/processados/`
 
 ## Ambiente Python
 
@@ -106,7 +109,8 @@ resultados/brutos/
 
 - `<id-janela>`: `AAAAMMDD-HHMM` do início da janela.
 - `<id-execucao>`:
-  `AAAAMMDD-HHMMSS_<eixo>_<arquitetura>_<cenario>_c<concorrencia>_r<repeticao>`.
+  `AAAAMMDD-HHMMSS_<eixo>_<arquitetura>_<cenario>_c<concorrencia>_r<repeticao>`,
+  com `_semcoleta` no fim nas execuções sem coleta interna (ADR-066).
   Exemplo: `20261108-142530_b_outbox_curta_c32_r03`.
 
 | Campo | Valores |
@@ -495,15 +499,32 @@ JSON.
 
 As séries completas são publicadas como anexos de uma release do GitHub, fora
 do histórico do repositório. São pacotes `tar` comprimidos com `zstd`, um por
-eixo e cenário, gerados fora do diretório do repositório. O GitHub aceita
-anexos de até 2 GiB cada e até 1000 por release, sem limite de tamanho total
-nem de banda. Um pacote que passe de 2 GiB é dividido por arquitetura. Os
-SHA-256 dos manifestos, que estão no Git, permitem conferir cada arquivo depois
-de descompactado. O tamanho real dos pacotes é estimado no piloto (Etapa 2.5).
+eixo e cenário, gerados fora do diretório do repositório, com `zstd -9`. O
+GitHub aceita anexos de até 2 GiB cada e até 1000 por release, sem limite de
+tamanho total nem de banda. Os SHA-256 dos manifestos, que estão no Git,
+permitem conferir cada arquivo depois de descompactado.
+
+Um pacote que passe de 2 GiB é dividido por arquitetura e, se ainda passar,
+por concorrência. A execução de longa duração do Eixo B pode passar de 2 GiB
+sozinha; a forma de dividi-la fica para a Etapa 3.4.
+
+Tamanhos medidos no piloto (09/11/2026), por execução com 8 clientes e 300 s
+de medição:
+
+| Eixo | Descompactado | Compactado |
+|---|---|---|
+| A | 2 a 20 MiB | não medido |
+| B | 139 a 425 MiB, quase tudo `operacoes.csv` | fila consolidada (417 MiB): 79 MiB com `zstd -3`; 68 MiB com `zstd -9`, que leva 1 s |
+| C | 3 a 6 MiB | não medido |
+
+O tamanho cresce com a vazão, então o Eixo B com 32 clientes e o teste de
+longa duração geram os maiores pacotes.
 
 ### Pendências
 
-1. Medir o custo da coleta no piloto (ADR-021, item 6).
+Nenhuma. O custo da coleta foi medido em 09/11/2026 (ADR-021, item 6) e ficou
+abaixo da variação entre repetições; a análise está em
+`analise/custo_coleta.py`.
 
 As saídas do TSBS descritas em "Eixo C: adaptação do TSBS" foram conferidas em
 08/11/2026, com o TSBS compilado (ADR-059): os percentis do JSON vêm em
@@ -548,6 +569,12 @@ expande em um nível de concorrência por valor de `concorrencias`, repetido
 (ADR-032): o bloco *r* contém a repetição *r* de cada configuração. Chaves
 desconhecidas, valores fora do domínio, configurações repetidas e a mistura do
 cenário `longa` com outros cenários são recusados com a explicação do problema.
+
+A chave opcional `coleta_interna = false` roda a configuração sem os coletores
+internos e com o `pg_stat_statements` sem rastrear, para medir o custo da
+coleta (ADR-021, item 6, e ADR-066). A mesma configuração pode aparecer com e
+sem coleta no mesmo plano; as duas recebem a mesma semente em cada repetição, e
+o manifesto registra `coleta_interna`.
 
 ```toml
 nome = "piloto"
@@ -699,8 +726,11 @@ gerador mande a mesma sequência de operações a todas elas (ADR-032).
    auxiliar (ADR-029).
 3. `sync` e `sudo fstrim -v /`; repouso de 20 minutos (ADR-004 e ADR-017).
 4. Iniciar a telemetria de host e containers.
-5. Subir a arquitetura e iniciar os coletores internos.
-6. Zerar o `pg_stat_statements` (ADR-034) e rodar o gerador.
+5. Subir a arquitetura e iniciar os coletores internos. Sem coleta interna,
+   aplicar `pg_stat_statements.track = none` em cada PostgreSQL, com
+   `ALTER SYSTEM` e `pg_reload_conf()` (ADR-066).
+6. Zerar o `pg_stat_statements` (ADR-034), se houver coleta interna, e rodar o
+   gerador.
 7. Parar os coletores; capturar `instantaneos/` (`pg_stat_statements`,
    `docker inspect`) e os logs dos containers em `ferramenta/`.
 8. Desligar a arquitetura.
