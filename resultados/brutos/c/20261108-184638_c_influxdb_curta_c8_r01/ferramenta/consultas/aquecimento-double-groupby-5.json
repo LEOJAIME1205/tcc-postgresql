@@ -1,0 +1,48 @@
+{
+ "ResultFormatVersion": "0.1",
+ "RunnerConfig": {
+  "DBName": "benchmark",
+  "Limit": 0,
+  "LimitRPS": 0,
+  "MemProfile": "",
+  "HDRLatenciesFile": "",
+  "Workers": 1,
+  "PrintResponses": false,
+  "Debug": 0,
+  "FileName": "",
+  "BurnIn": 0,
+  "PrintInterval": 0,
+  "PrewarmQueries": false,
+  "ResultsFile": "/saida/ferramenta/consultas/aquecimento-double-groupby-5.json"
+ },
+ "StartTime": 1794175831000,
+ "EndTime": 1794175848000,
+ "DurationMillis": 16919,
+ "Totals": {
+  "burnIn": 0,
+  "limit": 0,
+  "overallQuantiles": {
+   "Influx_mean_of_5_metrics_all_hosts_random_12h0m0s_by_1h": {
+    "q0": 0,
+    "q100": 3484.031,
+    "q50": 3369.855,
+    "q95": 3484.031,
+    "q99": 3484.031,
+    "q999": 3484.031
+   },
+   "all_queries": {
+    "q0": 0,
+    "q100": 3484.031,
+    "q50": 3369.855,
+    "q95": 3484.031,
+    "q99": 3484.031,
+    "q999": 3484.031
+   }
+  },
+  "overallQueryRates": {
+   "Influx_mean_of_5_metrics_all_hosts_random_12h0m0s_by_1h": 0.295516668931077,
+   "all_queries": 0.295516668931077
+  },
+  "prewarmQueries": false
+ }
+}

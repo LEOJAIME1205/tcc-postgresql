@@ -1,0 +1,27 @@
+{
+ "ResultFormatVersion": "0.1",
+ "RunnerConfig": {
+  "db-name": "benchmark",
+  "batch-size": 10000,
+  "workers": 8,
+  "limit": 0,
+  "do-load": true,
+  "do-create-db": false,
+  "do-abort-on-exist": false,
+  "reporting-period": 1000000000,
+  "hash-workers": false,
+  "no-flow-control": false,
+  "channel-capacity": 0,
+  "insert-intervals": "",
+  "results-file": "/saida/ferramenta/tsbs-carga.json",
+  "file": "",
+  "seed": 0
+ },
+ "StartTime": 1794177689,
+ "EndTime": 1794177780,
+ "DurationMillis": 91435,
+ "Totals": {
+  "metricRate": 11339183.125850007,
+  "rowRate": 1133918.3125850006
+ }
+}

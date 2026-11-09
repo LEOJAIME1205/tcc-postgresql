@@ -1,0 +1,110 @@
+{
+  "versao_formato": 1,
+  "janela": "20261108-2233",
+  "plano": "custo-coleta",
+  "semente": 20261110,
+  "repouso_s": 1200,
+  "ordem": [
+    "b_consolidada_curta_c8_r01",
+    "b_consolidada_curta_c8_r01_semcoleta",
+    "b_consolidada_curta_c8_r02_semcoleta",
+    "b_consolidada_curta_c8_r02",
+    "b_consolidada_curta_c8_r03",
+    "b_consolidada_curta_c8_r03_semcoleta"
+  ],
+  "momento": "2026-11-08T22:33:55-0300",
+  "controles": [
+    {
+      "controle": "swap desligado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhuma área ativa"
+    },
+    {
+      "controle": "timers parados",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "10 parados"
+    },
+    {
+      "controle": "P510 encontrado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "controlador nvme0"
+    },
+    {
+      "controle": "APST desligado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nvme0: pm_qos_latency_tolerance_us = 0"
+    },
+    {
+      "controle": "energia em performance",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "16 processadores em performance, boost ligado"
+    },
+    {
+      "controle": "suspensão e desligamento bloqueados",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "trava tcc-coleta ativa"
+    },
+    {
+      "controle": "nenhum container rodando",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "nenhum coletor órfão",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "nenhum navegador aberto",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "espaço livre de pelo menos 100 GiB",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "766 GiB livres"
+    },
+    {
+      "controle": "sudo sem senha para a coleta",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "fstrim e nvme smart-log liberados"
+    },
+    {
+      "controle": "sem programas pesados abertos",
+      "ok": false,
+      "bloqueante": false,
+      "detalhe": "abertos: claude, code"
+    }
+  ],
+  "disco": {
+    "ocupado_bytes": 109941014528,
+    "livre_bytes": 822328496128
+  },
+  "smart": {
+    "temperature": "35 °C (308 K, 95 °F)",
+    "percentage_used": "0%",
+    "Data Units Written": "8126856 (4.16 TB)",
+    "power_on_hours": "96",
+    "unsafe_shutdowns": "0",
+    "media_errors": "0"
+  },
+  "host": {
+    "kernel": "7.0.0-42-generic",
+    "docker": "29.9.2"
+  },
+  "repositorio": {
+    "commit": "126f2b8cf06e11108694a75eb843f3bb75a020fa",
+    "alteracoes_locais": true
+  }
+}

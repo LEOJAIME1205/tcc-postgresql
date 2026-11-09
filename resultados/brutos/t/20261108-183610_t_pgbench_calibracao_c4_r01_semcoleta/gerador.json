@@ -1,0 +1,16 @@
+{
+  "ferramenta": "pgbench",
+  "versao": "pgbench (PostgreSQL) 18.6 (Debian 18.6-1.pgdg13+2)",
+  "aquecimento_inicio_ms": 1794173782897,
+  "medicao_inicio_ms": 1794173787897,
+  "medicao_fim_ms": 1794173802897,
+  "processo_fim_ms": 1794173802915,
+  "parametros": {
+    "concorrencia": 4,
+    "threads": 4,
+    "escala": 20,
+    "semente": 3113561000,
+    "aquecimento_s": 5,
+    "medicao_s": 15
+  }
+}

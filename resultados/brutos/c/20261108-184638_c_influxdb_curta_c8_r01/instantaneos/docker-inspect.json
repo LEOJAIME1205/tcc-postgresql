@@ -1,0 +1,251 @@
+{
+  "containers": [
+    {
+      "Id": "1cef6fd6f205bb9ca0b3a109984e7a267ce5e309cdb4964af300300421666ffc",
+      "Created": "2026-11-08T22:06:40.634359097Z",
+      "Path": "/entrypoint.sh",
+      "Args": [
+        "influxd"
+      ],
+      "State": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 55864,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-11-08T22:06:40.655796891Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "Image": "sha256:33fa5b045658ddd676f3f9a72c1f40eb92ad1582539a691cd36e578ce0a6f751",
+      "ResolvConfPath": "/var/lib/docker/containers/1cef6fd6f205bb9ca0b3a109984e7a267ce5e309cdb4964af300300421666ffc/resolv.conf",
+      "HostnamePath": "/var/lib/docker/containers/1cef6fd6f205bb9ca0b3a109984e7a267ce5e309cdb4964af300300421666ffc/hostname",
+      "HostsPath": "/var/lib/docker/containers/1cef6fd6f205bb9ca0b3a109984e7a267ce5e309cdb4964af300300421666ffc/hosts",
+      "LogPath": "/var/lib/docker/containers/1cef6fd6f205bb9ca0b3a109984e7a267ce5e309cdb4964af300300421666ffc/1cef6fd6f205bb9ca0b3a109984e7a267ce5e309cdb4964af300300421666ffc-json.log",
+      "Name": "/tcc-c-influxdb-influxdb-1",
+      "RestartCount": 0,
+      "Driver": "overlayfs",
+      "Platform": "linux",
+      "MountLabel": "",
+      "ProcessLabel": "",
+      "AppArmorProfile": "docker-default",
+      "ExecIDs": null,
+      "HostConfig": {
+        "Binds": [
+          "/home/leojaime/tcc-dados/c/influxdb/influxdb/atual:/var/lib/influxdb:rw"
+        ],
+        "ContainerIDFile": "",
+        "LogConfig": {
+          "Type": "json-file",
+          "Config": {
+            "max-file": "5",
+            "max-size": "100m"
+          }
+        },
+        "NetworkMode": "tcc-c-influxdb_default",
+        "PortBindings": {},
+        "RestartPolicy": {
+          "Name": "no",
+          "MaximumRetryCount": 0
+        },
+        "AutoRemove": false,
+        "VolumeDriver": "",
+        "VolumesFrom": null,
+        "ConsoleSize": [
+          0,
+          0
+        ],
+        "CapAdd": null,
+        "CapDrop": null,
+        "CgroupnsMode": "private",
+        "Dns": null,
+        "DnsOptions": null,
+        "DnsSearch": null,
+        "ExtraHosts": [],
+        "GroupAdd": null,
+        "IpcMode": "private",
+        "Cgroup": "",
+        "Links": null,
+        "OomScoreAdj": 0,
+        "PidMode": "",
+        "Privileged": false,
+        "PublishAllPorts": false,
+        "ReadonlyRootfs": false,
+        "SecurityOpt": null,
+        "UTSMode": "",
+        "UsernsMode": "",
+        "ShmSize": 67108864,
+        "Runtime": "runc",
+        "Isolation": "",
+        "CpuShares": 0,
+        "Memory": 21474836480,
+        "NanoCpus": 0,
+        "CgroupParent": "",
+        "BlkioWeight": 0,
+        "BlkioWeightDevice": null,
+        "BlkioDeviceReadBps": null,
+        "BlkioDeviceWriteBps": null,
+        "BlkioDeviceReadIOps": null,
+        "BlkioDeviceWriteIOps": null,
+        "CpuPeriod": 0,
+        "CpuQuota": 0,
+        "CpuRealtimePeriod": 0,
+        "CpuRealtimeRuntime": 0,
+        "CpusetCpus": "0-5,8-13",
+        "CpusetMems": "",
+        "Devices": null,
+        "DeviceCgroupRules": null,
+        "DeviceRequests": null,
+        "MemoryReservation": 0,
+        "MemorySwap": 21474836480,
+        "MemorySwappiness": null,
+        "OomKillDisable": null,
+        "PidsLimit": null,
+        "Ulimits": null,
+        "CpuCount": 0,
+        "CpuPercent": 0,
+        "IOMaximumIOps": 0,
+        "IOMaximumBandwidth": 0,
+        "MaskedPaths": [
+          "/proc/acpi",
+          "/proc/asound",
+          "/proc/interrupts",
+          "/proc/kcore",
+          "/proc/keys",
+          "/proc/latency_stats",
+          "/proc/sched_debug",
+          "/proc/scsi",
+          "/proc/timer_list",
+          "/proc/timer_stats",
+          "/sys/devices/virtual/powercap",
+          "/sys/firmware"
+        ],
+        "ReadonlyPaths": [
+          "/proc/bus",
+          "/proc/fs",
+          "/proc/irq",
+          "/proc/sys",
+          "/proc/sysrq-trigger"
+        ]
+      },
+      "Storage": {
+        "RootFS": {
+          "Snapshot": {
+            "Name": "overlayfs"
+          }
+        }
+      },
+      "Mounts": [
+        {
+          "Type": "bind",
+          "Source": "/home/leojaime/tcc-dados/c/influxdb/influxdb/atual",
+          "Destination": "/var/lib/influxdb",
+          "Mode": "rw",
+          "RW": true,
+          "Propagation": "rprivate"
+        }
+      ],
+      "Config": {
+        "Hostname": "1cef6fd6f205",
+        "Domainname": "",
+        "User": "1000:1000",
+        "AttachStdin": false,
+        "AttachStdout": true,
+        "AttachStderr": true,
+        "ExposedPorts": {
+          "8086/tcp": {}
+        },
+        "Tty": false,
+        "OpenStdin": false,
+        "StdinOnce": false,
+        "Env": [
+          "INFLUXDB_DATA_INDEX_VERSION=tsi1",
+          "INFLUXDB_REPORTING_DISABLED=true",
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "INFLUXDB_VERSION=1.13.1",
+          "INFLUXDB_PR=-1",
+          "INFLUXDB_PV=1.13.1-1"
+        ],
+        "Cmd": [
+          "influxd"
+        ],
+        "Image": "influxdb:1.13.1@sha256:33fa5b045658ddd676f3f9a72c1f40eb92ad1582539a691cd36e578ce0a6f751",
+        "Volumes": {
+          "/var/lib/influxdb": {}
+        },
+        "WorkingDir": "",
+        "Entrypoint": [
+          "/entrypoint.sh"
+        ],
+        "Labels": {
+          "com.docker.compose.config-hash": "857cb2f6d4c7a4a33d672d025ede4b5387e44f0f07a565bb4fbc3b4304ea83ee",
+          "com.docker.compose.container-number": "1",
+          "com.docker.compose.depends_on": "",
+          "com.docker.compose.image": "sha256:222540c8fbe2bf6e30fc38fb22e97b7b6eaa67007e70b17895daf238df4ee1b5",
+          "com.docker.compose.oneoff": "False",
+          "com.docker.compose.project": "tcc-c-influxdb",
+          "com.docker.compose.project.config_files": "/home/leojaime/tcc/tcc-postgresql/eixo-c-temporal/influxdb/compose.yaml",
+          "com.docker.compose.project.working_dir": "/home/leojaime/tcc/tcc-postgresql/eixo-c-temporal/influxdb",
+          "com.docker.compose.service": "influxdb",
+          "com.docker.compose.version": "5.6.1"
+        },
+        "StopTimeout": 120
+      },
+      "NetworkSettings": {
+        "SandboxID": "a6b2c8124a94a592a3b922b40a4fb7d2f82917468d78ddb428d38b9eba21da45",
+        "SandboxKey": "/var/run/docker/netns/a6b2c8124a94",
+        "Ports": {
+          "8086/tcp": null
+        },
+        "Networks": {
+          "tcc-c-influxdb_default": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": [
+              "tcc-c-influxdb-influxdb-1",
+              "influxdb"
+            ],
+            "DriverOpts": null,
+            "GwPriority": 0,
+            "NetworkID": "1bf347f3763cd339851f5cf57f0e6b8292440c8b8d56ddf7b31a00f341cd9e62",
+            "EndpointID": "eb454b6b3ab7a3760c216ec6b1176b30d57ba4e244c4fd731c2958623953514a",
+            "Gateway": "172.18.0.1",
+            "IPAddress": "172.18.0.2",
+            "MacAddress": "26:c0:a5:66:75:b7",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "DNSNames": [
+              "tcc-c-influxdb-influxdb-1",
+              "influxdb",
+              "1cef6fd6f205"
+            ]
+          }
+        }
+      },
+      "ImageManifestDescriptor": {
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "digest": "sha256:222540c8fbe2bf6e30fc38fb22e97b7b6eaa67007e70b17895daf238df4ee1b5",
+        "size": 2314,
+        "annotations": {
+          "com.docker.official-images.bashbrew.arch": "amd64",
+          "org.opencontainers.image.base.digest": "sha256:a1c89a59d56245724cc8afbac1150c88385c2e7f7fd705ac988b1579ca421064",
+          "org.opencontainers.image.base.name": "buildpack-deps:bookworm-curl",
+          "org.opencontainers.image.created": "2026-10-28T02:28:06Z",
+          "org.opencontainers.image.revision": "03c5f22dfec78fa00ef48dce091f081890bf5d26",
+          "org.opencontainers.image.source": "https://github.com/influxdata/influxdata-docker.git#03c5f22dfec78fa00ef48dce091f081890bf5d26:influxdb/1.13",
+          "org.opencontainers.image.url": "https://hub.docker.com/_/influxdb",
+          "org.opencontainers.image.version": "1.13"
+        },
+        "platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        }
+      }
+    }
+  ]
+}

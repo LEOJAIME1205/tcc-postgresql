@@ -1,0 +1,54 @@
+{
+  "janela": "20261108-2233",
+  "atualizado": "2026-11-09T01:17:10-0300",
+  "execucoes": [
+    {
+      "ordem": 1,
+      "execucao": "b_consolidada_curta_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261108-223355_b_consolidada_curta_c8_r01"
+      ]
+    },
+    {
+      "ordem": 2,
+      "execucao": "b_consolidada_curta_c8_r01_semcoleta",
+      "estado": "ok",
+      "tentativas": [
+        "20261108-230108_b_consolidada_curta_c8_r01_semcoleta"
+      ]
+    },
+    {
+      "ordem": 3,
+      "execucao": "b_consolidada_curta_c8_r02_semcoleta",
+      "estado": "ok",
+      "tentativas": [
+        "20261108-232821_b_consolidada_curta_c8_r02_semcoleta"
+      ]
+    },
+    {
+      "ordem": 4,
+      "execucao": "b_consolidada_curta_c8_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261108-235533_b_consolidada_curta_c8_r02"
+      ]
+    },
+    {
+      "ordem": 5,
+      "execucao": "b_consolidada_curta_c8_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261109-002245_b_consolidada_curta_c8_r03"
+      ]
+    },
+    {
+      "ordem": 6,
+      "execucao": "b_consolidada_curta_c8_r03_semcoleta",
+      "estado": "ok",
+      "tentativas": [
+        "20261109-004957_b_consolidada_curta_c8_r03_semcoleta"
+      ]
+    }
+  ]
+}

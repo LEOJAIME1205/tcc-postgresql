@@ -1,0 +1,156 @@
+{
+  "versao_formato": 1,
+  "janela": "20261108-1846",
+  "plano": "piloto",
+  "semente": 20261109,
+  "repouso_s": 1200,
+  "ordem": [
+    "c_influxdb_curta_c8_r01",
+    "c_timescaledb_curta_c8_r01",
+    "b_outbox_curta_c8_r01",
+    "b_consolidada_curta_c8_r01",
+    "b_ingenua_curta_c8_r01",
+    "a_consolidada_curta_c8_r01",
+    "a_poliglota_curta_c8_r01"
+  ],
+  "motivo": "concluída",
+  "sessoes": [
+    {
+      "inicio": "2026-11-08T18:46:38-0300",
+      "fim": "2026-11-08T22:02:24-0300",
+      "motivo": "concluída"
+    }
+  ],
+  "execucoes": [
+    {
+      "ordem": 1,
+      "id": "20261108-184638_c_influxdb_curta_c8_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 2,
+      "id": "20261108-192124_c_timescaledb_curta_c8_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 3,
+      "id": "20261108-194557_b_outbox_curta_c8_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 4,
+      "id": "20261108-201317_b_consolidada_curta_c8_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 5,
+      "id": "20261108-204029_b_ingenua_curta_c8_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 6,
+      "id": "20261108-210739_a_consolidada_curta_c8_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 7,
+      "id": "20261108-213503_a_poliglota_curta_c8_r01",
+      "estado": "ok"
+    }
+  ],
+  "momento": "2026-11-08T22:02:24-0300",
+  "controles": [
+    {
+      "controle": "swap desligado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhuma área ativa"
+    },
+    {
+      "controle": "timers parados",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "10 parados"
+    },
+    {
+      "controle": "P510 encontrado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "controlador nvme0"
+    },
+    {
+      "controle": "APST desligado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nvme0: pm_qos_latency_tolerance_us = 0"
+    },
+    {
+      "controle": "energia em performance",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "16 processadores em performance, boost ligado"
+    },
+    {
+      "controle": "suspensão e desligamento bloqueados",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "trava tcc-coleta ativa"
+    },
+    {
+      "controle": "nenhum container rodando",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "nenhum coletor órfão",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "nenhum navegador aberto",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "espaço livre de pelo menos 100 GiB",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "766 GiB livres"
+    },
+    {
+      "controle": "sudo sem senha para a coleta",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "fstrim e nvme smart-log liberados"
+    },
+    {
+      "controle": "sem programas pesados abertos",
+      "ok": false,
+      "bloqueante": false,
+      "detalhe": "abertos: claude, code"
+    }
+  ],
+  "disco": {
+    "ocupado_bytes": 109938110464,
+    "livre_bytes": 822331400192
+  },
+  "smart": {
+    "temperature": "37 °C (310 K, 98 °F)",
+    "percentage_used": "0%",
+    "Data Units Written": "8126800 (4.16 TB)",
+    "power_on_hours": "95",
+    "unsafe_shutdowns": "0",
+    "media_errors": "0"
+  },
+  "host": {
+    "kernel": "7.0.0-42-generic",
+    "docker": "29.9.2"
+  },
+  "repositorio": {
+    "commit": "126f2b8cf06e11108694a75eb843f3bb75a020fa",
+    "alteracoes_locais": true
+  }
+}

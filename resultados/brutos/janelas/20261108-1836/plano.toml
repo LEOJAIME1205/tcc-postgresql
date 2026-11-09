@@ -1,0 +1,22 @@
+nome = "teste-coleta-interna"
+semente = 1
+espaco_livre_min_gib = 100
+
+[[configuracao]]
+eixo = "t"
+arquitetura = "pgbench"
+cenario = "calibracao"
+concorrencias = [4]
+repeticoes = 1
+aquecimento_s = 5
+medicao_s = 15
+
+[[configuracao]]
+eixo = "t"
+arquitetura = "pgbench"
+cenario = "calibracao"
+concorrencias = [4]
+repeticoes = 1
+aquecimento_s = 5
+medicao_s = 15
+coleta_interna = false

@@ -1,0 +1,260 @@
+{
+  "containers": [
+    {
+      "Id": "4edb60a007c1125a9869a945083fc0b6060ae5da17a9ea77b8eef4395d580a19",
+      "Created": "2026-11-08T23:33:21.132960388Z",
+      "Path": "docker-entrypoint.sh",
+      "Args": [
+        "postgres",
+        "-c",
+        "shared_preload_libraries=pg_stat_statements",
+        "-c",
+        "shared_buffers=5120MB",
+        "-c",
+        "effective_cache_size=15360MB",
+        "-c",
+        "work_mem=4MB"
+      ],
+      "State": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 64523,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-11-08T23:33:21.154432682Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "Image": "sha256:3c71fe3d3acb92bc6b4c2a1dfce722e9eff10c352252a6450051cd04880067ec",
+      "ResolvConfPath": "/var/lib/docker/containers/4edb60a007c1125a9869a945083fc0b6060ae5da17a9ea77b8eef4395d580a19/resolv.conf",
+      "HostnamePath": "/var/lib/docker/containers/4edb60a007c1125a9869a945083fc0b6060ae5da17a9ea77b8eef4395d580a19/hostname",
+      "HostsPath": "/var/lib/docker/containers/4edb60a007c1125a9869a945083fc0b6060ae5da17a9ea77b8eef4395d580a19/hosts",
+      "LogPath": "/var/lib/docker/containers/4edb60a007c1125a9869a945083fc0b6060ae5da17a9ea77b8eef4395d580a19/4edb60a007c1125a9869a945083fc0b6060ae5da17a9ea77b8eef4395d580a19-json.log",
+      "Name": "/tcc-b-consolidada-postgres-1",
+      "RestartCount": 0,
+      "Driver": "overlayfs",
+      "Platform": "linux",
+      "MountLabel": "",
+      "ProcessLabel": "",
+      "AppArmorProfile": "docker-default",
+      "ExecIDs": null,
+      "HostConfig": {
+        "Binds": [
+          "/home/leojaime/tcc-dados/b/consolidada/postgres/atual:/var/lib/postgresql:rw"
+        ],
+        "ContainerIDFile": "",
+        "LogConfig": {
+          "Type": "json-file",
+          "Config": {
+            "max-file": "5",
+            "max-size": "100m"
+          }
+        },
+        "NetworkMode": "tcc-b-consolidada_default",
+        "PortBindings": {},
+        "RestartPolicy": {
+          "Name": "no",
+          "MaximumRetryCount": 0
+        },
+        "AutoRemove": false,
+        "VolumeDriver": "",
+        "VolumesFrom": null,
+        "ConsoleSize": [
+          0,
+          0
+        ],
+        "CapAdd": null,
+        "CapDrop": null,
+        "CgroupnsMode": "private",
+        "Dns": null,
+        "DnsOptions": null,
+        "DnsSearch": null,
+        "ExtraHosts": [],
+        "GroupAdd": null,
+        "IpcMode": "private",
+        "Cgroup": "",
+        "Links": null,
+        "OomScoreAdj": 0,
+        "PidMode": "",
+        "Privileged": false,
+        "PublishAllPorts": false,
+        "ReadonlyRootfs": false,
+        "SecurityOpt": null,
+        "UTSMode": "",
+        "UsernsMode": "",
+        "ShmSize": 1073741824,
+        "Runtime": "runc",
+        "Isolation": "",
+        "CpuShares": 0,
+        "Memory": 21474836480,
+        "NanoCpus": 0,
+        "CgroupParent": "",
+        "BlkioWeight": 0,
+        "BlkioWeightDevice": null,
+        "BlkioDeviceReadBps": null,
+        "BlkioDeviceWriteBps": null,
+        "BlkioDeviceReadIOps": null,
+        "BlkioDeviceWriteIOps": null,
+        "CpuPeriod": 0,
+        "CpuQuota": 0,
+        "CpuRealtimePeriod": 0,
+        "CpuRealtimeRuntime": 0,
+        "CpusetCpus": "0-5,8-13",
+        "CpusetMems": "",
+        "Devices": null,
+        "DeviceCgroupRules": null,
+        "DeviceRequests": null,
+        "MemoryReservation": 0,
+        "MemorySwap": 21474836480,
+        "MemorySwappiness": null,
+        "OomKillDisable": null,
+        "PidsLimit": null,
+        "Ulimits": null,
+        "CpuCount": 0,
+        "CpuPercent": 0,
+        "IOMaximumIOps": 0,
+        "IOMaximumBandwidth": 0,
+        "MaskedPaths": [
+          "/proc/acpi",
+          "/proc/asound",
+          "/proc/interrupts",
+          "/proc/kcore",
+          "/proc/keys",
+          "/proc/latency_stats",
+          "/proc/sched_debug",
+          "/proc/scsi",
+          "/proc/timer_list",
+          "/proc/timer_stats",
+          "/sys/devices/virtual/powercap",
+          "/sys/firmware"
+        ],
+        "ReadonlyPaths": [
+          "/proc/bus",
+          "/proc/fs",
+          "/proc/irq",
+          "/proc/sys",
+          "/proc/sysrq-trigger"
+        ]
+      },
+      "Storage": {
+        "RootFS": {
+          "Snapshot": {
+            "Name": "overlayfs"
+          }
+        }
+      },
+      "Mounts": [
+        {
+          "Type": "bind",
+          "Source": "/home/leojaime/tcc-dados/b/consolidada/postgres/atual",
+          "Destination": "/var/lib/postgresql",
+          "Mode": "rw",
+          "RW": true,
+          "Propagation": "rprivate"
+        }
+      ],
+      "Config": {
+        "Hostname": "4edb60a007c1",
+        "Domainname": "",
+        "User": "",
+        "AttachStdin": false,
+        "AttachStdout": true,
+        "AttachStderr": true,
+        "ExposedPorts": {
+          "5432/tcp": {}
+        },
+        "Tty": false,
+        "OpenStdin": false,
+        "StdinOnce": false,
+        "Env": [
+          "POSTGRES_PASSWORD=tcc",
+          "POSTGRES_DB=fila",
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/postgresql/18/bin",
+          "GOSU_VERSION=1.19",
+          "LANG=en_US.utf8",
+          "PG_MAJOR=18",
+          "PG_VERSION=18.6-1.pgdg13+2",
+          "PGDATA=/var/lib/postgresql/18/docker"
+        ],
+        "Cmd": [
+          "postgres",
+          "-c",
+          "shared_preload_libraries=pg_stat_statements",
+          "-c",
+          "shared_buffers=5120MB",
+          "-c",
+          "effective_cache_size=15360MB",
+          "-c",
+          "work_mem=4MB"
+        ],
+        "Image": "tcc-postgres:18.6-ts2.31.0-pgv0.8.7",
+        "Volumes": {
+          "/var/lib/postgresql": {}
+        },
+        "WorkingDir": "",
+        "Entrypoint": [
+          "docker-entrypoint.sh"
+        ],
+        "Labels": {
+          "com.docker.compose.config-hash": "be01f05f05ade058322f95e9203f93a0468566b5b92ee6957116f88f204a72fe",
+          "com.docker.compose.container-number": "1",
+          "com.docker.compose.depends_on": "",
+          "com.docker.compose.image": "sha256:d079565c71a8b25b2381a3466ea086dcfa1f01ca4228f10aa24e45b951b2b85e",
+          "com.docker.compose.oneoff": "False",
+          "com.docker.compose.project": "tcc-b-consolidada",
+          "com.docker.compose.project.config_files": "/home/leojaime/tcc/tcc-postgresql/eixo-b-fila/consolidada/compose.yaml",
+          "com.docker.compose.project.working_dir": "/home/leojaime/tcc/tcc-postgresql/eixo-b-fila/consolidada",
+          "com.docker.compose.service": "postgres",
+          "com.docker.compose.version": "5.6.1"
+        },
+        "StopSignal": "SIGINT",
+        "StopTimeout": 120
+      },
+      "NetworkSettings": {
+        "SandboxID": "7962944d5c3c175dad806f1f16b4ec72bc870f507d4d70ba5e7782c749177ff7",
+        "SandboxKey": "/var/run/docker/netns/7962944d5c3c",
+        "Ports": {
+          "5432/tcp": null
+        },
+        "Networks": {
+          "tcc-b-consolidada_default": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": [
+              "tcc-b-consolidada-postgres-1",
+              "postgres"
+            ],
+            "DriverOpts": null,
+            "GwPriority": 0,
+            "NetworkID": "3f3ab6fe070221f9f4ac3b9aadfa11f1604c4383862b366fcadecbddea188c8d",
+            "EndpointID": "40a4a339213d466332c45b723efdd4dc3f1a00c889441eb3afc59b8692b2e6b5",
+            "Gateway": "172.18.0.1",
+            "IPAddress": "172.18.0.2",
+            "MacAddress": "1a:0b:48:70:d1:79",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "DNSNames": [
+              "tcc-b-consolidada-postgres-1",
+              "postgres",
+              "4edb60a007c1"
+            ]
+          }
+        }
+      },
+      "ImageManifestDescriptor": {
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "digest": "sha256:d079565c71a8b25b2381a3466ea086dcfa1f01ca4228f10aa24e45b951b2b85e",
+        "size": 3149,
+        "platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "janela": "20261108-1836",
+  "atualizado": "2026-11-08T18:37:13-0300",
+  "execucoes": [
+    {
+      "ordem": 1,
+      "execucao": "t_pgbench_calibracao_c4_r01_semcoleta",
+      "estado": "ok",
+      "tentativas": [
+        "20261108-183610_t_pgbench_calibracao_c4_r01_semcoleta"
+      ]
+    },
+    {
+      "ordem": 2,
+      "execucao": "t_pgbench_calibracao_c4_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261108-183643_t_pgbench_calibracao_c4_r01"
+      ]
+    }
+  ]
+}

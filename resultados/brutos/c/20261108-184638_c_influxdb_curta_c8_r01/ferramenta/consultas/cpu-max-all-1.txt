@@ -1,0 +1,7 @@
+Run complete after 20 queries with 1 workers (Overall query rate 882.97 queries/sec):
+Influx max of all CPU metrics, random    1 hosts, random 8h0m0s by 1h:
+min:     1.00ms, med:     1.04ms, mean:     1.13ms, max:    1.69ms, stddev:     0.19ms, sum:   0.0sec, count: 20
+all queries                                                          :
+min:     1.00ms, med:     1.04ms, mean:     1.13ms, max:    1.69ms, stddev:     0.19ms, sum:   0.0sec, count: 20
+wall clock time: 0.023117sec
+Saving results json file to /saida/ferramenta/consultas/cpu-max-all-1.json

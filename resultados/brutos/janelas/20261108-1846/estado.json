@@ -1,0 +1,62 @@
+{
+  "janela": "20261108-1846",
+  "atualizado": "2026-11-08T22:02:24-0300",
+  "execucoes": [
+    {
+      "ordem": 1,
+      "execucao": "c_influxdb_curta_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261108-184638_c_influxdb_curta_c8_r01"
+      ]
+    },
+    {
+      "ordem": 2,
+      "execucao": "c_timescaledb_curta_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261108-192124_c_timescaledb_curta_c8_r01"
+      ]
+    },
+    {
+      "ordem": 3,
+      "execucao": "b_outbox_curta_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261108-194557_b_outbox_curta_c8_r01"
+      ]
+    },
+    {
+      "ordem": 4,
+      "execucao": "b_consolidada_curta_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261108-201317_b_consolidada_curta_c8_r01"
+      ]
+    },
+    {
+      "ordem": 5,
+      "execucao": "b_ingenua_curta_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261108-204029_b_ingenua_curta_c8_r01"
+      ]
+    },
+    {
+      "ordem": 6,
+      "execucao": "a_consolidada_curta_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261108-210739_a_consolidada_curta_c8_r01"
+      ]
+    },
+    {
+      "ordem": 7,
+      "execucao": "a_poliglota_curta_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261108-213503_a_poliglota_curta_c8_r01"
+      ]
+    }
+  ]
+}

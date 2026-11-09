@@ -1,0 +1,7 @@
+Run complete after 20 queries with 1 workers (Overall query rate 0.26 queries/sec):
+Influx max cpu over last 5 min-intervals (random end):
+min:   932.29ms, med:  3747.97ms, mean:  3828.82ms, max: 6495.49ms, stddev:  1874.55ms, sum:  76.6sec, count: 20
+all queries                                          :
+min:   932.29ms, med:  3747.97ms, mean:  3828.82ms, max: 6495.49ms, stddev:  1874.55ms, sum:  76.6sec, count: 20
+wall clock time: 76.590328sec
+Saving results json file to /saida/ferramenta/consultas/groupby-orderby-limit.json

@@ -1,0 +1,48 @@
+{
+ "ResultFormatVersion": "0.1",
+ "RunnerConfig": {
+  "DBName": "benchmark",
+  "Limit": 0,
+  "LimitRPS": 0,
+  "MemProfile": "",
+  "HDRLatenciesFile": "",
+  "Workers": 1,
+  "PrintResponses": false,
+  "Debug": 0,
+  "FileName": "",
+  "BurnIn": 0,
+  "PrintInterval": 0,
+  "PrewarmQueries": false,
+  "ResultsFile": "/saida/ferramenta/consultas/single-groupby-5-1-1.json"
+ },
+ "StartTime": 1794175812000,
+ "EndTime": 1794175812000,
+ "DurationMillis": 14,
+ "Totals": {
+  "burnIn": 0,
+  "limit": 0,
+  "overallQuantiles": {
+   "Influx_5_cpu_metric_s_random_1_hosts_random_1h0m0s_by_1m": {
+    "q0": 0,
+    "q100": 1.469,
+    "q50": 0.62,
+    "q95": 0.947,
+    "q99": 1.469,
+    "q999": 1.469
+   },
+   "all_queries": {
+    "q0": 0,
+    "q100": 1.469,
+    "q50": 0.62,
+    "q95": 0.947,
+    "q99": 1.469,
+    "q999": 1.469
+   }
+  },
+  "overallQueryRates": {
+   "Influx_5_cpu_metric_s_random_1_hosts_random_1h0m0s_by_1m": 1408.7859357518948,
+   "all_queries": 1408.7859357518948
+  },
+  "prewarmQueries": false
+ }
+}
