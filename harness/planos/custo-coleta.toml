@@ -1,0 +1,25 @@
+# Custo da coleta (ADR-021, item 6, e ADR-066): a fila consolidada do Eixo B com 8 clientes,
+# 3 execuções com a coleta interna e 3 sem ela (coletores internos parados e
+# pg_stat_statements sem rastrear), sorteadas em blocos com a mesma semente por repetição.
+nome = "custo-coleta"
+semente = 20261110
+espaco_livre_min_gib = 100
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "consolidada"
+cenario = "curta"
+concorrencias = [8]
+repeticoes = 3
+aquecimento_s = 120
+medicao_s = 300
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "consolidada"
+cenario = "curta"
+concorrencias = [8]
+repeticoes = 3
+aquecimento_s = 120
+medicao_s = 300
+coleta_interna = false

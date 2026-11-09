@@ -1,0 +1,71 @@
+# Piloto (Etapa 2.5, ADR-066): uma execução de cada arquitetura dos três eixos, com 8 clientes
+# e as durações reais, para validar a coleta de ponta a ponta, rever o limite de memória do
+# gerador (ADR-025) e estimar o tamanho dos pacotes de dados. Não entra na análise.
+# No Eixo C, aquecimento_s é o trecho inicial da carga descartado da vazão e
+# aquecimento_s + medicao_s o prazo máximo da carga (ADR-065).
+nome = "piloto"
+semente = 20261109
+espaco_livre_min_gib = 100
+
+[[configuracao]]
+eixo = "a"
+arquitetura = "consolidada"
+cenario = "curta"
+concorrencias = [8]
+repeticoes = 1
+aquecimento_s = 120
+medicao_s = 300
+
+[[configuracao]]
+eixo = "a"
+arquitetura = "poliglota"
+cenario = "curta"
+concorrencias = [8]
+repeticoes = 1
+aquecimento_s = 120
+medicao_s = 300
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "consolidada"
+cenario = "curta"
+concorrencias = [8]
+repeticoes = 1
+aquecimento_s = 120
+medicao_s = 300
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "ingenua"
+cenario = "curta"
+concorrencias = [8]
+repeticoes = 1
+aquecimento_s = 120
+medicao_s = 300
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "outbox"
+cenario = "curta"
+concorrencias = [8]
+repeticoes = 1
+aquecimento_s = 120
+medicao_s = 300
+
+[[configuracao]]
+eixo = "c"
+arquitetura = "timescaledb"
+cenario = "curta"
+concorrencias = [8]
+repeticoes = 1
+aquecimento_s = 10
+medicao_s = 3590
+
+[[configuracao]]
+eixo = "c"
+arquitetura = "influxdb"
+cenario = "curta"
+concorrencias = [8]
+repeticoes = 1
+aquecimento_s = 10
+medicao_s = 3590

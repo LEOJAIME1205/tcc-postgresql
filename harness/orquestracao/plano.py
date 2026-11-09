@@ -17,7 +17,7 @@ CENARIOS: Tuple[str, ...] = ("calibracao", "curta", "mista", "longa", "qualidade
 CHAVES_PLANO: Set[str] = {"nome", "semente", "espaco_livre_min_gib", "configuracao"}
 CHAVES_CONFIGURACAO: Set[str] = {
     "eixo", "arquitetura", "cenario", "concorrencias",
-    "repeticoes", "aquecimento_s", "medicao_s",
+    "repeticoes", "aquecimento_s", "medicao_s", "coleta_interna",
 }
 
 
@@ -34,6 +34,7 @@ class Configuracao:
     repeticoes: int
     aquecimento_s: int
     medicao_s: int
+    coleta_interna: bool = True  # False só na medida do custo da coleta (ADR-066)
 
 
 @dataclass(frozen=True)
@@ -45,7 +46,8 @@ class Execucao:
     def sufixo(self) -> str:
         """Parte final do identificador da execução (harness/README.md)."""
         c = self.configuracao
-        return f"{c.eixo}_{c.arquitetura}_{c.cenario}_c{c.concorrencia}_r{self.repeticao:02d}"
+        sem_coleta = "" if c.coleta_interna else "_semcoleta"
+        return f"{c.eixo}_{c.arquitetura}_{c.cenario}_c{c.concorrencia}_r{self.repeticao:02d}{sem_coleta}"
 
 
 @dataclass(frozen=True)
@@ -112,7 +114,11 @@ def _configuracoes(item: Dict[str, Any], onde: str) -> List[Configuracao]:
     repeticoes = _inteiro(item, "repeticoes", onde, 1)
     aquecimento_s = _inteiro(item, "aquecimento_s", onde, 0)
     medicao_s = _inteiro(item, "medicao_s", onde, 1)
-    return [Configuracao(eixo, arquitetura, cenario, n, repeticoes, aquecimento_s, medicao_s)
+    coleta_interna = item.get("coleta_interna", True)
+    if not isinstance(coleta_interna, bool):
+        raise ErroPlano(f"{onde}: 'coleta_interna' precisa ser true ou false")
+    return [Configuracao(eixo, arquitetura, cenario, n, repeticoes, aquecimento_s, medicao_s,
+                         coleta_interna)
             for n in _concorrencias(item, onde)]
 
 
@@ -139,16 +145,17 @@ def ler_plano(caminho: str) -> Plano:
         raise ErroPlano("plano: é preciso pelo menos uma tabela [[configuracao]]")
 
     configuracoes: List[Configuracao] = []
-    vistas: Set[Tuple[str, str, str, int]] = set()
+    vistas: Set[Tuple[str, str, str, int, bool]] = set()
     for i, item in enumerate(cast(List[Any], tabelas), start=1):
         onde = f"configuracao {i}"
         if not isinstance(item, dict):
             raise ErroPlano(f"{onde}: precisa ser uma tabela [[configuracao]]")
         for c in _configuracoes(cast(Dict[str, Any], item), onde):
-            chave = (c.eixo, c.arquitetura, c.cenario, c.concorrencia)
+            chave = (c.eixo, c.arquitetura, c.cenario, c.concorrencia, c.coleta_interna)
             if chave in vistas:
+                coleta = "" if c.coleta_interna else " sem coleta interna"
                 raise ErroPlano(f"{onde}: {c.eixo}/{c.arquitetura}/{c.cenario} com concorrência "
-                                f"{c.concorrencia} aparece mais de uma vez no plano")
+                                f"{c.concorrencia}{coleta} aparece mais de uma vez no plano")
             vistas.add(chave)
             configuracoes.append(c)
 

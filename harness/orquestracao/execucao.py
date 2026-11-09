@@ -142,6 +142,29 @@ def _zerar_pg_stat_statements(arq: Arquitetura) -> None:
                  "-d", coletor.banco, "-tAc", "SELECT pg_stat_statements_reset()"])
 
 
+def _desligar_rastreamento(arq: Arquitetura) -> Optional[str]:
+    """Sem coleta interna (ADR-066): o pg_stat_statements fica carregado, mas sem rastrear.
+
+    O ALTER SYSTEM grava no diretório de dados, que é restaurado antes de cada execução.
+    Devolve o motivo da falha, se houver."""
+    for coletor in _postgres(arq):
+        container = arq.container(coletor.servico)
+        if not _esperar_banco(container):
+            return f"{coletor.servico} não aceitou conexões em 120 s"
+        for comando in ("ALTER SYSTEM SET pg_stat_statements.track = 'none'", "SELECT pg_reload_conf()"):
+            r = _docker(["exec", container, "psql", "-U", "postgres", "-d", "postgres", "-tAc", comando])
+            if r.returncode != 0:
+                return f"{coletor.servico}: '{comando}' falhou: {r.stderr.strip()}"
+        # O pg_reload_conf só sinaliza; a nova configuração vale logo depois.
+        prazo = time.monotonic() + 10
+        while _docker(["exec", container, "psql", "-U", "postgres", "-d", "postgres", "-tAc",
+                       "SHOW pg_stat_statements.track"]).stdout.strip() != "none":
+            if time.monotonic() > prazo:
+                return f"{coletor.servico}: pg_stat_statements.track não passou a 'none'"
+            time.sleep(0.5)
+    return None
+
+
 def _inspecionar(arq: Arquitetura) -> List[Dict[str, Any]]:
     """docker inspect de todos os containers da arquitetura."""
     ids = _docker(["ps", "-aq", "--filter",
@@ -187,11 +210,12 @@ def _recursos(inspecao: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
              "memoria_bytes": c["HostConfig"]["Memory"]} for c in inspecao]
 
 
-def _capturar(arq: Arquitetura, inspecao: List[Dict[str, Any]], pasta: str) -> None:
+def _capturar(arq: Arquitetura, inspecao: List[Dict[str, Any]], pasta: str,
+              coleta_interna: bool) -> None:
     """Instantâneos e logs dos containers, antes de a arquitetura ser desligada."""
     registros.gravar_json(os.path.join(pasta, "instantaneos", "docker-inspect.json"),
                           {"containers": inspecao})
-    for coletor in _postgres(arq):
+    for coletor in _postgres(arq) if coleta_interna else []:
         r = _docker(["exec", arq.container(coletor.servico), "psql", "-U", "postgres",
                      "-d", coletor.banco, "-c",
                      "\\copy (SELECT * FROM pg_stat_statements) TO STDOUT WITH CSV HEADER"])
@@ -247,7 +271,7 @@ def executar_uma(pl: Plano, ex: Execucao, janela: str, resultados: str,
         "versao_formato": registros.VERSAO_FORMATO, "id": identificador, "janela": janela,
         "eixo": cfg.eixo, "arquitetura": cfg.arquitetura, "cenario": cfg.cenario,
         "concorrencia": cfg.concorrencia, "repeticao": ex.repeticao, "ordem_na_janela": ex.ordem,
-        "semente": semente_execucao,
+        "semente": semente_execucao, "coleta_interna": cfg.coleta_interna,
         "duracao_planejada_s": {"aquecimento": cfg.aquecimento_s, "medicao": cfg.medicao_s},
         "repositorio": registros.repositorio(), "host": registros.host(),
         "inicio": registros.agora_iso(),
@@ -292,11 +316,16 @@ def executar_uma(pl: Plano, ex: Execucao, janela: str, resultados: str,
         if c.subir() != 0:
             estado, motivo = "falha", "a arquitetura não subiu; veja ferramenta/compose.log"
         else:
-            erro_banco = _iniciar_coletores_internos(arq, cfg.cenario, pasta, processos)
+            if cfg.coleta_interna:
+                erro_banco = _iniciar_coletores_internos(arq, cfg.cenario, pasta, processos)
+            else:
+                registrar("sem coleta interna: pg_stat_statements sem rastrear (ADR-066)")
+                erro_banco = _desligar_rastreamento(arq)
             if erro_banco is not None:
                 estado, motivo = "falha", erro_banco
             else:
-                _zerar_pg_stat_statements(arq)
+                if cfg.coleta_interna:
+                    _zerar_pg_stat_statements(arq)
                 registrar(f"gerador: {cfg.concorrencia} clientes, {cfg.aquecimento_s} s de "
                           f"aquecimento e {cfg.medicao_s} s de medição")
                 codigo = c.gerador(["executar", "--saida", "/saida",
@@ -321,7 +350,7 @@ def executar_uma(pl: Plano, ex: Execucao, janela: str, resultados: str,
         extra["imagens"] = _imagens(inspecao)
         extra["recursos"] = _recursos(inspecao)
         try:
-            _capturar(arq, inspecao, pasta)
+            _capturar(arq, inspecao, pasta, cfg.coleta_interna)
         except Exception as erro:  # a captura não pode esconder o motivo original
             registrar(f"captura incompleta: {erro!r}")
         c.desligar()
