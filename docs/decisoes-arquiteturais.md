@@ -64,6 +64,8 @@ O Eixo C consiste precisamente em escrita sustentada por horas. Uma queda de vaz
 
 **Estado.** Aceita. Revisada em 24/10/2026.
 
+**Revisão do item 2 (12/11/2026, ADR-069, item 5): taxa e padrão do controle com `fio` na longa duração.** Aprovada pelo Léo.
+
 **Revisão de 24/10/2026.** A caracterização (resultados em `ambiente/README.md`) mostrou que o cache pSLC é dinâmico, com ≈ 62 GiB com o disco 3% ocupado, e que depois dele a vazão sequencial não tem um regime único: fica entre 0,5 e 1,1 GiB/s enquanto o controlador esvazia o cache e sobe para 2,0 GiB/s em seguida. A premissa de executar fora da faixa de cache não se sustenta, porque, a taxas de escrita abaixo da capacidade de esvaziamento, o dispositivo nunca sai do cache. O controle passa a ser:
 
 1. Taxa de escrita e latência do dispositivo, e bytes gravados por container, amostradas a cada segundo em todas as execuções do Eixo C e no teste de longa duração.
@@ -99,6 +101,8 @@ O Eixo C consiste precisamente em escrita sustentada por horas. Uma queda de vaz
 **Efeito sobre a comparação.** Corrige um viés que favoreceria a arquitetura poliglota. Introduz o risco de o processo de relay se tornar o gargalo do eixo, o que é mitigado medindo sua vazão isoladamente antes do experimento principal.
 
 **Estado.** Aceita.
+
+**Revisão de 12/11/2026, com o orientador: papel da ingênua.** A configuração ingênua fica nas execuções curtas como referência de teto, identificada assim no artigo, e fica fora da longa duração (ADR-069). O PostgreSQL dela guarda só os pedidos, sem tabela de alta rotatividade, e os fenômenos que a longa duração mede (tuplas mortas, autovacuum e inflação) aparecem na `tarefas` da consolidada e na tabela de saída da *outbox*. A comparação principal (consolidada contra *outbox*) não muda.
 
 ---
 
@@ -325,6 +329,16 @@ montagem, impossíveis sob virtualização.
 **Efeito sobre a comparação.** Desfavorece o PostgreSQL em pequena medida: ele recebe duas sondas sem equivalente do outro lado, o `pgstattuple_approx` no teste de longa duração e o custo contínuo do `pg_stat_statements`. No Eixo B, as três configurações gravam o dado de negócio no PostgreSQL, então essas sondas valem para todas elas. O custo total é medido no piloto e reportado.
 
 **Estado.** Aceita. O item 6 é executado como define a ADR-066 (08/11/2026): sem coleta interna, o `pg_stat_statements` continua carregado, mas sem rastrear. Executado na janela `20261108-2233` (fila consolidada do Eixo B, c = 8, 3 execuções com coleta e 3 sem): nenhuma diferença de vazão, latência ou CPU superou a variação entre repetições. A maior diferença foi de 0,88 desvio padrão, no p95 do consumo. A vazão de enfileiramento diferiu em −0,06% e a CPU do PostgreSQL em −0,6%. Os intervalos ficam como estão. Análise em `harness/analise/custo_coleta.py`; tabelas em `resultados/processados/custo-coleta-20261108-2233-*.csv`.
+
+**Revisão do item 4 (12/11/2026, ADR-069, item 3): `pgstattuple_approx` só nas execuções longas do Eixo B, e idade das transações a cada 60 s em todos os PostgreSQL da longa duração.** Aprovada pelo Léo.
+
+**Complemento da revisão do item 4 (15/11/2026): criação da extensão `pgstattuple`.** O teste funcional da longa mostrou que nenhum esquema do Eixo B cria a extensão. Só o teste do harness com pgbench a criava, e por isso a falta não apareceu antes. Sem ela, o coletor registrava o erro a cada 5 min e não gravava as tuplas mortas da fila.
+
+- **Correção:** o coletor do PostgreSQL executa `CREATE EXTENSION IF NOT EXISTS pgstattuple` ao conectar, só quando recebe `--pgstattuple`. Isso acontece apenas nas execuções longas do Eixo B, na consolidada e na *outbox*.
+- **Alternativa descartada:** criar a extensão nos esquemas do B. Os estados iniciais mudariam depois das curtas e precisariam ser preparados de novo.
+- **Efeito sobre a comparação:** nenhum mensurável. A criação é uma única alteração de catálogo no início da execução, antes do aquecimento, sem atividade em segundo plano. Ela vale igualmente para as duas arquiteturas do B na longa. O custo da sonda continua o descrito no item 4.
+
+Aprovada pelo Léo em 15/11/2026.
 
 ---
 
@@ -654,6 +668,17 @@ Divisão definida em 03/11/2026, com o serviço de busca em 1 GiB nas duas arqui
 
 **Estado.** Aceita. Revisada em 30/10/2026: produto interno no `pgvector`, e calibração pelo recall@100 com piso de 100 (antes: cosseno nos dois e recall@10).
 
+**Calibração (09/11/2026, ADR-067, item 2).**
+- **Valores escolhidos:**
+  - `pgvector` 0.8.7: `hnsw.ef_search` = 260, com recall@100 médio de 0,9506; 270 e 280 também passam.
+  - Qdrant 1.19.2: `hnsw_ef` = 120, com 0,9531; 130 e 140 também passam.
+- **Valores no padrão de busca:** com `ef` = 100, os recalls eram de 0,883 e 0,944.
+- **Vizinhos exatos:** conferidos em quatro consultas contra a busca exata do próprio PostgreSQL, sem índice. As listas são idênticas.
+- **Consultas com recall perto de zero no `pgvector`:** com `ef` até 230, algumas consultas têm recall perto de zero, porque a busca no grafo termina numa região sem nenhum dos vizinhos exatos. Com `ef` = 100, as 100 respostas da consulta 442 ficam todas abaixo do centésimo vizinho exato. Com 260, o pior recall é 0,31.
+- **Por que o Qdrant atinge o alvo com `ef` menor:** a coleção fica em 6 segmentos, e cada um é buscado com o `ef` pedido.
+
+O `ef` maior no `pgvector` encarece a busca vetorial da consolidada em relação ao padrão (40). É o custo de devolver vizinhos da mesma qualidade. Registros em `resultados/calibracao/ef-consolidada.json` e `ef-poliglota.json`; vizinhos exatos em `eixo-a-busca/dados/vizinhos-exatos.npy`, com hash em `vizinhos-exatos.json`.
+
 ---
 
 ## ADR-039 — Fusão por RRF num serviço de busca dentro do sistema sob teste
@@ -849,6 +874,32 @@ As sugestões que a documentação do OpenSearch trata como experimento não sã
 
 **Estado.** Aceita.
 
+**Qualidade (09/11/2026, item 5).** Passagem com as 3.452 consultas, uma de cada vez, com o `ef` calibrado (ADR-038: 260 no `pgvector`, 120 no Qdrant):
+
+| Arquitetura | nDCG@10 | recall@10 | Duração da passagem |
+|---|---|---|---|
+| Consolidada | 0,3698 | 0,5906 | 1.917 s (0,55 s por consulta) |
+| Poliglota | 0,4443 | 0,6538 | 35 s (10 ms por consulta) |
+
+A poliglota tem qualidade maior. Isso já estava previsto como diferença declarada na ADR-039: o ramo vetorial tem o mesmo recall@100 nos dois lados (ADR-038), e o que muda é a ordenação léxica (`ts_rank_cd` em vez de BM25) e o tratamento de texto. A duração mostra o outro lado da mesma diferença estrutural: com a semântica OU, o PostgreSQL calcula o `ts_rank_cd` de todo documento que contém algum termo. Para comparação, a busca vetorial exata sozinha tem nDCG@10 de 0,5018 (ADR-035), e a fusão fica abaixo disso nas duas arquiteturas. A separação da qualidade por ramo, que mostra quanto da diferença vem do ramo léxico, fica para a análise (Fase 4). Os resultados estão em `resultados/qualidade/a-consolidada.json` e `a-poliglota.json`, com o nDCG e o recall de cada consulta.
+
+**Revisão do item 6 (10/11/2026, ADR-067, item 6): aquecimento de 300 s.** Aprovada pelo Léo.
+- **Contexto.** Na rampa do Eixo A (janela `20261109-2139`), o critério das durações falhou na consolidada com 2 clientes. A vazão do último minuto da medição ficou 12,4% acima da do primeiro, e o limite era 5%.
+- **Diagnóstico.** Saiu de `harness/analise/calibracao.py`.
+  - **Ruído:** com 110 a 330 consultas por minuto e CV de 0,65 a 0,91 nas latências, a diferença entre dois minutos oscila de 5 a 9 pontos só pelo sorteio das consultas. A estimativa é sqrt(2) · CV / sqrt(n). Uma simulação de clientes em laço fechado com as latências observadas dá a mesma ordem. Nessa simulação, um sistema estacionário passa dos 5% com probabilidade de 38 a 61%.
+  - **Tendência:** a inclinação dentro da medição não tem sinal consistente entre os níveis.
+  - **Aquecimento incompleto:** o último minuto do aquecimento ficou abaixo da média da medição em todos os níveis até a saturação: −13,2%, −6,9%, −6,3% e −5,4% com 1, 2, 4 e 8 clientes. Na poliglota a diferença não passou de 0,4% em nenhum nível.
+
+  | Clientes | Consolidada, 1º e 2º min do aquecimento | Consolidada, média da medição |
+  |---|---|---|
+  | 1 | 1,3 e 1,6 consultas/s | 1,86 consultas/s |
+  | 2 | 2,9 e 3,3 | 3,52 |
+  | 4 | 4,5 e 4,7 | 5,0 |
+  | 8 | 4,8 e 5,0 | 5,28 |
+- **Decisão.** Aquecimento de 300 s nas execuções curtas do Eixo A, nas duas arquiteturas. A medição continua com 300 s, e o critério dos 5% continua o mesmo para os outros eixos.
+- **Justificativa.** A consolidada ainda está esquentando no fim dos 120 s. Com 300 s de aquecimento, a medição começa no sexto minuto, onde a curva já estabilizou nos quatro níveis. A falha do critério com 2 clientes vem sobretudo do ruído, então aumentar a medição não resolveria. A variação entre repetições das execuções curtas mede esse ruído diretamente.
+- **Efeito sobre a comparação.** Favorece a consolidada, que é a que ainda esquentava. Com 120 s, o primeiro minuto da medição ficava em média 1,4% abaixo da média da medição (de 1 a 8 clientes), um viés de cerca de 0,3% contra ela na média dos 5 minutos. A poliglota não muda, porque já estava estável. Cada execução do A fica 3 minutos mais longa.
+
 ---
 
 ## ADR-049 — Coletores internos do OpenSearch e do Qdrant
@@ -888,6 +939,8 @@ As sugestões que a documentação do OpenSearch trata como experimento não sã
 
 **Estado.** Aceita. Revisada em 08/11/2026: o comando de enfileiramento deixou de chamar `pg_notify` (revisão da ADR-051).
 
+**Revisão do item 2 (10/11/2026, ADR-054).** Nas execuções com taxa fixa, o cabeçalho leva a origem da latência definida na revisão da ADR-054, em Unix e no relógio monotônico. É o instante agendado do envio quando o produtor ainda estava ocupado nessa hora, e o início real do enfileiramento quando ele estava livre. Assim, a latência fim a fim inclui a espera causada pelo sistema sob teste. O tamanho e a carga útil não mudam. Em laço fechado, nada muda.
+
 ---
 
 ## ADR-051 — Retirada e espera na fila consolidada
@@ -918,6 +971,8 @@ As sugestões que a documentação do OpenSearch trata como experimento não sã
 | 32 | 1.737/s | 34.480/s |
 
 O commit que avisa toma um bloqueio global e espera o próprio `fsync` (cerca de 0,7 ms no P510, ver `ambiente/README.md`), sem dividir a gravação com os outros commits. Na consolidada completa, com 32 produtores e 32 consumidores, o aviso deu 1.734 tarefas/s, com o PostgreSQL em 0,3 núcleo; a consulta a cada 100 ms consumiu 13 mil tarefas/s, com o PostgreSQL saturado em 10,4 núcleos. A latência fim a fim com 4 clientes foi de 2,9 ms com aviso e de 3,3 ms com consulta.
+
+**Correção (10/11/2026).** Os 3,3 ms com consulta e 4 clientes foram medidos num momento sem atraso acumulado na fila. Na rampa da calibração, a mesma configuração deu 1,7 ms nos primeiros 10 s e ~25 ms depois de uma perturbação que não drenou. Com espera por aviso, deu 2,8 ms, estável. A causa e a forma de medir a latência fim a fim estão na revisão da ADR-054.
 
 ---
 
@@ -981,6 +1036,39 @@ O commit que avisa toma um bloqueio global e espera o próprio `fsync` (cerca de
 
 **Estado.** Aceita. Revisada em 08/11/2026, junto com a ADR-051: a espera por aviso (`LISTEN`, com `pg_notify` no enfileiramento) foi trocada pela consulta a cada 100 ms. O modo por aviso continua disponível no relay (`TCC_ESPERA=aviso`) para a medida do teto na calibração. Primeira medida, sem valor de calibração (07/11/2026, banco recém-preparado, 32 produtores e 32 consumidores): o relay publicou cerca de 15,6 mil mensagens/s, sempre em lotes cheios, com as conexões esperando a confirmação do RabbitMQ, enquanto os produtores gravavam 24,6 mil linhas/s; nesse nível, o relay é o gargalo.
 
+**Vazão isolada (09/11/2026, item 5 e ADR-067, item 1).** Medida dentro do protocolo, com o `max_wal_size` final (8 GB, ADR-055). A *outbox* foi restaurada da cópia inicial e passou por `fstrim` e 20 min de repouso. Postgres, RabbitMQ e relay subiram com o `cpuset` do sistema sob teste, e o script rodou nos núcleos do gerador. Configuração: 2 trabalhadores, lotes de 100, espera por consulta e 8 consumidores.
+
+| Medida | Valor |
+|---|---|
+| Vazão em regime (de 90% a 10% das linhas restantes) | 20.886 mensagens/s |
+| Vazão média até a tabela esvaziar | 20.379 mensagens/s |
+| Linhas | 1 milhão, todas consumidas, sem repetição |
+| Tabela de saída vazia | 49,1 s |
+| Fila vazia | 58,2 s |
+
+Na busca do `max_wal_size`, com c = 32, a *outbox* consumiu de 10,2 a 10,6 mil mensagens/s, cerca de 50% da vazão isolada. Isso fica abaixo do critério de 90% (ADR-067, item 6), e os 2 trabalhadores ficam. A primeira medida de 07/11, com o relay como gargalo, foi feita sem protocolo e com o `max_wal_size` padrão. O critério volta a ser aplicado em cada nível da rampa. Registro em `resultados/relay/vazao-isolada.json`.
+
+**Revisão do item 5 (10/11/2026, ADR-067): relay como gargalo com 32 clientes.** Aprovada pelo Léo.
+
+*Contexto.* Na rampa do Eixo B (janela `20261110-0928`), o critério do relay não disparou em nenhum nível. O máximo foi 71% da vazão isolada, com 16 clientes. Com 32 clientes, porém:
+- os produtores enfileiraram ~25 mil/s desde o início;
+- o relay entregou no máximo 16,2 mil/s nos primeiros 30 s, 78% da vazão isolada, e caiu para ~11 mil/s com a tabela de saída acima de 4 milhões de linhas;
+- o PostgreSQL da *outbox* ficou em ~2,5 núcleos.
+
+O relay foi, portanto, o componente que limitou esse nível. A média da medição (10.290/s, 49%) ficou longe dos 90% porque a vazão isolada foi medida sem enfileiramento concorrente e superestima a capacidade do relay sob carga. Os últimos ~90 s dessa execução também passaram pelo esgotamento do cache pSLC do SSD (ADR-067).
+
+*Decisão.*
+1. Os 2 trabalhadores ficam, e o critério da ADR-067, item 6, não muda.
+2. A vazão sustentável da *outbox* (14.871/s com 16 clientes) é reportada como limite inferior, com a observação de que, com 32 clientes, o relay com 2 trabalhadores foi o gargalo.
+3. A vazão isolada continua sendo reportada, com a ressalva de que não vale como capacidade do relay com produtores concorrentes.
+
+*Justificativa.*
+- O critério foi fixado antes das rampas para não ser ajustado depois de ver os dados, em nenhuma direção.
+- Com 16 clientes, a *outbox* já sustenta 2,6 vezes a vazão da consolidada. O sentido da comparação não depende do nível 32.
+- A *outbox* a ~25 mil/s grava ~63 GiB em menos de 7 min. Uma nova execução com 32 clientes e mais trabalhadores passaria do cache pSLC durante a medição e misturaria o efeito do relay com o do SSD.
+
+*Efeito sobre a comparação.* Favorece a consolidada: a vazão sustentável da *outbox* fica limitada por uma escolha do autor (item 3), não por recomendação de mantenedor, e é reportada como limite inferior. A alternativa descartada era passar a 4 trabalhadores, medir de novo a vazão isolada e repetir a *outbox* com 32 clientes, ao custo de ~1,5 h.
+
 ---
 
 ## ADR-054 — Gerador e modelo de carga do Eixo B
@@ -1013,6 +1101,50 @@ O commit que avisa toma um bloqueio global e espera o próprio `fsync` (cerca de
 
 **Estado.** Aceita.
 
+**Revisão dos itens 2 e 5 (10/11/2026, ADR-067): latência fim a fim com taxa fixa.** Aprovada pelo Léo.
+
+*Contexto.* Na rampa do Eixo B, níveis 1 a 4 (janela `20261110-0402`), a latência fim a fim da fila consolidada com espera por consulta deu p50 de 171 ms com 1 cliente, 96 ms com 2 e 24 ms com 4. A *outbox* e a ingênua ficaram estáveis, em 3,6 a 4,5 ms e 1,9 a 2,2 ms.
+- **Com 1 e 2 clientes:** cada consumidor achou a fila vazia uma única vez na execução inteira, nos primeiros milissegundos. Dormiu 100 ms (ADR-051, item 3), e o produtor enfileirou ~260 tarefas nesse intervalo. Esse atraso continuou na fila até o fim, com a profundidade variando poucas tarefas em 7 minutos.
+- **Com 4 clientes:** a latência foi de 1,7 ms nos primeiros 10 s. Depois, uma perturbação deixou ~140 tarefas de atraso, e a latência ficou em ~25 ms até o fim.
+- **Causa:** no modelo do item 2, produtor e consumidor da consolidada fazem um commit cada um por tarefa e andam no mesmo ritmo. O consumidor fica com utilização perto de 1 e não tem folga para drenar um atraso.
+- **Nas poliglotas é diferente:** o RabbitMQ empurra as mensagens e confirma de forma assíncrona, o que deixa o consumidor com folga.
+
+Por isso, nesse modelo, a latência fim a fim da consolidada mede o transitório da partida, não o mecanismo de fila, e varia ao acaso entre repetições. A vazão sustentável não é afetada.
+
+*Decisão.*
+1. **Vazão sustentável:** continua medida como no item 2, com N produtores e N consumidores em laço fechado, nas rampas e nas execuções curtas de vazão. O critério do item 5 não muda.
+2. **Latência fim a fim:** medida em execuções próprias, com os produtores em taxa fixa (laço aberto).
+   - **No plano:** a chave `taxas` (mensagens/s, a soma de todos os produtores), aceita só no Eixo B. O identificador da execução termina em `_t<taxa>`.
+   - **Produtores e consumidores:** 32 de cada, o nível mais alto da faixa (item 3), iguais nas três arquiteturas.
+   - **Agenda uniforme:** o envio k está agendado para o início do aquecimento mais k/R, com R a taxa, e cabe ao produtor k mod 32. Cada produtor tem uma operação em curso por vez. Se a anterior ainda não terminou na hora agendada, o envio sai logo que ela termina, sem pular o agendamento.
+   - **Origem da latência:** o `ts_us` e a latência de `enfileira` e de `fim_a_fim` partem do instante agendado quando o produtor ainda estava ocupado com o envio anterior nessa hora. Assim, a espera causada pelo sistema sob teste entra na latência, em vez de reduzir a carga oferecida (correção da omissão coordenada). Quando o produtor estava livre, eles partem do início real do envio, para que a resolução do temporizador do gerador (cerca de 1 ms no `uvloop`) não entre na latência. O cabeçalho da mensagem leva a origem usada (revisão da ADR-050).
+   - **Taxas:** 25%, 50% e 75% da menor vazão sustentável máxima entre as três arquiteturas na rampa (níveis 1 a 32), arredondadas para baixo na centena. Os valores entram na proposta das execuções curtas (ADR-067, item 7).
+   - **Validade:** na medição, a taxa de enfileiramento fica a menos de 1% da planejada e a fila não cresce (item 5). Se uma arquitetura não cumprir isso, a execução é reportada como taxa não sustentada por ela, não como latência.
+   - **Diagnóstico:** o `gerador.json` registra a taxa, quantos envios encontraram o produtor ocupado, quantos saíram mais de 1 ms depois do agendado e o maior atraso.
+3. **Durações e erros:** iguais aos do item 6.
+
+*Justificativa.*
+- **Laço aberto para latência:** benchmarks de filas medem a latência fim a fim com taxa de produção fixa e a vazão máxima em teste separado; é o que faz o OpenMessaging Benchmark. Em laço fechado e no limite da vazão, a latência de uma fila não tem valor de regime.
+- **Contagem a partir do instante agendado:** evita que um produtor atrasado esconda a espera, como faz o wrk2.
+- **32 produtores:** dão capacidade de produção às três arquiteturas em todas as taxas. A mais lenta por produtor é a ingênua, com ~540 envios/s com 1 cliente.
+- **Agenda uniforme:** é a do limitador de taxa usual e não acrescenta rajadas sorteadas.
+
+*Efeito sobre a comparação.*
+- **Favorece a consolidada em relação ao modelo anterior:** o atraso congelado da partida sai da medida.
+- **Custo da espera por consulta:** passa a aparecer quando a fila esvazia, como a ADR-051 declara. Vale na consolidada e no relay da *outbox* (ADR-053).
+- **32 consumidores:** é o valor da faixa mais favorável à consolidada. Uma tarefa que chega com a fila vazia espera, em média, cerca de 100/(C + 1) ms até a próxima consulta de algum consumidor ocioso. As consultas vazias, até 320 por segundo, entram no custo medido. Nas poliglotas, que recebem mensagens empurradas, o número de consumidores pesa pouco na latência.
+- **Agenda uniforme:** forma filas menores que chegadas de Poisson em todas as arquiteturas, o que fica declarado.
+
+*Teste funcional (10/11/2026).* Imagem `tcc-gerador-fila:2`, fora do protocolo e sem valor de medição. As três arquiteturas foram restauradas da cópia inicial e rodaram com 32 produtores e 32 consumidores, 10 s de aquecimento e 30 s de medição, a 1.400 e a 4.200 mensagens/s.
+- **Taxa e fila:** a taxa obtida ficou a menos de 0,003% da planejada, e a fila não cresceu. Não houve erros.
+- **Agenda:** de 0,1% a 0,5% dos envios encontraram o produtor ocupado, com atraso máximo de 33 a 84 ms, registrados no `gerador.json`.
+- **Latência fim a fim (p50 / p99):**
+  - consolidada: 49,7 / 98,9 ms a 1.400/s e 34,3 / 98,4 ms a 4.200/s;
+  - ingênua: 2,7 / 4,1 ms e 2,8 / 4,2 ms;
+  - *outbox*: 4,0 / 71 ms e 4,5 / 7,9 ms.
+
+*Correção do efeito dos 32 consumidores.* A estimativa de ~100/(C + 1) ms de espera supunha consumidores ociosos com fases independentes. No teste, eles se sincronizaram: esvaziam a fila juntos, dormem os mesmos 100 ms (ADR-051, item 3) e acordam juntos. Foram ~308 retiradas vazias por segundo a 1.400/s, quase os 32 consumidores a cada ciclo. Com isso, a espera média fica perto da metade do intervalo, e o p99, perto do intervalo inteiro. Os 32 consumidores não são, portanto, o valor mais favorável à consolidada. Ao esvaziar a fila mais depressa, eles fazem todos dormirem juntos. O custo da espera por consulta pesa mais que o declarado e desfavorece a consolidada. A configuração não muda, porque o intervalo vem das filas de referência (ADR-051) e o número de consumidores é igual nas três arquiteturas.
+
 ---
 
 ## ADR-055 — Divisão da memória e configuração dos sistemas no Eixo B
@@ -1044,6 +1176,25 @@ O commit que avisa toma um bloqueio global e espera o próprio `fsync` (cerca de
 - Os ajustes guiados por aviso valem para todas as arquiteturas que usam o sistema avisado.
 
 **Estado.** Aceita.
+
+**Revisão do item 4 (09/11/2026, ADR-067, item 3): `max_wal_size` = 8GB nos três PostgreSQL.** No piloto, com o padrão (1 GB), o PostgreSQL da fila consolidada avisou "checkpoints are occurring too frequently" de 22 a 25 vezes por execução, com c = 8. A busca rodou dentro do protocolo, com 32 produtores e 32 consumidores, contando os avisos da execução inteira. Como o valor vale para os três PostgreSQL do eixo, a *outbox*, que gravou mais WAL que a consolidada nesse nível, também foi testada:
+
+| `max_wal_size` | Consolidada: avisos (checkpoints) | Consolidada: consumo/s | *Outbox*: avisos (checkpoints) | *Outbox*: consumo/s |
+|---|---|---|---|---|
+| 8 GB | 0 (3) | 12.629 | 0 (4) | 10.239 |
+| 4 GB | 0 (8) | 9.860 | 1 (11) | 10.570 |
+| 2 GB | 11 (16) | 8.607 | 20 (23) | 10.234 |
+
+O primeiro valor, 8 GB, veio da taxa de WAL do piloto (pico de 41 MiB/s com c = 8). A consolidada passou sem aviso com 8 GB e com 4 GB e avisou com 2 GB. A *outbox* avisou com 2 GB, com intervalos de até 12 s, e uma vez com 4 GB. Esse único aviso saiu 4 s depois do fim da medição, com o gerador já parado e o relay esvaziando sozinho os 4,1 milhões de linhas que tinham sobrado na tabela de saída. A ADR-067 conta a execução inteira, e a regra foi aplicada como estava. Fica 8 GB, o menor valor sem aviso nos dois. A ingênua não foi testada à parte: no piloto, com c = 8, gravou 189 bytes de WAL por enfileiramento (cerca de 1 MiB/s, 1 checkpoint), contra 2.755 bytes da consolidada e 1.559 da *outbox*, porque o seu PostgreSQL guarda só os pedidos. O RabbitMQ não deu alarme.
+
+**Efeito:**
+- Favorece o lado PostgreSQL das três arquiteturas, com menos checkpoints e menos páginas inteiras no WAL.
+- Nessas execuções únicas, o consumo da fila consolidada caiu junto com o `max_wal_size` (12,6 mil/s com 8 GB, 8,6 mil/s com 2 GB).
+- O consumo da *outbox* ficou igual nos três valores, o que é coerente com o limite estar no relay (ADR-053).
+- São execuções únicas, com a vazão do primeiro e do último minuto da medição diferindo em até 39% na consolidada e 62% na *outbox*, porque a fila cresce o tempo todo com c = 32. A relação entre o `max_wal_size` e a vazão não é afirmada a partir delas.
+- A regra escolheu o valor pelos avisos, não pela vazão.
+
+Janelas `20261109-1737`, `-1831`, `-1923`, `-2019` e `-2048`.
 
 ---
 
@@ -1155,6 +1306,15 @@ O commit que avisa toma um bloqueio global e espera o próprio `fsync` (cerca de
 
 **Estado.** Aceita. Revisada em 08/11/2026, com aprovação do Léo: a versão anterior usava 1 dia (o padrão do código do TSBS). Medido em desenvolvimento com 8 trabalhadores: o dia inteiro carregava em 31 s no TimescaleDB e em 71 s no InfluxDB, e os efeitos de início pesariam na vazão. Com 3 dias, a carga dura de cerca de 90 s a 215 s nesse nível.
 
+**Item 4 resolvido pela ADR-069, item 4 (12/11/2026):** 31,25 dias com os mesmos parâmetros, gerados durante a execução. Aprovado pelo Léo.
+
+**Correção (10/11/2026, rampa da ADR-067).** A frase "cada carga grava menos que os 62 GB do cache pSLC" está errada. Ela tomou o tamanho da tabela (~20 GB) pelo volume gravado no SSD. Medido no coletor do host, nas 12 execuções da rampa:
+- **TimescaleDB:** cada carga gravou ~75 GiB, contando os 10 s de aquecimento. Desse total, ~27 GiB foram de WAL, e o restante, dos arquivos de dados e dos índices. A compressão gravou mais 10 a 14 GiB.
+- **InfluxDB:** cada carga gravou de 22 a 29 GiB.
+- **Esgotamento do cache:** no TimescaleDB, o cache se esgotou em todos os níveis, por volta de 63 a 66 GiB gravados, com cerca de 80% das métricas carregadas. Depois disso, a vazão da carga caiu de 40% a 80%, com o disco em 0,3 a 0,7 GB/s, a faixa pós-cache da caracterização.
+
+Pela ADR-004 (revisão de 24/10/2026), essa queda é reportada como custo do TimescaleDB neste hardware, porque é o volume gravado por ele que leva o disco além do cache, e não é descontada. O efeito sobre a comparação deixa de ser neutro nesse ponto: favorece o InfluxDB. Os bytes gravados por métrica entram como resultado (ADR-004, item 4, e ADR-065, item 4).
+
 ---
 
 ## ADR-061 — Carga e consultas do Eixo C
@@ -1213,6 +1373,16 @@ O commit que avisa toma um bloqueio global e espera o próprio `fsync` (cerca de
 
 **Estado.** Aceita. Na implementação, o InfluxDB passou a rodar com o usuário 1000: a imagem roda como o usuário 1500 e não ajusta o dono do volume, que o orquestrador cria com o usuário 1000. É uma mudança operacional, sem efeito no comportamento do banco.
 
+**Revisão do item 4 (09/11/2026, ADR-067, item 3): `max_wal_size` = 32GB no TimescaleDB.** No piloto, com o valor do `timescaledb-tune` (1 GB), o TimescaleDB avisou "checkpoints are occurring too frequently" 83 vezes por execução, durante a carga. A busca rodou dentro do protocolo, com 32 trabalhadores, contando os avisos da execução inteira:
+
+| `max_wal_size` | Avisos | Checkpoints | Carga | WAL na carga |
+|---|---|---|---|---|
+| 1 GB (piloto, c = 8) | 83 | 83 | 91,5 s (11,3 milhões de métricas/s) | 30,0 GiB |
+| 32 GB | 0 | 1 | 105,9 s (9,8 milhões/s) | 27,5 GiB |
+| 16 GB | 3 (25 a 29 s de intervalo) | 3 | 90,4 s (11,5 milhões/s) | 28,5 GiB |
+
+O primeiro valor testado, 32 GB, veio da taxa de WAL do piloto (cerca de 330 MiB/s na carga). Como 16 GB avisou, fica 32 GB, o menor valor da grade sem aviso. O InfluxDB não deu aviso equivalente e não muda. **Efeito:** favorece o TimescaleDB, com menos checkpoints e cerca de 8% menos WAL na carga em relação ao piloto. Nessas execuções únicas, a vazão da carga não mostrou ganho: com 32 GB ela foi a menor das três. A comparação de vazão sai das repetições das execuções curtas, não daqui. Execuções `20261109-180435` e `20261109-185832`, janelas `20261109-1737` e `20261109-1831`.
+
 ---
 
 ## ADR-064 — Coletores do TimescaleDB e do InfluxDB
@@ -1261,6 +1431,20 @@ O commit que avisa toma um bloqueio global e espera o próprio `fsync` (cerca de
 
 Conferido também que nenhuma consulta do InfluxDB volta com erro no corpo da resposta, e que as duas bases devolvem as mesmas contagens e somas para as mesmas consultas.
 
+**Revisão do item 3 (10/11/2026, ADR-067): trecho em que a CPU do gerador é avaliada.** Aprovada pelo Léo.
+
+*Contexto.* Na rampa do Eixo C (janela `20261110-1455`), toda carga do TimescaleDB passou do cache pSLC por volta de 64 GiB gravados, e a vazão do resto da carga caiu de 40% a 80% (correção da ADR-060).
+- **Na média da carga inteira,** o gerador ficou em 2,92 a 2,99 núcleos com 8 a 32 trabalhadores, abaixo do limite de 3,4.
+- **Antes do esgotamento,** ficou em 3,43 a 3,47 núcleos, com o TimescaleDB em ~3,4 dos 12 núcleos.
+
+A fase lenta do disco diluía a média e escondia o limite que este item descreve.
+
+*Decisão.* A CPU do gerador, do sistema sob teste e, no Eixo C, a vazão de diagnóstico são medidas também no trecho da medição anterior aos primeiros 60 GiB gravados no SSD, contados desde o início da coleta da execução. O limiar é o mesmo da marcação do cache (ADR-067, revisão dos itens 5 e 6). O critério do gerador como gargalo usa esse trecho, com pelo menos 10 s de medição. Nas execuções que não chegam aos 60 GiB, o trecho é a medição inteira, e nada muda. A vazão reportada continua sendo a da carga inteira (item 2).
+
+*Justificativa.* O critério existe para saber se o cliente limita o banco. Na fase em que o disco limita, o gerador espera e a sua CPU cai, então a média da carga inteira mede o disco, não o cliente. O limiar de 60 GiB já é o usado para marcar o cache e não foi escolhido para este fim.
+
+*Efeito sobre a comparação.* Nenhum número muda. Com essa regra, o TimescaleDB com 8, 16 e 32 trabalhadores é reportado como limite inferior, o que reconhece que a vantagem dele sobre o InfluxDB está subestimada, como este item já previa. Nas execuções dos Eixos A e B, só a *outbox* com 32 clientes passa dos 60 GiB, com o gerador em ~1,1 núcleo, sem efeito. A regra vale para todos os eixos.
+
 ---
 
 ## ADR-066 — Piloto e medida do custo da coleta
@@ -1283,6 +1467,386 @@ Conferido também que nenhuma consulta do InfluxDB volta com erro no corpo da re
 **Execução (08 e 09/11/2026).**
 - **Piloto** (janela `20261108-1846`, 3 h 16 min): as 7 execuções terminaram `ok`, sem erros no gerador. Todos os coletores gravaram séries completas, e os resultados repetem os de desenvolvimento.
 - **Custo da coleta** (janela `20261108-2233`, 2 h 43 min): as 6 execuções terminaram `ok`. O resultado está na ADR-021, e a revisão da memória do gerador, na ADR-025.
+
+---
+
+## ADR-067 — Calibração
+
+**Contexto.** A Etapa 3.1 determina o ponto de saturação de cada arquitetura, para definir a faixa de concorrência das execuções curtas. Várias ADRs deixaram valores para esta etapa:
+- o `ef` da busca vetorial (ADR-038, item 3);
+- o `max_wal_size`, se o PostgreSQL avisar (ADR-055 e ADR-063, item 4);
+- a vazão isolada do relay (ADR-053, item 5);
+- o teto do aviso na fila consolidada (ADR-051, item 4);
+- a confirmação dos níveis e das durações (ADR-048, ADR-054 e ADR-061).
+
+No piloto (ADR-066), o PostgreSQL avisou "checkpoints are occurring too frequently" de 22 a 25 vezes por execução na fila consolidada e 83 vezes no TimescaleDB.
+
+**Decisão.**
+
+1. **Ordem:** configuração primeiro, rampas depois.
+   1. `ef` e passagem de qualidade do Eixo A.
+   2. `max_wal_size`.
+   3. Vazão isolada do relay, já com o `max_wal_size` final.
+   4. Rampas de concorrência.
+   5. Proposta das execuções curtas.
+
+   O `ef` e a qualidade não dependem de desempenho e rodam fora do protocolo. Todo o resto roda dentro dele.
+2. **`ef`:**
+   - **Vizinhos exatos:** produto interno das 3.452 consultas contra as 2.681.468 passagens. O cálculo é feito em float32, e os 200 melhores de cada consulta são reordenados em float64. O resultado fica gravado com hash em `eixo-a-busca/dados/`.
+   - **Varredura:** de 100 em diante, de 10 em 10, nos dois sistemas, com a mesma busca vetorial do serviço:
+     - no PostgreSQL, `ORDER BY embedding <#> ... LIMIT 100` com `hnsw.ef_search`;
+     - no Qdrant, `query_points` com `hnsw_ef` e limite de 100.
+   - **Escolha:** o menor valor com recall@100 médio de pelo menos 0,95, desde que os dois valores seguintes da grade também passem. O valor vai para o `TCC_EF_BUSCA` de cada serviço.
+   - **Depois:** a passagem de qualidade das duas arquiteturas (ADR-048, item 5).
+3. **`max_wal_size`:**
+   - **Valores testados:** potências de 2 GB, no nível mais pesado da rampa (32), contando os avisos da execução inteira.
+   - **Busca:** o primeiro valor testado é estimado pela taxa de WAL medida. Se a execução avisar, o valor dobra; se não avisar, testa-se a metade. Fica o menor valor sem aviso.
+   - **Onde vale:**
+     - no Eixo B, nos três PostgreSQL (ADR-055), conferido também na *outbox* com 32 clientes;
+     - no Eixo C, só no TimescaleDB (ADR-063).
+4. **Teto do aviso:** a fila consolidada com espera por aviso nos 6 níveis do Eixo B, uma execução por nível, nas janelas da rampa do eixo. No plano, isso é a chave `espera = "aviso"`, aceita só na consolidada do Eixo B. O identificador da execução termina em `_aviso`.
+5. **Rampas:**
+   - **Níveis:** os das ADRs (A: 1 a 64; B e C: 1 a 32).
+   - **Execuções:** cenário `calibracao`, uma repetição, protocolo completo, ordem sorteada dentro de cada janela.
+   - **Durações:** as mesmas das execuções curtas.
+     - A e B: 120 s de aquecimento e 300 s de medição.
+     - C: carga inteira, com prazo de 3.590 s.
+   - **Janelas:** quatro.
+     - A.
+     - B, níveis 1 a 4.
+     - B, níveis 8 a 32.
+     - C.
+
+   Se uma arquitetura não saturar dentro da faixa, a ampliação vira ADR.
+6. **Critérios, fixados antes das rampas:**
+   - **Saturação (A e C):** o menor nível em que dobrar a concorrência aumenta a vazão em menos de 10%.
+   - **Vazão sustentável (B, ADR-054, item 5):** a maior vazão de consumo num nível em que a fila não cresce. Isto é, a profundidade no fim da medição, menos a do início, fica em até 1% do que foi enfileirado na medição.
+   - **Relay como gargalo (ADR-053, item 5):** vazão da *outbox* de pelo menos 90% da vazão isolada.
+   - **Gerador como gargalo (A e B):** CPU do gerador acima de 1,7 núcleo, que é 85% dos seus 2 processos. Nesse caso, a revisão da ADR-048 ou da ADR-054 passa o gerador para 4 processos, e os níveis afetados são repetidos. No Eixo C vale a ADR-065.
+   - **Durações:** abaixo da saturação, a vazão do primeiro e do último minuto da medição difere em menos de 5%. Se não, aquecimento ou medição são revistos.
+7. **Proposta das execuções curtas:** feita com os dados da calibração.
+   - **Níveis:** saem os níveis em que todas as arquiteturas do eixo já saturaram.
+   - **Repetições:** dimensionadas pela variação entre repetições medida.
+   - **Janelas:** divisão definida na mesma proposta.
+
+**Justificativa.**
+- A configuração vem antes da rampa para que a rampa meça a configuração das execuções curtas.
+- Potências de 2 evitam ajuste fino.
+- Testar o menor valor sem aviso mantém o desvio do padrão no mínimo que o próprio sistema pede.
+- Os critérios são fixados antes de ver os dados para que os limiares não sejam escolhidos a favor de uma arquitetura.
+- Os vizinhos exatos reordenados em float64 eliminam o erro de arredondamento na fronteira da centésima posição.
+
+**Efeito sobre a comparação.**
+- **`max_wal_size` maior:** favorece o lado PostgreSQL de cada eixo, com menos checkpoints, menos páginas inteiras no WAL e menos bytes gravados por operação ou métrica. É a recomendação do próprio sistema, no texto do aviso. O RabbitMQ e o InfluxDB não deram aviso equivalente no piloto.
+- **`ef` calibrado:** remove o viés de esforço nos dois sentidos (ADR-038).
+- **Teto do aviso:** entra como achado, não como configuração medida.
+- **Rampas:** uma repetição só serve para escolher a faixa e não entra na análise.
+- **Quatro processos no gerador, se necessários:** valeriam para todas as arquiteturas do eixo.
+
+**Estado.** Aceita em 09/11/2026, com aprovação do Léo.
+
+**Execução das rampas (a partir de 09/11/2026).** Análise com `harness/analise/calibracao.py`, tabelas em `resultados/processados/calibracao-*.csv`.
+- **Eixo A** (janela `20261109-2139`, 14 execuções `ok`):
+  - **Consolidada:** satura em 4 clientes, com ~5,5 consultas/s e o sistema sob teste em 11,9 dos 12 núcleos. O p50 vai de 434 ms com 1 cliente a 9,9 s com 64.
+  - **Poliglota:** satura em 8 clientes, com ~1.010 consultas/s e também 11,9 núcleos. O p50 vai de 3,9 ms com 1 cliente a 61 ms com 64.
+  - **Gerador:** no máximo 0,15 núcleo, então não é gargalo em nenhum nível.
+  - **Durações:** o critério falhou na consolidada com 2 clientes, o que levou à revisão da ADR-048 (aquecimento de 300 s).
+- **Eixo B, níveis 1 a 4** (janela `20261110-0402`, 12 execuções `ok`):
+  - **Critérios:** nenhuma fila cresceu, o gerador ficou em no máximo 0,38 núcleo, o relay chegou a no máximo 20% da vazão isolada e não houve nível instável.
+  - **Consumo com 4 clientes:** consolidada 5.681/s, *outbox* 4.170/s e ingênua 1.775/s.
+  - **Teto do aviso (item 4):** 1.407/s com 1 cliente, 1.877/s com 2 e 1.873/s com 4, ou seja, satura em 2. A latência fim a fim com aviso fica em 1,7 a 2,8 ms.
+  - **Latência fim a fim:** na consolidada com espera por consulta, ela dependia do transitório da partida, o que levou à revisão da ADR-054 (latência com taxa fixa).
+- **Eixo B, níveis 8 a 32** (janela `20261110-0928`, 12 execuções `ok`; série completa de 1 a 32 em `calibracao-b-*.csv`):
+  - **Critérios:**
+    - **Consolidada:** a fila cresce em 8, 16 e 32. A vazão sustentável é de 5.681/s, com 4 clientes.
+    - ***Outbox*:** 14.871/s com 16 clientes. A fila cresce em 32.
+    - **Ingênua:** nenhuma fila cresceu. Com 32 clientes, consome 9.321/s, e o sistema sob teste usa 1,35 núcleo. Não saturou na faixa (item 5).
+    - **Gerador:** no máximo 1,28 núcleo, na ingênua com 32 clientes.
+    - **Relay:** no máximo 71% da vazão isolada, na média da medição, com 16 clientes. O critério não disparou.
+  - **Teto do aviso (item 4):** 1.866 a 1.875/s de 8 a 32 clientes, o que confirma a saturação em 2. A latência fim a fim com aviso sobe de 4,9 ms com 8 clientes para 17,5 ms com 32.
+  - **Consolidada saturada** (vazão e tuplas de `tarefas` a cada 30 s):
+    - **Com 8 clientes:** o consumo acompanhou o enfileiramento, ~11,2 mil/s, por ~3,5 min, com a fila quase vazia e uma única retirada vazia na execução. Depois, formou-se um atraso. O consumo caiu para 8,2 a 10,0 mil/s e não voltou, e a fila terminou com 403 mil tarefas.
+    - **Com 16 e 32 clientes:** nos primeiros 30 s, o consumo foi de 21,4 e 19,3 mil/s. Depois oscilou entre 7,5 e 14,7 mil/s, em oposição às tuplas mortas de `tarefas`. Foi mais alto logo depois de cada autovacuum e mais baixo quando as mortas passavam de ~900 mil. O PostgreSQL usou 8,2 e 10,5 núcleos.
+    - **Disco:** latência de escrita normal, de 0,2 a 0,5 ms.
+  - ***Outbox* com 32 clientes:**
+    - **Relay:** os produtores enfileiraram ~25 mil/s desde o início. O relay entregou 16,2 mil/s nos primeiros 30 s, 78% da vazão isolada. Depois caiu para ~11 mil/s, com a tabela de saída passando de 4 milhões de linhas. O PostgreSQL da *outbox* ficou em ~2,5 núcleos.
+    - **Critério do relay:** a média da medição foi de 10.290/s, 49% da vazão isolada, então o critério não disparou. Mesmo assim, o relay foi o componente que limitou esse nível. A vazão isolada, medida sem enfileiramento concorrente, superestima a capacidade do relay sob carga.
+    - **Disco:** aos ~330 s do início, com ~63 GiB gravados (cerca de 200 MB/s em média), a latência por escrita passou de ~0,5 ms para 3,6 a 5,7 ms. O enfileiramento caiu de ~27 mil/s para 4 a 9,6 mil/s. O volume coincide com o tamanho do cache pSLC (≈62 GiB, `ambiente/README.md`), então os últimos ~90 s da execução refletem o SSD.
+    - **Veredito:** a fila já crescia antes do evento do disco, então o veredito do nível não depende dele.
+    - **Volume gravado:** foi a única execução do B que chegou ao tamanho do cache, com 77,6 GiB gravados na execução inteira. A seguinte foi a *outbox* com 16 clientes, com 47,6 GiB.
+- **Eixo C** (janela `20261110-1455`, 12 execuções `ok`, das 14:55 às 21:18; `calibracao-c-*.csv`):
+  - **InfluxDB:** satura em 8 trabalhadores, com 4,99 milhões de métricas/s, contra 5,24 milhões com 16 (+4,9%) e 5,02 milhões com 32.
+    - **Limite:** é o próprio banco, com o sistema sob teste em 9,6 núcleos com 8 trabalhadores e 11,6 com 16. O gerador usa no máximo 1,56 núcleo.
+    - **Durações:** variação entre o primeiro e o último minuto de no máximo 3,5%.
+    - **Volume gravado:** de 22 a 29 GiB por execução.
+  - **TimescaleDB:** com a carga inteira (ADR-065, item 2), 2,94 milhões de métricas/s com 1 trabalhador, 7,20 milhões com 4, 9,99 milhões com 8 e 10,0 a 10,2 milhões com 16 e 32. Pelo critério, satura em 8.
+  - **TimescaleDB, cache pSLC:** todas as execuções passaram do cache, com 85,6 a 87,9 GiB gravados (correção da ADR-060).
+    - **Antes do esgotamento:** a vazão foi estável, de 3,0 a 3,2 milhões/s com 1 trabalhador, ~7,9 milhões com 4 e 11,2 a 11,9 milhões com 8, 16 e 32.
+    - **Depois:** caiu de 40% a 80%.
+    - **Critério das durações:** falhou com 1, 2 e 4 trabalhadores (−31%, −31% e −21%), porque o último minuto cai depois do esgotamento. Com 8 ou mais, a carga dura menos de 2 min depois do aquecimento, e o critério não se calcula.
+    - **Atribuição:** pela ADR-004, a queda é custo do TimescaleDB neste hardware. No Eixo C, a medição é a carga inteira (ADR-065), então não há aquecimento ou medição a rever.
+  - **TimescaleDB, gerador:** na média da carga inteira, o gerador ficou em 2,92 a 2,99 núcleos com 8 a 32 trabalhadores, abaixo do limite de 3,4 (85% das 4 CPUs lógicas). Antes do esgotamento do cache, porém, ficou em 3,42 a 3,48 núcleos, com o sistema sob teste em 3,2 a 3,7 dos 12 núcleos. A média da carga inteira dilui o limite com a fase lenta do disco. É o limite do cliente do TSBS que a ADR-065 descreve. Com a revisão da ADR-065, item 3, a análise aponta o gerador como gargalo com 8, 16 e 32 trabalhadores, e a vazão do TimescaleDB nesses níveis é limite inferior. O nível 8 é o do gerador, não o do banco.
+  - **Eficiência antes do esgotamento:** com 8 trabalhadores, ~0,3 núcleo do sistema sob teste por milhão de métricas/s no TimescaleDB e ~1,9 no InfluxDB.
+
+**Revisão dos itens 5 e 6 (10/11/2026): ingênua sem saturar e cache pSLC.** Aprovada pelo Léo.
+
+*Contexto.*
+- **Ingênua:** não saturou até 32 clientes. Consumiu 9.321/s com o sistema sob teste em 1,35 núcleo. O limite é o cliente: cada produtor espera a confirmação do broker a cada mensagem (ADR-052, item 3), ~3,4 ms com 32 clientes. Pelo item 5, ampliar a faixa vira ADR.
+- **Custo da ampliação:**
+  - com 64 clientes, o gerador passaria de 1,7 núcleo (~137 µs de CPU por mensagem na ingênua), o que exigiria 4 processos (item 6);
+  - se 64 ainda não saturasse, 128 conexões passariam do `max_connections` padrão do PostgreSQL (ADR-054, item 3).
+- **Cache pSLC:** a *outbox* com 32 clientes esgotou o cache do SSD na medição. As outras execuções do B gravaram no máximo 47,6 GiB.
+
+*Decisão.*
+1. **Faixa do Eixo B:** a faixa não é ampliada. A vazão da ingênua é reportada como "pelo menos 9.321/s, sem saturar até 32 clientes", com a causa: a confirmação por mensagem limita cada produtor.
+2. **Níveis do Eixo B nas execuções curtas:** pelo item 7, os 6 níveis ficam, porque a ingênua não saturou.
+3. **Marcação do cache pSLC:** a análise marca toda execução que gravar mais de 60 GiB no SSD, contados no coletor do host durante a coleta inteira da execução. O limiar fica abaixo dos ≈62 GiB do cache medido com o disco vazio (`ambiente/README.md`), porque o cache diminui com o disco mais ocupado. Execuções marcadas não saem da análise. A marcação é reportada junto com o resultado e declarada como ameaça à validade. Ela não muda nenhum critério.
+
+*Justificativa.*
+- A ingênua já supera a vazão sustentável da consolidada (9.321 contra 5.681/s), então o sentido da comparação não depende da ampliação, só o tamanho da diferença. A ampliação exigiria dois desvios só para uma arquitetura.
+- O limite de 32 clientes vem do padrão do PostgreSQL e dos 2 núcleos do gerador (ADR-018). É uma limitação do banco de ensaio, declarada.
+- O cache pSLC é a ameaça que a caracterização do SSD apontou. A marcação permite separar os efeitos do disco dos efeitos da arquitetura sem descartar dados.
+
+*Efeito sobre a comparação.*
+- **Item 1:** subestima a ingênua e favorece a consolidada no tamanho da diferença, nunca no sentido. O mesmo vale para a *outbox* (revisão da ADR-053). As vazões sustentáveis das três arquiteturas são limites inferiores da grade de níveis dobrados. A da consolidada fica entre 5.681/s (4 clientes) e o ponto em que ela deixou de sustentar 11,2 mil/s (8 clientes).
+- **Item 3:** neutro. As arquiteturas que gravam mais por mensagem chegam antes ao limite do cache, e isso é uma propriedade delas, que fica visível.
+
+**Proposta das execuções curtas (item 7, 11/11/2026).** Aprovada pelo Léo.
+
+*Contexto.*
+- **Saturação nas rampas:**
+  - A: consolidada em 4 clientes, poliglota em 8;
+  - B: a ingênua não saturou até 32 (revisão dos itens 5 e 6);
+  - C: InfluxDB em 8 trabalhadores; TimescaleDB em 8, com o gerador como gargalo (revisão da ADR-065, item 3).
+- **Variação entre repetições:** só o piloto a mediu (ADR-066). O CV foi de 0,6% a 1,1% no consumo do B e de 1% a 2% no p99.
+- **Diferenças entre arquiteturas no mesmo nível, na rampa:**
+  - a menor foi de ~15%, a consolidada contra a *outbox* no B com 32 clientes (11.866 contra 10.290/s);
+  - a maior foi de ~180 vezes, no A com 8 clientes.
+- **Taxas do B (ADR-054, revisão dos itens 2 e 5):** a menor vazão sustentável máxima da rampa é a da consolidada, 5.681/s. As taxas são 25%, 50% e 75% dela, arredondadas para baixo na centena: 1.400, 2.800 e 4.200/s.
+
+*Decisão.*
+1. **Configurações:** 43, no cenário `curta`.
+
+   | Grupo | Arquiteturas | Níveis | Durações | Configurações |
+   |---|---|---|---|---|
+   | A | consolidada, poliglota | 1, 2, 4, 8 | 300 s de aquecimento e 300 s de medição (revisão da ADR-048) | 8 |
+   | B, vazão | consolidada, ingênua, *outbox* | 1, 2, 4, 8, 16, 32, laço fechado | 120 s e 300 s | 18 |
+   | B, latência | as três | 32 produtores e 32 consumidores, a 1.400, 2.800 e 4.200/s | 120 s e 300 s | 9 |
+   | C | TimescaleDB, InfluxDB | 1, 2, 4, 8 | carga inteira, com prazo de 3.590 s (ADR-065) | 8 |
+
+   A fila consolidada usa a espera da composição, por consulta. A espera por aviso fica fora, porque o teto do aviso é um achado, não uma configuração medida (item 4).
+2. **Repetições:** 5 por configuração.
+3. **Teste:**
+   - **Comparação:** Mann-Whitney exato e bilateral, por nível e por métrica, entre a consolidada e cada poliglota.
+   - **Correção:** Holm dentro de cada nível, com nível de família de 0,05. São 2 comparações no B e até 4 na latência do B, com p50 e p99.
+   - **Tamanho de efeito:** Â12 de Vargha-Delaney e razão das medianas.
+   - **Pareamento:** o mesmo bloco usa a mesma semente nas arquiteturas (ADR-032). O pareamento entra só como descrição, pela razão entre as arquiteturas em cada bloco.
+   - **Consultas do C:** rodam depois da carga, sobre os mesmos dados, e não dependem do nível. São 20 observações por tipo de consulta e arquitetura (5 repetições × 4 níveis).
+4. **Janelas:** quatro, uma por grupo, cada uma com os 5 blocos completos e a ordem sorteada dentro de cada bloco (ADR-032).
+
+   | Janela | Plano | Execuções | Tempo estimado |
+   |---|---|---|---|
+   | A | `curta-a.toml` | 40 | ~20 h |
+   | B, vazão | `curta-b-vazao.toml` | 90 | ~41 h |
+   | B, latência | `curta-b-latencia.toml` | 45 | ~20 h |
+   | C | `curta-c.toml` | 40 | ~22 h |
+
+   As estimativas vêm da duração real das execuções nas rampas. As janelas rodam em sequência, nessa ordem. Uma janela pode ser interrompida entre execuções e retomada com `--retomar` (ADR-033).
+
+*Justificativa.*
+- **Níveis:** seguem a regra do item 7, fixada antes das rampas.
+- **5 repetições:** é o menor número em que o teste exato consegue rejeitar depois da correção.
+  - Com 5 contra 5, o menor p bilateral é 0,0079. Isso fica abaixo do limiar de Holm para 2 comparações (0,025) e para 4 (0,0125).
+  - Com 4, o menor p é 0,029, e nenhuma comparação do B passaria. Com 3, é 0,10.
+- **Poder:** com CV de ~1% e diferenças de pelo menos ~15%, 5 repetições já separam as distribuições por completo. O limite é a granularidade do teste exato, não o poder.
+- **Pareamento:** o Wilcoxon pareado com 5 pares tem menor p bilateral de 0,0625, então não serve como teste.
+- **Blocos completos dentro da janela:** uma deriva lenta da máquina se espalha igualmente pelas arquiteturas.
+
+*Efeito sobre a comparação.*
+- **Níveis:** neutros, porque a regra foi fixada antes dos dados. As latências do A com 16 a 64 clientes e do C com 16 e 32 trabalhadores ficam só na rampa, com uma repetição.
+- **5 repetições:** a variação foi medida só no piloto, em poucas configurações. A consolidada saturada do B oscila com o autovacuum (bloco do Eixo B, níveis 8 a 32) e pode variar mais entre repetições. Se a variação for maior, as diferenças pequenas podem não passar no teste. Isso vale nos dois sentidos e fica declarado.
+- **Limites inferiores já declarados:** a ingênua e a *outbox* no B (revisão dos itens 5 e 6 e da ADR-053) e o TimescaleDB com 8 trabalhadores no C (revisão da ADR-065, item 3). Eles favorecem a consolidada no B e o InfluxDB no C, sempre no tamanho da diferença.
+- **Volume no SSD:** as execuções do TimescaleDB passam de 60 GiB e são marcadas (revisão dos itens 5 e 6). Pela ADR-004, a queda depois do cache é custo dele.
+
+---
+
+## ADR-068 — Carga mista: busca sob ingestão temporal
+
+**Contexto.**
+- **Pergunta:** a QS4 pergunta o impacto da escrita intensiva sobre a latência de consulta na arquitetura consolidada, onde as duas competem pelos mesmos recursos. Na proposta, é o custo específico da consolidação (seção 2).
+- **Escolha da carga (12/11/2026, com o Léo):** a escrita é a ingestão do Eixo C, e a leitura é a busca do Eixo A. Na consolidada, as duas ficam no mesmo PostgreSQL. Na poliglota, ficam em motores separados, na mesma máquina e no mesmo cpuset.
+- **Dados das rampas (ADR-067):**
+  - **Busca:** a consolidada satura em 4 clientes. Com 2, usa 5,9 dos 12 núcleos, e a poliglota usa 3,9.
+  - **Ingestão:** o InfluxDB satura em 4,99 milhões de métricas/s. Por métrica, o TimescaleDB grava ~77 bytes no SSD (correção da ADR-060) e o InfluxDB, de 22 a 30. O InfluxDB gasta ~6 vezes mais CPU por métrica que o TimescaleDB.
+  - **Memória do InfluxDB:** a memória própria dele não passou de 0,93 GiB nas rampas com 1 a 4 trabalhadores.
+- **Alternativa descartada:** a fila do Eixo B como escrita. De 1.400 a 5.700 mensagens/s, a fila consolidada usa de 0,06 a 0,25 núcleo e quase não disputa recursos com a busca.
+
+**Decisão.**
+
+1. **Composições:** pasta `eixo-m-mista/`, eixo `m` no harness, com duas arquiteturas.
+   - **Consolidada:** um PostgreSQL de 19 GiB com o banco `busca` do Eixo A e o banco `benchmark` com TimescaleDB, mais o serviço de busca com 1 GiB, como no Eixo A.
+   - **Poliglota:** OpenSearch com 9 GiB (heap de 4,5 GiB, metade do container, ADR-036), Qdrant com 8 GiB, InfluxDB com 2 GiB e o serviço de busca com 1 GiB.
+   - **Divisão da poliglota:** pela regra da ADR-037, os 19 GiB dos motores são divididos na proporção da necessidade mínima medida. Os mínimos são ~4,8 GiB no OpenSearch, ~4,4 GiB no Qdrant e ~1 GiB no InfluxDB. A divisão dá 8,9, 8,2 e 1,9 GiB, arredondados para 9, 8 e 2 GiB. Cada motor fica com pelo menos o dobro do seu mínimo.
+   - **Estado inicial:** cópia do estado inicial do Eixo A (volumes do PostgreSQL, do OpenSearch e do Qdrant), com o banco `benchmark` vazio criado como no Eixo C:
+     - no PostgreSQL, com as extensões `timescaledb` e `pg_stat_statements`;
+     - no InfluxDB, com o banco vazio.
+
+     É restaurado antes de cada execução (ADR-029).
+2. **PostgreSQL da consolidada:** a configuração do Eixo A (ADR-042) somada ao que o TimescaleDB exige e ao que foi calibrado para a ingestão.
+   - **Do Eixo A:**
+     - `shared_buffers` de 4864MB, `effective_cache_size` de 14592MB e `work_mem` de 4MB;
+     - os padrões de paralelismo, `jit` e custos, que definem o plano das consultas da busca.
+   - **Do TimescaleDB (ADR-024 e ADR-063):**
+     - `shared_preload_libraries` com `timescaledb` e telemetria desligada;
+     - `timescaledb.max_background_workers` = 16, `max_worker_processes` = 31 e `max_locks_per_transaction` = 512;
+     - `max_wal_size` de 32GB (calibrado) e `min_wal_size` de 512MB;
+     - `autovacuum_max_workers` = 10 e `autovacuum_naptime` = 10.
+   - **Fora:** os parâmetros de sessão do `timescaledb-tune` (`work_mem`, paralelismo, custos, `jit` e estatísticas). Eles valem para consultas, e, na carga mista, o banco `benchmark` só recebe inserções.
+3. **Escrita:** ingestão do TSBS em taxa fixa.
+   - **Dados:** o arquivo das execuções curtas do C (ADR-060), lido desde o início em cada execução.
+   - **Taxas:** 250 mil, 500 mil e 1 milhão de métricas/s, ou 25, 50 e 100 mil pontos/s. São ~5%, 10% e 20% da vazão de saturação do InfluxDB.
+     - **Teto:** 1 milhão é a maior dobra que cabe no arquivo durante a execução inteira, com ~620 milhões de 1,04 bilhão de métricas.
+     - **Disco:** no TimescaleDB, 1 milhão/s grava ~48 GB, abaixo do limiar de 60 GiB da revisão da ADR-067.
+   - **Envio:** um alimentador entrega os pontos ao `tsbs_load` no ritmo da taxa, em fatias de 10 ms. É a agenda uniforme da ADR-054.
+     - O `tsbs_load` usa 4 trabalhadores e lotes de 10.000 pontos (ADR-061).
+     - Com 4 trabalhadores, a capacidade medida na rampa é 3,6 vezes a maior taxa no InfluxDB e 7,2 vezes no TimescaleDB.
+   - **Duração:** a ingestão começa 10 s antes do aquecimento da busca e para no fim da medição.
+   - **Validade:** na medição da busca, a taxa obtida fica a menos de 1% da planejada. Se não ficar, a execução é reportada como taxa não sustentada pela arquitetura.
+4. **Leitura:** a busca do Eixo A com 2 clientes, 300 s de aquecimento e 300 s de medição (revisão da ADR-048).
+   - **Nível:** 2 é o maior nível das execuções curtas abaixo da saturação das duas arquiteturas.
+   - **Semente:** é a mesma em todas as taxas e nas duas arquiteturas de um bloco, então as mesmas consultas são comparadas. No eixo `m`, a taxa não entra na semente.
+5. **Configurações e janela:**
+   - 2 arquiteturas × 4 taxas (sem escrita, 250 mil, 500 mil e 1 milhão) = 8 configurações;
+   - 5 repetições em blocos (ADR-032);
+   - uma janela, `harness/planos/mista.toml`, com 40 execuções e ~21 h.
+6. **Análise:**
+   - **Medida principal:** p50, p95 e p99 da busca e a vazão, na medição.
+   - **Dentro de cada arquitetura:** Mann-Whitney exato e bilateral de cada taxa contra a configuração sem escrita, para p50 e p99. A correção de Holm cobre as 6 comparações da arquitetura. Com 5 contra 5, o menor p (0,0079) fica abaixo do primeiro limiar (0,0083).
+   - **Entre arquiteturas:**
+     - A degradação de cada execução é a razão entre a latência dela e a mediana da mesma arquitetura sem escrita.
+     - Teste: Mann-Whitney exato das degradações, consolidada contra poliglota, em cada taxa, para p50 e p99. A correção de Holm cobre as 6 comparações.
+     - Tamanho de efeito: Â12 e razão das medianas das degradações.
+   - **Diagnóstico:**
+     - CPU e memória de cada container, bytes lidos e gravados no SSD;
+     - tuplas e autovacuum do banco `benchmark`;
+     - taxa obtida e atraso da ingestão.
+   - **Coletores:** no PostgreSQL da consolidada há um coletor por banco (`busca` e `benchmark`), com o arquivo de saída nomeado pelo banco.
+7. **Código:**
+   - **Imagens:** `tcc-gerador-mista:1`, com o gerador do Eixo A, o TSBS e o alimentador da versão 2 do gerador do C (`tcc-gerador-temporal:2`).
+   - **Harness:** eixo `m`, chave `taxas` em métricas/s nos eixos `m` e `c` (no `c`, só no cenário `longa`) e semente sem a taxa no eixo `m`.
+   - **Quando:** as mudanças no harness e nos arquivos de composição dos Eixos B e C são aplicadas depois da janela das curtas do C, que ainda lê os atuais.
+
+**Justificativa.**
+- **Ingestão em vez de fila:** a QS4 fala de escrita intensiva. A ingestão disputa cache, WAL e disco, justamente o que a consolidação compartilha e a poliglota separa.
+- **Taxa fixa:** as duas arquiteturas recebem a mesma escrita. Em laço fechado, cada uma receberia a escrita que conseguisse aceitar, e a interferência ficaria confundida com a vazão.
+- **Base na mesma composição:** a configuração sem escrita mede a mudança de composição (memória da poliglota e configuração do PostgreSQL), e a degradação fica só com a interferência.
+- **Taxas em dobras:** seguem o padrão dos níveis de concorrência. O teto vem do arquivo e do cache do SSD, não de uma escolha.
+
+**Efeito sobre a comparação.**
+- **Escrita escolhida:** desfavorece a consolidada. É a escrita que mais disputa recursos com a busca dentro do mesmo servidor, e a QS4 foi formulada para expor essa desvantagem.
+- **Divisão da poliglota:** tira 1 GiB de cada motor de busca, o que pode aumentar a latência da poliglota mesmo sem escrita. Isso fica medido na base e não entra na degradação. Na consolidada, o PostgreSQL divide os seus 19 GiB entre as duas cargas sem limite fixo.
+- **Configuração do PostgreSQL:** o `max_wal_size` de 32 GB e o autovacuum do TimescaleDB favorecem a consolidada sob ingestão, com menos checkpoints. São os valores calibrados e recomendados para o TimescaleDB. O InfluxDB fica com a configuração do Eixo C (ADR-063).
+- **Recursos disputados:** são diferentes nas duas arquiteturas.
+  - Na poliglota, a ingestão disputa mais CPU, porque o InfluxDB gasta ~6 vezes mais por métrica.
+  - Na consolidada, disputa mais cache e disco, porque o TimescaleDB grava ~3 vezes mais bytes por métrica.
+
+  O desenho mede as duas disputas e não escolhe uma.
+
+**Estado.** Aceita em 12/11/2026, com aprovação do Léo.
+
+---
+
+## ADR-069 — Longa duração
+
+**Contexto.**
+- **Proposta:** a seção 4.2 e a QS2 pedem uma execução contínua de várias horas, com crescimento de tuplas mortas, atividade de autovacuum, inflação de tabela e índice e deriva de latência. As objeções ao PostgreSQL como fila e como armazenamento temporal são sobre o comportamento ao longo do tempo.
+- **ADRs anteriores:**
+  - estado contínuo (ADR-013);
+  - uma execução por arquitetura, em janelas próprias (ADR-032);
+  - `pgstattuple_approx` a cada 5 min (ADR-021, item 4);
+  - controle com `fio` pelo mesmo tempo (ADR-004, item 2);
+  - volume próprio do Eixo C (ADR-060, item 4).
+- **Decisões de 12/11/2026:**
+  - com o Léo: Eixos B e C, e 12 h por execução;
+  - com o orientador: a ingênua fica fora (revisão da ADR-006).
+- **Consumo de transações na fila, a 2.800 mensagens/s:**
+  - **Consolidada:** 2 transações por mensagem, uma no enfileiramento e outra no `DELETE`. Uma retirada vazia não consome identificador. A consolidada chega ao `autovacuum_freeze_max_age` (200 milhões) em ~9,9 h, e o PostgreSQL força o congelamento.
+  - ***Outbox*:** ~1 transação por mensagem, mais uma por lote do relay. Chega ao mesmo limite em ~19,8 h.
+
+**Decisão.**
+
+1. **Execuções:** quatro, uma por arquitetura:
+   - fila consolidada;
+   - *outbox*;
+   - TimescaleDB;
+   - InfluxDB.
+
+   Todas no cenário `longa`, num plano só, `harness/planos/longa.toml`, com a ordem sorteada pela semente do plano (ADR-032). O estado é restaurado só antes de cada execução (ADR-013).
+2. **Duração:** 12 h de medição em todas.
+3. **Eixo B:**
+   - **Carga:** 32 produtores e 32 consumidores em taxa fixa de 2.800 mensagens/s, com a agenda uniforme da ADR-054. É 50% da menor vazão sustentável máxima (5.681/s) e a taxa intermediária da latência nas curtas.
+   - **Durações:** 120 s de aquecimento e 43.200 s de medição. São ~121 milhões de mensagens. A tabela `pedidos` cresce durante todo o teste, porque o dado de negócio fica.
+   - **Coleta:** a das curtas, mais:
+     - `pgstattuple_approx` a cada 5 min (ADR-021, item 4);
+     - a idade das transações a cada 60 s: `age(datfrozenxid)` de cada banco e `age(relfrozenxid)` de cada tabela.
+4. **Eixo C:**
+   - **Carga:** ingestão contínua em taxa fixa de 250 mil métricas/s (25 mil pontos/s), com o alimentador da ADR-068 e 4 trabalhadores. É ~5% da saturação do InfluxDB e a menor taxa da carga mista.
+   - **Dados:** gerados durante a execução pelo `tsbs_generate_data`.
+     - **Parâmetros:** os da ADR-060 (`cpu-only`, 4.000 hosts, 10 s, semente 20261108, a partir de 2016-01-01), até 2016-02-01T06:00:00Z.
+     - **Volume:** 1,08 bilhão de pontos e 10,8 bilhões de métricas, em 12 h de ingestão. É o volume próprio da ADR-060, item 4, ~10 vezes o das curtas.
+     - **Conferência:** antes da janela, confere-se que os 3 primeiros dias são os mesmos pontos do arquivo das curtas.
+   - **Consultas periódicas:** a cada 30 min, um lote com 5 consultas de cada um dos 15 tipos (ADR-061), com 1 trabalhador.
+     - As consultas são geradas na hora sobre o intervalo já carregado, com uma semente por lote, igual nos dois sistemas.
+     - São 24 lotes.
+   - **Depois da ingestão:**
+     - **TimescaleDB:** fica sem compressão durante a ingestão, como nas curtas (ADR-062). No fim, todos os chunks são comprimidos e roda o `ANALYZE`.
+     - **InfluxDB:** espera as compactações pararem, com prazo de 2 h.
+     - **Bateria final:** a das curtas, com os mesmos arquivos (20 consultas medidas e 5 de aquecimento por tipo), para comparar as mesmas consultas com 10 vezes mais dados.
+   - **Prazo:** se a ingestão atrasar, a execução continua até 13 h, e o que não foi carregado fica registrado.
+   - **Coleta:** a das curtas, mais a idade das transações no TimescaleDB. Não há `pgstattuple_approx`.
+5. **Controle do SSD (revisão da ADR-004, item 2):** `fio` por 12 h, depois das quatro execuções.
+   - **Padrão:** escrita aleatória de 8 KiB, o `rand8k` da caracterização, num arquivo de 64 GiB.
+   - **Taxa:** limitada à maior vazão média de escrita no SSD entre as quatro execuções, medida no coletor do host.
+   - **Protocolo:** o das execuções, com `fstrim`, repouso de 1200 s e telemetria do host.
+   - **Por que revisar:** a redação original pede "a maior taxa do piloto". Essa taxa é a da carga do TimescaleDB, de centenas de MB/s, e não representa as longas, que gravam dezenas de MB/s. Em 12 h, ela gravaria ~15 TB.
+6. **Análise:** descritiva, sem teste, como manda a proposta (seção 6.2), com séries por minuto.
+   - **Eixo B:**
+     - enfileiramento, consumo e profundidade da fila;
+     - latência fim a fim (p50 e p99);
+     - tuplas vivas e mortas, autovacuum (contagem e tempo), tamanho de tabelas e índices, `pgstattuple`;
+     - WAL, checkpoints e idade das transações;
+     - CPU, memória e disco.
+   - **Eixo C:**
+     - taxa obtida e atraso da ingestão;
+     - latência de cada lote de consultas por tipo;
+     - tamanhos (hypertable e TSM), autovacuum dos chunks e compactações;
+     - CPU, memória e disco.
+   - **Deriva:** inclinação por hora da latência e da vazão, e a primeira hora contra a última.
+   - **Atribuição de quedas ao disco:** pelo critério da ADR-004, item 3.
+7. **Tempo e disco:**
+   - **Tempo:** ~53 h para as quatro execuções (~12,7 h em cada uma do B e ~13,5 h em cada uma do C, com repouso e pós-carga), mais ~12,5 h para o controle.
+   - **Espaço:** no fim da ingestão, o TimescaleDB ocupa ~205 GB sem compressão, mais até 32 GB de WAL.
+   - **Volume gravado:** ~6 a 7 TB no total, entre as quatro execuções e o controle. O SMART registra o volume em cada janela.
+
+**Justificativa.**
+- **2.800/s:** fica abaixo da capacidade das duas arquiteturas do B. Assim, a deriva aparece como mudança de latência e de recursos, não como saturação imediata. É também a taxa já medida nas curtas.
+- **12 h:** inclui o primeiro congelamento forçado previsto na consolidada.
+- **250 mil/s no C:** o limite é o disco. Sem compressão, o TimescaleDB ocupa ~19 bytes por métrica, e o volume de 12 h cabe com folga nos ~730 GiB livres. Taxas maiores não caberiam.
+- **TimescaleDB sem compressão durante a ingestão:** a política de compressão decide pela idade dos dados em relação ao relógio (`now()`), e os dados do TSBS são de 2016. Qualquer política comprimiria todos os chunks de uma vez, inclusive o que está recebendo dados, ou nenhum. Emular a política seria configuração própria.
+- **`pgstattuple_approx` só no B:** no C, a ingestão só acrescenta linhas. Varrer ~200 GB a cada 5 min seria um custo sem pergunta a responder.
+- **Dados gerados na hora:** evitam ~40 GB de arquivos. A geração dos 3 dias levou ~5 min para os dois formatos, então 25 mil pontos/s usam menos de 10% de um núcleo do gerador.
+- **`rand8k` no controle:** é o padrão mais exigente da caracterização e o mais próximo da escrita de páginas dos checkpoints.
+
+**Efeito sobre a comparação.**
+- **Ingênua fora:** nenhum efeito na comparação principal, consolidada contra *outbox*.
+- **2.800/s:** abaixo da saturação. A metaestabilidade da consolidada vista na rampa, que só aparece com atraso acumulado, pode não se manifestar. Uma taxa maior a desfavoreceria. Fica declarado.
+- **12 h:** desfavorece a consolidada, que chega ao congelamento forçado. A *outbox* não chega.
+- **Uma execução por arquitetura:** resultados descritivos, sem teste estatístico.
+- **TimescaleDB sem compressão durante a ingestão:** desfavorece o TimescaleDB no espaço ocupado e, possivelmente, nas consultas sobre dados antigos. Na prática, uma política comprimiria os chunks antigos. O InfluxDB compacta durante a ingestão.
+- **`pgstattuple_approx` só no B:** favorece o TimescaleDB em relação à redação original da ADR-021, porque tira dele a sonda mais cara.
+- **Taxa baixa no C:** favorece os dois sistemas na vazão. O que se mede é o comportamento com o volume crescente.
+
+**Estado.** Aceita em 12/11/2026, com aprovação do Léo.
 
 ---
 
@@ -1317,3 +1881,19 @@ Conferido também que nenhuma consulta do InfluxDB volta com erro no corpo da re
 | 08/11/2026 | ADR-060 e ADR-061 revisadas (3 dias de dados; 20 consultas por tipo). ADR-065: execução do Eixo C e limite do gerador |
 | 08/11/2026 | ADR-066: piloto e medida do custo da coleta |
 | 09/11/2026 | ADR-021, ADR-025 e ADR-066: resultados do piloto e do custo da coleta; intervalos de coleta e limite de memória do gerador mantidos |
+| 09/11/2026 | ADR-067: calibração (ordem, `ef`, `max_wal_size`, teto do aviso, rampas e critérios) |
+| 09/11/2026 | ADR-038 e ADR-048: `ef` calibrado (260 no `pgvector`, 120 no Qdrant) e qualidade da busca híbrida nas duas arquiteturas |
+| 09/11/2026 | ADR-055 e ADR-063 revisadas pela calibração (ADR-067, item 3): `max_wal_size` de 8 GB nos três PostgreSQL do Eixo B e de 32 GB no TimescaleDB |
+| 09/11/2026 | ADR-053: vazão isolada do relay medida (20.886 mensagens/s em regime); 2 trabalhadores mantidos |
+| 10/11/2026 | ADR-048 revisada pela rampa do Eixo A: aquecimento de 300 s nas execuções curtas do eixo |
+| 10/11/2026 | ADR-054 revisada pela rampa do Eixo B: latência fim a fim medida com taxa fixa (32 produtores e 32 consumidores, envio agendado); ADR-050 (cabeçalho com o instante agendado) e correção na ADR-051 |
+| 10/11/2026 | ADR-067: resultados das rampas dos Eixos A e B (níveis 1 a 32), com o comportamento da consolidada e da *outbox* saturadas e o esgotamento do cache pSLC na *outbox* com 32 clientes |
+| 10/11/2026 | ADR-067 revisada: faixa do Eixo B mantida com a ingênua sem saturar (limite inferior) e marcação das execuções com mais de 60 GiB gravados. ADR-053 revisada: relay como gargalo da *outbox* com 32 clientes, 2 trabalhadores mantidos |
+| 10/11/2026 | ADR-067: resultados da rampa do Eixo C. ADR-060 corrigida: cada carga do TimescaleDB grava ~75 GiB e passa do cache pSLC |
+| 10/11/2026 | ADR-054: teste funcional do modo de taxa fixa com a imagem `tcc-gerador-fila:2`; correção do efeito dos 32 consumidores (sincronização da espera por consulta) |
+| 10/11/2026 | ADR-065 revisada: CPU do gerador avaliada antes dos primeiros 60 GiB gravados no SSD; TimescaleDB com 8 a 32 trabalhadores reportado como limite inferior |
+| 11/11/2026 | ADR-067, item 7: proposta das execuções curtas aprovada (43 configurações, 5 repetições, Mann-Whitney exato com Holm dentro de cada nível, quatro janelas) |
+| 12/11/2026 | ADR-006 revisada com o orientador: a ingênua fica nas execuções curtas como referência de teto e fora da longa duração |
+| 12/11/2026 | ADR-068 (carga mista: busca sob ingestão temporal) e ADR-069 (longa duração dos Eixos B e C, 12 h), propostas; revisões propostas das ADR-004 (item 2), ADR-021 (item 4) e ADR-060 (item 4) |
+| 12/11/2026 | ADR-068 e ADR-069 aceitas, com as revisões das ADR-004 (item 2), ADR-021 (item 4) e ADR-060 (item 4) |
+| 15/11/2026 | ADR-021, item 4: complemento aprovado; o coletor cria a extensão `pgstattuple` nas execuções longas do Eixo B, que nenhum esquema criava |
