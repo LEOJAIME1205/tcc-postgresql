@@ -32,6 +32,8 @@ services:
       - -c
       - min_wal_size=512MB
       - -c
+      - max_wal_size=32GB  # calibrado pelo aviso de checkpoints (ADR-063 e ADR-067)
+      - -c
       - default_statistics_target=100
       - -c
       - random_page_cost=1.1
@@ -56,7 +58,7 @@ services:
     extends:
       file: ../../harness/orquestracao/modelos.yaml
       service: gerador
-    image: tcc-gerador-temporal:1
+    image: tcc-gerador-temporal:2
     environment:
       TCC_ARQUITETURA: timescaledb
       PGHOST: timescaledb

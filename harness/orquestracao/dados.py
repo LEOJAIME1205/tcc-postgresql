@@ -61,6 +61,33 @@ def preparar_diretorios(arq: Arquitetura) -> None:
         os.makedirs(os.path.join(base, "atual"))
 
 
+def copiar_de(origem: Arquitetura, destino: Arquitetura, margem_gib: float) -> Dict[str, int]:
+    """Põe em cada atual/ do destino uma cópia do inicial/ da origem com o mesmo subdiretório;
+    os subdiretórios sem correspondente ficam vazios. Serve à carga mista, que parte dos dados
+    do Eixo A (ADR-068); devolve o tamanho de cada cópia."""
+    copiados: Dict[str, int] = {}
+    for _, sub in destino.dados:
+        fonte = os.path.join(origem.diretorio_dados(sub), "inicial")
+        if not os.path.isdir(fonte):
+            continue
+        base = destino.diretorio_dados(sub)
+        if not base.startswith(DADOS_RAIZ + os.sep):
+            raise ErroDados(f"recusado: {base} fica fora de {DADOS_RAIZ}")
+        tamanho = _tamanho_bytes(origem.diretorio_dados(sub), "inicial")
+        necessario = tamanho + int(margem_gib * 2**30)
+        livre = _livre_bytes(base)
+        if livre < necessario:
+            raise ErroDados(f"espaço insuficiente para copiar {fonte} em {base}: precisa de "
+                            f"{necessario / 2**30:.1f} GiB livres, há {livre / 2**30:.1f} GiB")
+        r = subprocess.run(["docker", "run", "--rm", "--network", "none", "-v", f"{fonte}:/o:ro",
+                            "-v", f"{base}:/d", IMAGEM_AUXILIAR, "sh", "-c",
+                            "rm -rf /d/atual && cp -a /o /d/atual"], capture_output=True, text=True)
+        if r.returncode != 0:
+            raise ErroDados(f"cópia de {fonte} para {base}/atual falhou: {r.stderr.strip()}")
+        copiados[sub] = tamanho
+    return copiados
+
+
 def salvar_inicial(arq: Arquitetura, margem_gib: float) -> Dict[str, int]:
     """Copia cada atual/ para inicial/, depois da carga e do desligamento limpo."""
     return {sub: _copiar(arq.diretorio_dados(sub), "atual", "inicial", margem_gib)

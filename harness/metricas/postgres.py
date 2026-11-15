@@ -1,4 +1,5 @@
-"""Coletor de métricas internas do PostgreSQL; com --timescaledb, também das hypertables (ADR-064)."""
+"""Coletor de métricas internas do PostgreSQL; com --timescaledb, também das hypertables (ADR-064),
+e com --idades, a idade das transações de cada banco e tabela (cenário longa, ADR-069)."""
 
 import argparse
 import csv
@@ -51,6 +52,20 @@ SQL_PGSTATTUPLE: LiteralString = """
     FROM pg_stat_user_tables t
     JOIN pg_class c ON c.oid = t.relid
     CROSS JOIN LATERAL pgstattuple_approx(t.relid) a
+    WHERE c.relkind IN ('r', 'm')
+"""
+
+
+SQL_IDADES_BANCOS: LiteralString = """
+    SELECT datname, age(datfrozenxid), mxid_age(datminmxid)
+    FROM pg_database
+    WHERE datallowconn
+"""
+
+SQL_IDADES_TABELAS: LiteralString = """
+    SELECT t.schemaname || '.' || t.relname, age(c.relfrozenxid)
+    FROM pg_stat_user_tables t
+    JOIN pg_class c ON c.oid = t.relid
     WHERE c.relkind IN ('r', 'm')
 """
 
@@ -122,6 +137,20 @@ def ler_pgstattuple(conexao: Conexao) -> List[Metrica]:
     return linhas
 
 
+def ler_idades(conexao: Conexao) -> List[Metrica]:
+    """Idade das transações e dos multixacts de cada banco e das transações de cada tabela, a
+    cada 60 s (cenário longa): mostra quando o autovacuum vai forçar o congelamento (ADR-069)."""
+    linhas: List[Metrica] = []
+    with conexao.cursor() as cur:
+        for banco, idade, idade_mxid in cur.execute(SQL_IDADES_BANCOS).fetchall():
+            linhas.append(("postgres", "pg_idade_xid", str(banco), int(idade)))
+            linhas.append(("postgres", "pg_idade_mxid", str(banco), int(idade_mxid)))
+        for tabela, idade in cur.execute(SQL_IDADES_TABELAS).fetchall():
+            if idade is not None:
+                linhas.append(("postgres", "pg_idade_xid_tabela", str(tabela), int(idade)))
+    return linhas
+
+
 def ler_timescaledb(conexao: Conexao) -> List[Metrica]:
     """Tamanho, chunks e compressão de cada hypertable, a cada 60 s; vazios ficam de fora."""
     linhas: List[Metrica] = []
@@ -131,6 +160,16 @@ def ler_timescaledb(conexao: Conexao) -> List[Metrica]:
                 if valor is not None:
                     linhas.append(("timescaledb", metrica, str(tabela), int(valor)))
     return linhas
+
+
+def criar_pgstattuple(conexao: Conexao) -> None:
+    """Cria a extensão no banco coletado. Só roda com --pgstattuple, no cenário longa do Eixo B: os
+    esquemas não a criam, e o estado inicial fica o mesmo das curtas (revisão da ADR-021, item 4)."""
+    try:
+        conexao.execute("CREATE EXTENSION IF NOT EXISTS pgstattuple")
+        avisar("extensão pgstattuple disponível")
+    except psycopg.Error as erro:
+        avisar(f"pgstattuple: {erro}")
 
 
 def avisar(mensagem: str) -> None:
@@ -161,11 +200,14 @@ def main() -> None:
                    help="amostra pgstattuple_approx a cada 5 min (cenário longa)")
     p.add_argument("--timescaledb", action="store_true",
                    help="tamanhos e compressão das hypertables a cada 60 s (ADR-064)")
+    p.add_argument("--idades", action="store_true",
+                   help="idade das transações de bancos e tabelas a cada 60 s (cenário longa)")
     args = p.parse_args()
     saida: str = args.saida
     conninfo: str = args.conninfo
     com_pgstattuple: bool = args.pgstattuple
     com_timescaledb: bool = args.timescaledb
+    com_idades: bool = args.idades
 
     os.sched_setaffinity(0, CPUS_COLETA)
 
@@ -192,6 +234,8 @@ def main() -> None:
                 conexao = conectar(conninfo)
                 if conexao is not None:
                     avisar("conectado")
+                    if com_pgstattuple:
+                        criar_pgstattuple(conexao)
 
             if conexao is not None:
                 leitores: List[Tuple[str, Leitor]] = [("estatísticas", ler_estatisticas)]
@@ -199,6 +243,8 @@ def main() -> None:
                     leitores.append(("tamanhos", ler_tamanhos))
                     if com_timescaledb:
                         leitores.append(("timescaledb", ler_timescaledb))
+                    if com_idades:
+                        leitores.append(("idades", ler_idades))
                 if com_pgstattuple and volta % VOLTAS_PGSTATTUPLE == 0:
                     leitores.append(("pgstattuple", ler_pgstattuple))
 

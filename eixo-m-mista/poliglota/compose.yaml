@@ -1,0 +1,86 @@
+# Carga mista, lado poliglota (ADR-068): OpenSearch (BM25) e Qdrant (HNSW) com a busca do Eixo A,
+# InfluxDB com a ingestão do Eixo C e o serviço de busca. Os 19 GiB dos motores divididos pela
+# necessidade mínima medida (ADR-037 e ADR-068, item 1): 9, 8 e 2 GiB.
+services:
+  opensearch:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: sistema-sob-teste
+    image: opensearchproject/opensearch:3.8.0@sha256:fafe3fc3587088674669235575aa166228c48bdb940294a8cdbbc1da75236a40
+    mem_limit: 9g
+    memswap_limit: 9g
+    stop_grace_period: 2m
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    environment:
+      discovery.type: single-node
+      bootstrap.memory_lock: "true"
+      OPENSEARCH_JAVA_OPTS: -Xms4608m -Xmx4608m  # metade do container (ADR-036)
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      DISABLE_SECURITY_PLUGIN: "true"
+    volumes:
+      - ${TCC_DADOS_OPENSEARCH:?defina TCC_DADOS_OPENSEARCH}:/usr/share/opensearch/data
+
+  qdrant:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: sistema-sob-teste
+    image: qdrant/qdrant:v1.19.2@sha256:b7b0444c4c351c970b98e90a6f89c2ee4287c65b44e52b4cb503fa5b2aa927ad
+    mem_limit: 8g
+    memswap_limit: 8g
+    stop_grace_period: 2m
+    environment:
+      QDRANT__TELEMETRY_DISABLED: "true"
+    volumes:
+      - ${TCC_DADOS_QDRANT:?defina TCC_DADOS_QDRANT}:/qdrant/storage
+
+  influxdb:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: sistema-sob-teste
+    image: influxdb:1.13.1@sha256:33fa5b045658ddd676f3f9a72c1f40eb92ad1582539a691cd36e578ce0a6f751
+    # Como no Eixo C: o orquestrador cria os diretórios de dados com o usuário 1000.
+    user: "1000:1000"
+    mem_limit: 2g
+    memswap_limit: 2g
+    stop_grace_period: 2m
+    environment:
+      INFLUXDB_REPORTING_DISABLED: "true"
+      INFLUXDB_DATA_INDEX_VERSION: tsi1
+    volumes:
+      - ${TCC_DADOS_INFLUXDB:?defina TCC_DADOS_INFLUXDB}:/var/lib/influxdb
+
+  busca:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: sistema-sob-teste
+    image: tcc-busca:1
+    mem_limit: 1g
+    memswap_limit: 1g
+    environment:
+      TCC_MOTOR: poliglota
+      TCC_CONEXOES: "11"
+      TCC_EF_BUSCA: "120"  # calibrado: recall@100 de 0,95 (ADR-038 e ADR-067)
+      OPENSEARCH_HOST: opensearch
+      QDRANT_HOST: qdrant
+
+  gerador:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: gerador
+    image: tcc-gerador-mista:1
+    environment:
+      TCC_ARQUITETURA: poliglota
+      TCC_SERVICO: http://busca:8000
+      OPENSEARCH_HOST: opensearch
+      QDRANT_HOST: qdrant
+      TCC_INFLUXDB: http://influxdb:8086
+    volumes:
+      - ../../eixo-a-busca/dados:/app/eixo-a-busca/dados:ro
+      - ../../eixo-c-temporal/dados:/app/eixo-c-temporal/dados:ro
+      - ${TCC_SAIDA:?defina TCC_SAIDA}:/saida

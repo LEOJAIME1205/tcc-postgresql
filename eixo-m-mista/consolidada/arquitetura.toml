@@ -1,0 +1,20 @@
+# Carga mista, lado consolidado (ADR-068): um PostgreSQL com a busca do Eixo A (banco busca) e o
+# TimescaleDB (banco benchmark), o serviço de busca e o gerador. Um coletor por banco.
+eixo = "m"
+arquitetura = "consolidada"
+compose = "compose.yaml"
+servicos_sob_teste = ["postgres", "busca"]
+servico_gerador = "gerador"
+
+[dados]
+TCC_DADOS_POSTGRES = "postgres"
+
+[[coletor]]
+tipo = "postgres"
+servico = "postgres"
+banco = "busca"
+
+[[coletor]]
+tipo = "timescaledb"
+servico = "postgres"
+banco = "benchmark"

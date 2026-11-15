@@ -1,0 +1,76 @@
+# Carga mista, lado consolidado (ADR-068): um PostgreSQL com a busca do Eixo A (banco busca) e o
+# TimescaleDB (banco benchmark), mais o serviço de busca. Memória e plano da busca como no Eixo A
+# (ADR-042); do TimescaleDB, o que ele exige e o que foi calibrado para a ingestão (ADR-068, item 2).
+services:
+  postgres:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: postgres
+    mem_limit: 19g
+    memswap_limit: 19g
+    shm_size: 9g
+    environment:
+      POSTGRES_DB: busca
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=timescaledb,pg_stat_statements
+      - -c
+      - timescaledb.telemetry_level=off
+      # Do Eixo A (ADR-042)
+      - -c
+      - shared_buffers=4864MB
+      - -c
+      - effective_cache_size=14592MB
+      - -c
+      - work_mem=4MB
+      # Do TimescaleDB: saída congelada do timescaledb-tune (ADR-024) e max_wal_size calibrado (ADR-063)
+      - -c
+      - max_worker_processes=31
+      - -c
+      - timescaledb.max_background_workers=16
+      - -c
+      - max_locks_per_transaction=512
+      - -c
+      - max_wal_size=32GB
+      - -c
+      - min_wal_size=512MB
+      - -c
+      - autovacuum_max_workers=10
+      - -c
+      - autovacuum_naptime=10
+    volumes:
+      - ${TCC_DADOS_POSTGRES:?defina TCC_DADOS_POSTGRES}:/var/lib/postgresql
+
+  busca:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: sistema-sob-teste
+    image: tcc-busca:1
+    mem_limit: 1g
+    memswap_limit: 1g
+    environment:
+      TCC_MOTOR: consolidada
+      TCC_CONEXOES: "11"
+      TCC_EF_BUSCA: "260"  # calibrado: recall@100 de 0,95 (ADR-038 e ADR-067)
+      PGHOST: postgres
+      PGUSER: postgres
+      PGPASSWORD: tcc
+      PGDATABASE: busca
+
+  gerador:
+    extends:
+      file: ../../harness/orquestracao/modelos.yaml
+      service: gerador
+    image: tcc-gerador-mista:1
+    environment:
+      TCC_ARQUITETURA: consolidada
+      TCC_SERVICO: http://busca:8000
+      PGHOST: postgres
+      PGUSER: postgres
+      PGPASSWORD: tcc
+      PGDATABASE: busca
+    volumes:
+      - ../../eixo-a-busca/dados:/app/eixo-a-busca/dados:ro
+      - ../../eixo-c-temporal/dados:/app/eixo-c-temporal/dados:ro
+      - ${TCC_SAIDA:?defina TCC_SAIDA}:/saida

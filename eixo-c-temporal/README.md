@@ -34,10 +34,14 @@ dois sistemas (ADR-060). Consultas: os 15 tipos do caso de uso, 20 de cada em
 cada execução, com 1 trabalhador e aquecimento à parte (ADR-061).
 
 ```bash
-docker build -f eixo-c-temporal/cargas/Dockerfile -t tcc-gerador-temporal:1 .
+docker build -f eixo-c-temporal/cargas/Dockerfile -t tcc-gerador-temporal:2 .
 docker run --rm --user $(id -u):$(id -g) \
-  -v $PWD/eixo-c-temporal/dados:/app/eixo-c-temporal/dados tcc-gerador-temporal:1 gerar
+  -v $PWD/eixo-c-temporal/dados:/app/eixo-c-temporal/dados tcc-gerador-temporal:2 gerar
 ```
+
+A versão 2 do gerador (`tcc-gerador-temporal:2`) acrescenta a taxa fixa da
+longa duração e da carga mista (ADR-068 e ADR-069). O caminho das execuções
+curtas não muda; elas rodaram com a versão 1.
 
 O gerador cumpre o contrato do harness:
 
@@ -47,6 +51,16 @@ O gerador cumpre o contrato do harness:
   e roda `ANALYZE` no TimescaleDB (ADR-062), ou espera as compactações do
   InfluxDB pararem, e roda as consultas. Grava `metricas-gerador.csv`,
   `resumo.json` e as saídas do TSBS em `ferramenta/` (ADR-065).
+- `executar --taxa R` é a longa duração (ADR-069): os dados são gerados durante
+  a execução, com os parâmetros da ADR-060 e o período que cabe em `medicao_s`
+  a R métricas/s, e um alimentador os entrega ao `tsbs_load` em taxa fixa. A
+  cada 30 min roda um lote de 5 consultas de cada tipo sobre o que já foi
+  carregado (`metricas-lotes.csv`); no fim, compressão ou compactações e as
+  consultas das curtas.
+- `ingerir --taxa R` é a escrita da carga mista (ADR-068): carrega o arquivo das
+  curtas a R métricas/s até receber o sinal de parar e grava
+  `metricas-ingestao.csv` e `ingestao.json`. Quem o chama é o gerador de
+  `eixo-m-mista/`.
 
 Com 2 núcleos físicos, o gerador limita a ingestão do TimescaleDB: em
 desenvolvimento, com 8 trabalhadores, ele ficou em 3,6 das suas 4 CPUs lógicas,

@@ -12,6 +12,7 @@ PASTAS_EIXO: Dict[str, str] = {
     "a": "eixo-a-busca",
     "b": "eixo-b-fila",
     "c": "eixo-c-temporal",
+    "m": "eixo-m-mista",
     "t": "harness/teste",
 }
 TIPOS_COLETOR: Set[str] = {"postgres", "timescaledb", "opensearch", "qdrant", "rabbitmq", "influxdb"}

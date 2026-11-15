@@ -21,7 +21,7 @@ services:
     extends:
       file: ../../harness/orquestracao/modelos.yaml
       service: gerador
-    image: tcc-gerador-temporal:1
+    image: tcc-gerador-temporal:2
     environment:
       TCC_ARQUITETURA: influxdb
       TCC_INFLUXDB: http://influxdb:8086

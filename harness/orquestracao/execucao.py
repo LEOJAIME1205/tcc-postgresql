@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional, Tuple, cast
 from harness.orquestracao import controles, dados, registros
 from harness.orquestracao.arquitetura import RAIZ, Arquitetura, Coletor, ErroDescritor, ler_arquitetura
 from harness.orquestracao.compose import Compose
-from harness.orquestracao.plano import Execucao, Plano
+from harness.orquestracao.plano import UNIDADE_TAXA, Execucao, Plano
 
 SENHA_POSTGRES: str = "tcc"
 PORTAS_HTTP: Dict[str, int] = {"opensearch": 9200, "qdrant": 6333, "rabbitmq": 15672, "influxdb": 8086}
@@ -45,6 +45,11 @@ def semente(pl: Plano, ex: Execucao) -> int:
     mesma sequência de operações a todas elas."""
     c = ex.configuracao
     chave = f"{pl.semente}:{c.eixo}_{c.cenario}_c{c.concorrencia}_r{ex.repeticao:02d}"
+    # No Eixo B, a taxa fixa muda a chave, e as sementes anteriores ficam. Na carga mista, a
+    # taxa é a da ingestão e fica fora, para a busca mandar as mesmas consultas em todas as
+    # taxas de um bloco (ADR-068).
+    if c.taxa is not None and c.eixo == "b":
+        chave += f"_t{c.taxa}"
     return int(hashlib.sha256(chave.encode()).hexdigest()[:8], 16)
 
 
@@ -102,12 +107,20 @@ def _parar(processos: List[Processo]) -> None:
             p.wait()
 
 
+def _rotulo(arq: Arquitetura, coletor: Coletor) -> str:
+    """Nome do coletor nos arquivos: o serviço; com mais de um coletor no mesmo serviço, como os
+    dois bancos do PostgreSQL da carga mista (ADR-068), o serviço e o banco."""
+    if sum(1 for c in arq.coletores if c.servico == coletor.servico) > 1:
+        return f"{coletor.servico}-{coletor.banco}"
+    return coletor.servico
+
+
 def _iniciar_coletores_internos(arq: Arquitetura, cenario: str, pasta: str,
                                 processos: List[Processo]) -> Optional[str]:
     """Espera cada sistema e inicia o seu coletor; devolve o motivo da falha, se houver."""
     for coletor in arq.coletores:
         container = arq.container(coletor.servico)
-        saida = os.path.join(pasta, f"metricas-{coletor.servico}.csv")
+        saida = os.path.join(pasta, f"metricas-{_rotulo(arq, coletor)}.csv")
         if coletor.tipo in TIPOS_POSTGRES:
             if not _esperar_banco(container):
                 return f"{coletor.servico} não aceitou conexões em 120 s"
@@ -115,7 +128,9 @@ def _iniciar_coletores_internos(arq: Arquitetura, cenario: str, pasta: str,
                         f"password={SENHA_POSTGRES}")
             argumentos = ["harness/metricas/postgres.py", saida, "--conninfo", conninfo]
             if cenario == "longa":
-                argumentos.append("--pgstattuple")
+                argumentos.append("--idades")  # idade das transações (ADR-069, item 3)
+                if arq.eixo == "b":  # pgstattuple_approx só na fila (revisão da ADR-021, item 4)
+                    argumentos.append("--pgstattuple")
             if coletor.tipo == "timescaledb":
                 argumentos.append("--timescaledb")  # tamanhos e compressão das hypertables (ADR-064)
         else:
@@ -126,7 +141,7 @@ def _iniciar_coletores_internos(arq: Arquitetura, cenario: str, pasta: str,
             if coletor.tipo in COM_TAMANHO_POR_DU:
                 argumentos += ["--container", container]
         processos.append(_iniciar_coletor(
-            argumentos, os.path.join(pasta, "ferramenta", f"coletor-{coletor.servico}.log")))
+            argumentos, os.path.join(pasta, "ferramenta", f"coletor-{_rotulo(arq, coletor)}.log")))
     return None
 
 
@@ -220,7 +235,7 @@ def _capturar(arq: Arquitetura, inspecao: List[Dict[str, Any]], pasta: str,
                      "-d", coletor.banco, "-c",
                      "\\copy (SELECT * FROM pg_stat_statements) TO STDOUT WITH CSV HEADER"])
         sufixo = "csv" if r.returncode == 0 else "erro"
-        with open(os.path.join(pasta, "instantaneos", f"pg_stat_statements-{coletor.servico}.{sufixo}"),
+        with open(os.path.join(pasta, "instantaneos", f"pg_stat_statements-{_rotulo(arq, coletor)}.{sufixo}"),
                   "w", encoding="utf-8") as f:
             f.write(r.stdout if r.returncode == 0 else r.stderr)
     for c in inspecao:
@@ -272,6 +287,7 @@ def executar_uma(pl: Plano, ex: Execucao, janela: str, resultados: str,
         "eixo": cfg.eixo, "arquitetura": cfg.arquitetura, "cenario": cfg.cenario,
         "concorrencia": cfg.concorrencia, "repeticao": ex.repeticao, "ordem_na_janela": ex.ordem,
         "semente": semente_execucao, "coleta_interna": cfg.coleta_interna,
+        "espera": cfg.espera, "taxa": cfg.taxa,
         "duracao_planejada_s": {"aquecimento": cfg.aquecimento_s, "medicao": cfg.medicao_s},
         "repositorio": registros.repositorio(), "host": registros.host(),
         "inicio": registros.agora_iso(),
@@ -328,11 +344,20 @@ def executar_uma(pl: Plano, ex: Execucao, janela: str, resultados: str,
                     _zerar_pg_stat_statements(arq)
                 registrar(f"gerador: {cfg.concorrencia} clientes, {cfg.aquecimento_s} s de "
                           f"aquecimento e {cfg.medicao_s} s de medição")
-                codigo = c.gerador(["executar", "--saida", "/saida",
-                                    "--concorrencia", str(cfg.concorrencia),
-                                    "--aquecimento-s", str(cfg.aquecimento_s),
-                                    "--medicao-s", str(cfg.medicao_s),
-                                    "--semente", str(semente_execucao)])
+                ambiente: Dict[str, str] = {}
+                if cfg.espera is not None:
+                    registrar(f"espera dos consumidores: {cfg.espera} (ADR-067)")
+                    ambiente["TCC_ESPERA"] = cfg.espera
+                argumentos = ["executar", "--saida", "/saida",
+                              "--concorrencia", str(cfg.concorrencia),
+                              "--aquecimento-s", str(cfg.aquecimento_s),
+                              "--medicao-s", str(cfg.medicao_s),
+                              "--semente", str(semente_execucao)]
+                if cfg.taxa is not None:
+                    registrar(f"escrita em taxa fixa: {cfg.taxa} {UNIDADE_TAXA[cfg.eixo]} "
+                              "(ADR-054, ADR-068 e ADR-069)")
+                    argumentos += ["--taxa", str(cfg.taxa)]
+                codigo = c.gerador(argumentos, ambiente)
                 estado, motivo = _estado(codigo, _inspecionar(arq), arq.servicos_sob_teste)
     except KeyboardInterrupt:
         motivo = "interrompida pelo operador (Ctrl+C)"

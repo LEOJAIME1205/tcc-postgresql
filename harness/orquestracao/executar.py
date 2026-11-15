@@ -53,12 +53,20 @@ def planejar(caminho: str) -> int:
           "(repouso, aquecimento e medição; sem restauração, subida e desligamento)")
     return 0
 
-def preparar(eixo: str, nome: str, refazer: bool, margem_gib: float, resultados: str) -> int:
-    """Carrega os dados de uma arquitetura e grava a cópia inicial (ADR-029)."""
+def preparar(eixo: str, nome: str, refazer: bool, margem_gib: float, resultados: str,
+             copiar_de: Optional[str] = None) -> int:
+    """Carrega os dados de uma arquitetura e grava a cópia inicial (ADR-029).
+
+    Com `copiar_de`, os diretórios de dados partem da cópia inicial da arquitetura de mesmo nome
+    nesse eixo, e o gerador só acrescenta o que falta (carga mista, ADR-068)."""
     try:
         arq = arquitetura.ler_arquitetura(eixo, nome)
+        origem = arquitetura.ler_arquitetura(copiar_de, nome) if copiar_de is not None else None
     except arquitetura.ErroDescritor as erro:
         print(f"Descritor inválido: {erro}")
+        return 1
+    if origem is not None and not dados.existe_inicial(origem):
+        print(f"{copiar_de}/{nome} não tem cópia inicial para copiar")
         return 1
     if dados.existe_inicial(arq) and not refazer:
         print(f"{eixo}/{nome} já tem cópia inicial; use --refazer para substituí-la")
@@ -73,8 +81,13 @@ def preparar(eixo: str, nome: str, refazer: bool, margem_gib: float, resultados:
     os.makedirs(pasta)
     log = os.path.join(pasta, "compose.log")
     c = Compose(arq, pasta, log)
+    copiados: Dict[str, int] = {}
     try:
         dados.preparar_diretorios(arq)
+        if origem is not None:
+            copiados = dados.copiar_de(origem, arq, margem_gib)
+            for sub, tamanho in copiados.items():
+                print(f"{sub}: {tamanho / 2**20:.0f} MiB copiados de {origem.diretorio_dados(sub)}/inicial")
         try:
             if c.subir() != 0 or c.gerador(["preparar"]) != 0:
                 print(f"Falha na carga dos dados; veja {log}")
@@ -92,6 +105,8 @@ def preparar(eixo: str, nome: str, refazer: bool, margem_gib: float, resultados:
         "inicio": inicio,
         "fim": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "refeito": refazer,
+        "copiado_de": f"{copiar_de}/{nome}" if copiar_de is not None else None,
+        "copiados_bytes": copiados,
         "tamanhos_bytes": tamanhos,
     }
     with open(os.path.join(pasta, "preparo.json"), "w", encoding="utf-8") as f:
@@ -261,6 +276,8 @@ def main() -> None:
     pr.add_argument("--refazer", action="store_true", help="substitui a cópia inicial existente")
     pr.add_argument("--margem-gib", type=float, default=100.0, help="espaço livre que precisa sobrar depois da cópia")
     pr.add_argument("--resultados", default=RESULTADOS_PADRAO, help="raiz dos resultados brutos")
+    pr.add_argument("--copiar-de", metavar="EIXO", default=None,
+                    help="parte da cópia inicial da arquitetura de mesmo nome nesse eixo (ADR-068)")
     pe = sub.add_parser("executar", help="roda uma janela a partir de um plano, ou retoma uma interrompida")
     grupo = pe.add_mutually_exclusive_group(required=True)
     grupo.add_argument("plano", nargs="?", help="arquivo TOML do plano da janela")
@@ -286,7 +303,8 @@ def main() -> None:
         refazer: bool = args.refazer
         margem_gib: float = args.margem_gib
         resultados: str = args.resultados
-        sys.exit(preparar(eixo, nome, refazer, margem_gib, resultados))
+        copiar: Optional[str] = args.copiar_de
+        sys.exit(preparar(eixo, nome, refazer, margem_gib, resultados, copiar))
     elif subcomando == "executar":
         caminho_plano: Optional[str] = args.plano
         retomar: Optional[str] = args.retomar

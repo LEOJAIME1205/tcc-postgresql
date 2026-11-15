@@ -1,0 +1,24 @@
+# Carga mista, lado poliglota (ADR-068): OpenSearch e Qdrant com a busca do Eixo A, InfluxDB com a
+# ingestão do Eixo C, o serviço de busca e o gerador.
+eixo = "m"
+arquitetura = "poliglota"
+compose = "compose.yaml"
+servicos_sob_teste = ["opensearch", "qdrant", "influxdb", "busca"]
+servico_gerador = "gerador"
+
+[dados]
+TCC_DADOS_OPENSEARCH = "opensearch"
+TCC_DADOS_QDRANT = "qdrant"
+TCC_DADOS_INFLUXDB = "influxdb"
+
+[[coletor]]
+tipo = "opensearch"
+servico = "opensearch"
+
+[[coletor]]
+tipo = "qdrant"
+servico = "qdrant"
+
+[[coletor]]
+tipo = "influxdb"
+servico = "influxdb"

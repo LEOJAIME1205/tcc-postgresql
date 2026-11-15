@@ -9,9 +9,14 @@ evitar instrumentação divergente entre eles.
 - `metricas/` — coletores de `pg_stat_*`, `pgstattuple`, `pg_stat_statements`,
   métricas dos serviços especializados e telemetria de host
 - `analise/` — scripts de consolidação, tratamento estatístico e geração de
-  figuras. Por ora, `custo_coleta.py` (ADR-021, item 6):
-  `uv run python -m harness.analise.custo_coleta <id-janela>`, com saída em
-  `resultados/processados/`
+  figuras, com saída em `resultados/processados/`. As leituras comuns (execuções
+  de uma janela, CPU dos containers e gravação dos CSV) ficam em `comum.py`.
+  Por ora:
+  - `custo_coleta.py` (ADR-021, item 6):
+    `uv run python -m harness.analise.custo_coleta <id-janela>`;
+  - `calibracao.py` (ADR-067, itens 6 e 7), que resume as rampas e aplica os
+    critérios de saturação, vazão sustentável, relay, gerador e estabilidade:
+    `uv run python -m harness.analise.calibracao <id-janela> [...] [--relay <registro>]`
 
 ## Ambiente Python
 
@@ -101,8 +106,10 @@ resultados/brutos/
 | `operacoes.csv` | Gerador de carga |
 | `metricas-host.csv` | Coletor de telemetria de host e containers |
 | `metricas-postgres.csv` | Coletor do PostgreSQL |
-| `metricas-<sistema>.csv` | Coletor de cada sistema especializado e do TimescaleDB |
+| `metricas-<sistema>.csv` | Coletor de cada sistema especializado e do TimescaleDB; com dois coletores no mesmo serviço, `metricas-<serviço>-<banco>.csv` (carga mista) |
 | `metricas-gerador.csv` | Adaptador do TSBS, no Eixo C |
+| `metricas-lotes.csv` | Lotes de consultas da longa duração do Eixo C (ADR-069) |
+| `metricas-ingestao.csv`, `ingestao.json` | Ingestão em taxa fixa da carga mista (ADR-068) |
 | `resumo.json`, `instantaneos/`, `ferramenta/` | Orquestrador, ao fim |
 
 ### Identificadores
@@ -110,13 +117,15 @@ resultados/brutos/
 - `<id-janela>`: `AAAAMMDD-HHMM` do início da janela.
 - `<id-execucao>`:
   `AAAAMMDD-HHMMSS_<eixo>_<arquitetura>_<cenario>_c<concorrencia>_r<repeticao>`,
-  com `_semcoleta` no fim nas execuções sem coleta interna (ADR-066).
+  com `_t<taxa>` nas execuções com escrita em taxa fixa (Eixo B, ADR-054;
+  carga mista, ADR-068; longa duração do Eixo C, ADR-069), `_aviso` nas execuções da fila consolidada com espera por aviso
+  (ADR-067) e `_semcoleta` no fim nas execuções sem coleta interna (ADR-066).
   Exemplo: `20261108-142530_b_outbox_curta_c32_r03`.
 
 | Campo | Valores |
 |---|---|
-| `eixo` | `a`, `b`, `c`; e `t`, o eixo de teste do harness |
-| `arquitetura` | Eixo A: `consolidada`, `poliglota`. Eixo B: `consolidada`, `ingenua`, `outbox`. Eixo C: `timescaledb`, `influxdb`. Eixo T: `pgbench` |
+| `eixo` | `a`, `b`, `c`; `m`, a carga mista (ADR-068); e `t`, o eixo de teste do harness |
+| `arquitetura` | Eixo A: `consolidada`, `poliglota`. Eixo B: `consolidada`, `ingenua`, `outbox`. Eixo C: `timescaledb`, `influxdb`. Carga mista: `consolidada`, `poliglota`. Eixo T: `pgbench` |
 
 O eixo `t` existe só para validar o harness de ponta a ponta. Nenhum resultado
 dele entra no artigo.
@@ -282,7 +291,9 @@ causa das colunas de tempo de autovacuum:
 | `pg_autovacuum_ms_total`, `pg_autoanalyze_ms_total` | tabela | `pg_stat_user_tables` (`total_autovacuum_time`, `total_autoanalyze_time`) | 10 s |
 | `pg_esperas_lock` | | `pg_locks`, pedidos não concedidos | 10 s |
 | `pg_tabela_bytes`, `pg_indices_bytes` | tabela | `pg_table_size`, `pg_indexes_size` | 60 s |
-| `pg_tuplas_mortas_pct`, `pg_espaco_livre_pct` | tabela | `pgstattuple_approx` | 5 min, só no cenário `longa` |
+| `pg_tuplas_mortas_pct`, `pg_espaco_livre_pct` | tabela | `pgstattuple_approx` | 5 min, só no cenário `longa` do Eixo B (ADR-069) |
+| `pg_idade_xid`, `pg_idade_mxid` | banco | `pg_database` (`age(datfrozenxid)`, `mxid_age(datminmxid)`) | 60 s, só no cenário `longa` |
+| `pg_idade_xid_tabela` | tabela | `pg_class` (`age(relfrozenxid)`) | 60 s, só no cenário `longa` |
 
 O rótulo `tabela` é `esquema.tabela`, para distinguir, por exemplo, os chunks do
 TimescaleDB, que ficam no esquema `_timescaledb_internal`. O rótulo `banco` é o
@@ -423,9 +434,24 @@ código-fonte da ferramenta (`load/loader.go`, `pkg/query/benchmarker.go` e
   `espera_compactacao_s` e `tsm_bytes`.
 - **Arquivo HDR.** A opção `--hdr-latencies` não é usada. O código não esvazia
   o buffer de escrita antes de terminar, e o arquivo pode sair incompleto.
-- **Deriva.** Nos cenários `mista` e `longa`, as consultas rodam em lotes
-  periódicos, cada um com o seu JSON. A série de percentis por lote, com o
-  instante de cada lote, mostra a deriva. A definir na Fase 3.
+- **Taxa fixa (ADR-068 e ADR-069).** Com `--taxa R` (métricas/s), um
+  alimentador lê os pontos de uma fonte e os entrega ao `tsbs_load` no ritmo
+  da taxa, em fatias de 10 ms, com 4 trabalhadores. O ponto k está agendado
+  para o início mais k/R; se o `tsbs_load` não acompanhar, os atrasados saem
+  logo que a escrita volta, sem pular o agendamento. O `metricas-gerador.csv`
+  (ou o `metricas-ingestao.csv` da carga mista) ganha
+  `alimentador_pontos_enviados_total` e `alimentador_pontos_devidos_total` a
+  cada relatório. Na longa duração, a fonte é o `tsbs_generate_data` com os
+  parâmetros da ADR-060 e o período que cabe em `medicao_s` à taxa, e o prazo
+  é `aquecimento_s` + `medicao_s` + 1 h; na carga mista, é o arquivo das
+  curtas, e a ingestão para quando a busca termina.
+- **Deriva.** Na longa duração, um lote de consultas a cada 30 min, com 5
+  consultas de cada tipo geradas na hora sobre o período já carregado (semente
+  `20261208` + número do lote), e mais um ao fim da ingestão. O
+  `metricas-lotes.csv` tem uma linha por lote e tipo, com a contagem e as
+  latências em ms; as saídas originais ficam em `ferramenta/lotes/<lote>/`.
+  Depois vêm a compressão ou as compactações (prazo de 2 h) e as consultas das
+  execuções curtas.
 
 As saídas originais ficam em `ferramenta/`: `tsbs-carga.txt` e
 `tsbs-carga.json` da carga, e `consultas/<tipo>.txt` e `.json` de cada tipo,
@@ -558,8 +584,15 @@ aos núcleos do gerador (`6-7,14-15`), dentro de `systemd-inhibit` e de
 |---|---|
 | `verificar` | Confere os controles do protocolo e lista o que está fora, sem rodar nada |
 | `planejar` | Lê um plano e mostra a ordem sorteada das execuções, bloco a bloco, com a duração mínima da janela |
-| `preparar` | Carrega os dados de uma arquitetura uma vez e grava a cópia inicial (ADR-029) |
+| `preparar` | Carrega os dados de uma arquitetura uma vez e grava a cópia inicial (ADR-029). Com `--copiar-de <eixo>`, os diretórios de dados partem da cópia inicial da arquitetura de mesmo nome nesse eixo, e o gerador só acrescenta o que falta: a carga mista parte do Eixo A (`preparar m consolidada --copiar-de a`, ADR-068) |
 | `executar` | Roda uma janela inteira a partir de um plano; `--retomar <id-janela>` continua uma janela interrompida (ADR-033). Código de saída 0 quando a janela termina, 1 quando o ambiente fica inválido ou a configuração está errada, 130 quando o operador interrompe |
+
+A execução de controle do SSD com `fio`, depois da longa duração (ADR-004, item
+2, revisto na ADR-069), fica em `harness/orquestracao/controle_fio.py`, com o
+mesmo protocolo e as mesmas travas:
+`python -m harness.orquestracao.controle_fio --taxa-mib-s <R>`. Grava em
+`resultados/brutos/controle/<id>_controle_fio/` o manifesto, a telemetria do
+host, o SMART no início e no fim e as saídas do `fio`.
 
 ### Plano da janela
 
@@ -575,6 +608,26 @@ internos e com o `pg_stat_statements` sem rastrear, para medir o custo da
 coleta (ADR-021, item 6, e ADR-066). A mesma configuração pode aparecer com e
 sem coleta no mesmo plano; as duas recebem a mesma semente em cada repetição, e
 o manifesto registra `coleta_interna`.
+
+A chave opcional `espera = "aviso"` (ou `"consulta"`), aceita só na fila
+consolidada do Eixo B, troca o modo de espera dos consumidores do gerador
+(`TCC_ESPERA`, passada ao `docker compose run`) para a medida do teto do aviso
+(ADR-051, item 4, e ADR-067). Sem a chave vale o da composição, a consulta a
+cada 100 ms. O manifesto registra `espera` (`null` sem a chave).
+
+A chave opcional `taxas = [R1, R2, ...]` põe a escrita em taxa fixa. A
+configuração é expandida por concorrência e por taxa, o gerador recebe
+`--taxa`, o identificador termina em `_t<taxa>` e o manifesto registra `taxa`
+(`null` sem a chave).
+
+- **Eixo B:** mensagens/s somando todos os produtores, para a latência fim a
+  fim (revisão de 10/11/2026 da ADR-054). A semente inclui a taxa. Sem a chave,
+  os produtores ficam em laço fechado.
+- **Carga mista (`m`):** métricas/s da ingestão que concorre com a busca
+  (ADR-068). A semente não inclui a taxa, para a busca mandar as mesmas
+  consultas em todas as taxas de um bloco. Sem a chave, só a busca.
+- **Eixo C:** métricas/s da ingestão contínua, aceita só no cenário `longa`
+  (ADR-069). Sem a chave, a carga é a do arquivo inteiro.
 
 ```toml
 nome = "piloto"
@@ -595,7 +648,8 @@ medicao_s = 300
 
 Arquivo `arquitetura.toml` em `<pasta do eixo>/<arquitetura>/`, ao lado da
 composição. A pasta de cada eixo é fixa: `a` em `eixo-a-busca`, `b` em
-`eixo-b-fila`, `c` em `eixo-c-temporal` e `t` em `harness/teste`. Assim o
+`eixo-b-fila`, `c` em `eixo-c-temporal`, `m` em `eixo-m-mista` e `t` em
+`harness/teste`. Assim o
 descritor da arquitetura `outbox` do Eixo B é sempre
 `eixo-b-fila/outbox/arquitetura.toml`. Tudo o que é específico de uma
 arquitetura fica ali, e o orquestrador permanece genérico.
