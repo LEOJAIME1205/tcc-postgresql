@@ -1,0 +1,48 @@
+{
+ "ResultFormatVersion": "0.1",
+ "RunnerConfig": {
+  "DBName": "benchmark",
+  "Limit": 0,
+  "LimitRPS": 0,
+  "MemProfile": "",
+  "HDRLatenciesFile": "",
+  "Workers": 1,
+  "PrintResponses": false,
+  "Debug": 0,
+  "FileName": "",
+  "BurnIn": 0,
+  "PrintInterval": 0,
+  "PrewarmQueries": false,
+  "ResultsFile": "/saida/ferramenta/consultas/aquecimento-cpu-max-all-8.json"
+ },
+ "StartTime": 1794675294000,
+ "EndTime": 1794675294000,
+ "DurationMillis": 11,
+ "Totals": {
+  "burnIn": 0,
+  "limit": 0,
+  "overallQuantiles": {
+   "Influx_max_of_all_CPU_metrics_random_8_hosts_random_8h0m0s_by_1h": {
+    "q0": 0,
+    "q100": 2.404,
+    "q50": 2.088,
+    "q95": 2.404,
+    "q99": 2.404,
+    "q999": 2.404
+   },
+   "all_queries": {
+    "q0": 0,
+    "q100": 2.404,
+    "q50": 2.088,
+    "q95": 2.404,
+    "q99": 2.404,
+    "q999": 2.404
+   }
+  },
+  "overallQueryRates": {
+   "Influx_max_of_all_CPU_metrics_random_8_hosts_random_8h0m0s_by_1h": 452.20709167440623,
+   "all_queries": 452.20709167440623
+  },
+  "prewarmQueries": false
+ }
+}

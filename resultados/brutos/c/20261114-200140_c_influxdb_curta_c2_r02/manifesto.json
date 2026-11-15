@@ -1,0 +1,524 @@
+{
+  "versao_formato": 1,
+  "id": "20261114-200140_c_influxdb_curta_c2_r02",
+  "janela": "20261114-1321",
+  "eixo": "c",
+  "arquitetura": "influxdb",
+  "cenario": "curta",
+  "concorrencia": 2,
+  "repeticao": 2,
+  "ordem_na_janela": 13,
+  "semente": 3325815656,
+  "coleta_interna": true,
+  "espera": null,
+  "taxa": null,
+  "duracao_planejada_s": {
+    "aquecimento": 10,
+    "medicao": 3590
+  },
+  "repositorio": {
+    "commit": "bb3710ee5b90362de3c528b3e71f7c3c90d2d924",
+    "alteracoes_locais": true
+  },
+  "host": {
+    "kernel": "7.0.0-42-generic",
+    "docker": "29.9.2"
+  },
+  "inicio": "2026-11-14T20:01:40-0300",
+  "estado": "ok",
+  "motivo_falha": null,
+  "tempos_ms": {
+    "repouso_inicio": 1794697303835,
+    "aquecimento_inicio": 1794698504838,
+    "medicao_inicio": 1794698514838,
+    "medicao_fim": 1794698973226
+  },
+  "controles": {
+    "conferidos": [
+      {
+        "controle": "swap desligado",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nenhuma área ativa"
+      },
+      {
+        "controle": "timers parados",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "10 parados"
+      },
+      {
+        "controle": "P510 encontrado",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "controlador nvme0"
+      },
+      {
+        "controle": "APST desligado",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nvme0: pm_qos_latency_tolerance_us = 0"
+      },
+      {
+        "controle": "energia em performance",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "16 processadores em performance, boost ligado"
+      },
+      {
+        "controle": "suspensão e desligamento bloqueados",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "trava tcc-coleta ativa"
+      },
+      {
+        "controle": "nenhum container rodando",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nenhum"
+      },
+      {
+        "controle": "nenhum coletor órfão",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nenhum"
+      },
+      {
+        "controle": "nenhum navegador aberto",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nenhum"
+      },
+      {
+        "controle": "espaço livre de pelo menos 50 GiB",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "694 GiB livres"
+      },
+      {
+        "controle": "sudo sem senha para a coleta",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "fstrim e nvme smart-log liberados"
+      },
+      {
+        "controle": "sem programas pesados abertos",
+        "ok": false,
+        "bloqueante": false,
+        "detalhe": "abertos: claude, code"
+      }
+    ],
+    "volumes_restaurados": true,
+    "fstrim": "/: 2,3 GiB (2458886144 bytes) descartado",
+    "repouso_s": 1200
+  },
+  "imagens": [
+    {
+      "servico": "influxdb",
+      "imagem": "influxdb:1.13.1@sha256:33fa5b045658ddd676f3f9a72c1f40eb92ad1582539a691cd36e578ce0a6f751",
+      "id": "sha256:33fa5b045658ddd676f3f9a72c1f40eb92ad1582539a691cd36e578ce0a6f751",
+      "digests": [
+        "influxdb@sha256:33fa5b045658ddd676f3f9a72c1f40eb92ad1582539a691cd36e578ce0a6f751"
+      ]
+    }
+  ],
+  "recursos": [
+    {
+      "servico": "influxdb",
+      "cpuset": "0-5,8-13",
+      "memoria_bytes": 21474836480
+    }
+  ],
+  "gerador": {
+    "ferramenta": "tcc-gerador-temporal",
+    "versao": "1 (TSBS 8323e59c74027b108f4ad5ec5d3e498b0101a02e com pr255.patch (ADR-059), psycopg 3.3.6, Python 3.14.4)",
+    "parametros": {
+      "arquitetura": "influxdb",
+      "trabalhadores": 2,
+      "lote": 10000,
+      "gzip": true,
+      "semente_execucao": 3325815656,
+      "semente_dados": 20261108,
+      "caso_de_uso": "cpu-only",
+      "escala": 4000,
+      "inicio": "2016-01-01T00:00:00Z",
+      "fim": "2016-01-04T00:00:00Z",
+      "consultas_por_tipo": 20,
+      "aquecimento_por_tipo": 5,
+      "aquecimento_s": 10,
+      "limite_carga_s": 3600
+    }
+  },
+  "disco": {
+    "ocupado_bytes": 187405766656,
+    "livre_bytes": 744863744000
+  },
+  "fim": "2026-11-14T20:41:02-0300",
+  "arquivos": [
+    {
+      "nome": "ferramenta/coletor-host.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "nome": "ferramenta/coletor-influxdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "nome": "ferramenta/compose.log",
+      "bytes": 1726,
+      "sha256": "fbcb436f97a2feb2ebfb3dce21b8a469a304e4534b32be13147bf530ce20d601"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-cpu-max-all-1.json",
+      "bytes": 1022,
+      "sha256": "cd0b807a1af7c2c795570dc59683848bfaa3f80a567120e73c56f7370f220f67"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-cpu-max-all-1.txt",
+      "bytes": 567,
+      "sha256": "99fc8a79ce4b26183536bbbaf6467afdcc7f3ebb7a7d248d7fb798ce04e2f2d6"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-cpu-max-all-8.json",
+      "bytes": 1021,
+      "sha256": "06c7f0fbd036f07d58df34c670ce889f2ab76db5a3d25bb08940d7e31a57f0d1"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-cpu-max-all-8.txt",
+      "bytes": 567,
+      "sha256": "44c28b3d89ce5017000c74590a0aeb45f998967eb7564c5a27d4ea2cce16c685"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-double-groupby-1.json",
+      "bytes": 1032,
+      "sha256": "119f5feb7f4df2d03772ee8373d37e7129af777d0ac4ac2f298b9f87f4181ff4"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-double-groupby-1.txt",
+      "bytes": 544,
+      "sha256": "c0485b59c81c252557bcc81845d56027ec401452ddf93cb6b115fc86f9bcbe80"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-double-groupby-5.json",
+      "bytes": 1045,
+      "sha256": "347449ef9cc28640b7532c6a798e6e66be08e9b867b9ef90dd696b403167d016"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-double-groupby-5.txt",
+      "bytes": 545,
+      "sha256": "25882833d1cd63f9655f8d2be4e4bd03b10130a650f9eaf3d6347a39845ebf6f"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-double-groupby-all.json",
+      "bytes": 1049,
+      "sha256": "bcecd5bc2ef1d9527a1ea708be5d455ba1b44ed73877369214fb5e7a749b08a6"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-double-groupby-all.txt",
+      "bytes": 549,
+      "sha256": "6adcdda6a567d462d269eb12139627669c592afb2a8620925f16c0a1ec2a08ee"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-groupby-orderby-limit.json",
+      "bytes": 1041,
+      "sha256": "0b4a89664402872621ac42400a2d28d8490cecfd3a0769fee7591d27a7661880"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-groupby-orderby-limit.txt",
+      "bytes": 541,
+      "sha256": "52319015f6e88b738f0e818dadf9ae7a211c8b9e41e6993fb447b9c2d7bbdb53"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-high-cpu-1.json",
+      "bytes": 964,
+      "sha256": "f93661a9ac68c4e779434068553b00a59f077696a10f7a06c24f24b1b7ad851e"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-high-cpu-1.txt",
+      "bytes": 498,
+      "sha256": "e5735bb0d912dbfff264e7af7ca649067375afe1c5fa1a92b799d7edd0b90bb1"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-high-cpu-all.json",
+      "bytes": 1011,
+      "sha256": "6a6fe8fe770af1ff7f9fa33221e883e8e3fad49bf41f3c767296a5baf80e2a7a"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-high-cpu-all.txt",
+      "bytes": 501,
+      "sha256": "cec4ca693773abb898707867b9a1a99d6f12443c8262f91c66b203b9735e2fe9"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-lastpoint.json",
+      "bytes": 961,
+      "sha256": "9a5e876d3cc79f5ebe92fd3b6fde5428a59147ff8fe0303c9e8c7fab46ace2c7"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-lastpoint.txt",
+      "bytes": 471,
+      "sha256": "b3a29edaba5078aeeadceec2391350a436073a7b27c0e186a9eafade71867162"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-single-groupby-1-1-1.json",
+      "bytes": 1015,
+      "sha256": "6b800578d8fd30985f903fab626ff7582b2a99e0a6c80e507d511c59d8eeaed9"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-single-groupby-1-1-1.txt",
+      "bytes": 561,
+      "sha256": "dba89c04b4a34e345a08cb92b13a94fa8f3b87aecf1970cc4668f4bb3f41916f"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-single-groupby-1-1-12.json",
+      "bytes": 1017,
+      "sha256": "1df178518157cd92e58996476e45f2b1c5f23cb358c56f2888112562852a463e"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-single-groupby-1-1-12.txt",
+      "bytes": 563,
+      "sha256": "3f2733863aed1e87eb690c0111cc04984993e08e27a20e39b1682cbf61156864"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-single-groupby-1-8-1.json",
+      "bytes": 1013,
+      "sha256": "8ad74e47c28a1d0c9e5af1aa11dcf9d8986b89017fcf0034b20bde5d2d823d79"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-single-groupby-1-8-1.txt",
+      "bytes": 560,
+      "sha256": "23ec4ee55c0604e2aae5bdf9b7a3ba7f7efc717b3a1ccb3f16f6f9a6b166ab48"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-single-groupby-5-1-1.json",
+      "bytes": 1007,
+      "sha256": "8390f5b223dddc6c227fa3b6070356abfb67abc5d06c0a253daed15b650d0a5c"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-single-groupby-5-1-1.txt",
+      "bytes": 561,
+      "sha256": "9e0b3e12c813112ee96f32380464dc2642ffcd28f470d1ee2a16c917b526447c"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-single-groupby-5-1-12.json",
+      "bytes": 1019,
+      "sha256": "e145aa5fd09b3cad9d1e435135c602f58b08687a51b198c0487eead6c9e69152"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-single-groupby-5-1-12.txt",
+      "bytes": 563,
+      "sha256": "707c333d76ed4d179b2080fe91496d1d53acb6363a1d101fb5689db5ad03a3c3"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-single-groupby-5-8-1.json",
+      "bytes": 1013,
+      "sha256": "b2438bec3af74d36ad9525d0b543b7e692ed8ec75dfbc6059a7f6a8fa258b6a7"
+    },
+    {
+      "nome": "ferramenta/consultas/aquecimento-single-groupby-5-8-1.txt",
+      "bytes": 560,
+      "sha256": "b193ebfb6721cd6c98ee7f8f3b8f572a9ea452f9fae5bce66ea992b229c54085"
+    },
+    {
+      "nome": "ferramenta/consultas/cpu-max-all-1.json",
+      "bytes": 1005,
+      "sha256": "464e3f007a4501cc5ebe84f1420ef9715f2c68ab4e509263b6d2741ebd00194c"
+    },
+    {
+      "nome": "ferramenta/consultas/cpu-max-all-1.txt",
+      "bytes": 558,
+      "sha256": "1e7704c1cf3582a32a1fd1bfeee34cde1a6bf0ab1fec3c2a4648734c0874e70d"
+    },
+    {
+      "nome": "ferramenta/consultas/cpu-max-all-8.json",
+      "bytes": 1011,
+      "sha256": "d8bae5cfe9e9b12c7bd4741dda9a5e464a99e7fae58d6b98713969462ad63bd8"
+    },
+    {
+      "nome": "ferramenta/consultas/cpu-max-all-8.txt",
+      "bytes": 558,
+      "sha256": "8e9eaa854e0e1f0c2ede388441cc6fb677d4a9f0b39065bcb1812e03a72ef40d"
+    },
+    {
+      "nome": "ferramenta/consultas/double-groupby-1.json",
+      "bytes": 1021,
+      "sha256": "e99dc07b2392eae7476c9f31a0d5d1b583e4c44709890c537499038fb486287f"
+    },
+    {
+      "nome": "ferramenta/consultas/double-groupby-1.txt",
+      "bytes": 536,
+      "sha256": "6f1bc2fda4a687d5020aa7e10eb9dbc4ca2983d6df7b55028134ccb18cb94b7b"
+    },
+    {
+      "nome": "ferramenta/consultas/double-groupby-5.json",
+      "bytes": 1033,
+      "sha256": "ffa26274c0d44356c4c4eaefe722a93e8a1ef6a3aefac5419f6e678576367364"
+    },
+    {
+      "nome": "ferramenta/consultas/double-groupby-5.txt",
+      "bytes": 536,
+      "sha256": "5d251cde2f4dc36373210e135f5ec01fca191aec3103710a6a89cbecfd32bcff"
+    },
+    {
+      "nome": "ferramenta/consultas/double-groupby-all.json",
+      "bytes": 1034,
+      "sha256": "7f625b0ccf9f86d848323b16c3daf23ce19242853d024e3580f8e26791d7eb51"
+    },
+    {
+      "nome": "ferramenta/consultas/double-groupby-all.txt",
+      "bytes": 541,
+      "sha256": "f1732c91e7cf5d9cbc294c70482095bd53182d9c39685c0edf93d2496c521bba"
+    },
+    {
+      "nome": "ferramenta/consultas/groupby-orderby-limit.json",
+      "bytes": 1030,
+      "sha256": "33a63a3cea7c34e8b4093f48e3c56dec6a434b2dce0e07cd07c7bf5427ade4e0"
+    },
+    {
+      "nome": "ferramenta/consultas/groupby-orderby-limit.txt",
+      "bytes": 533,
+      "sha256": "9460b78a869e98cff2a0cb052b605c9af9cb0f0bbc3c90352f133fb93ac5f0a9"
+    },
+    {
+      "nome": "ferramenta/consultas/high-cpu-1.json",
+      "bytes": 952,
+      "sha256": "d8c6c79212131045249111628059fbe29f78a5a9e1c53483de31fa60c71fdb1b"
+    },
+    {
+      "nome": "ferramenta/consultas/high-cpu-1.txt",
+      "bytes": 489,
+      "sha256": "b1f4ab6bbee08d01f49a442f664d807fc9609459e04e4a3e535fe1bebd6e158b"
+    },
+    {
+      "nome": "ferramenta/consultas/high-cpu-all.json",
+      "bytes": 1000,
+      "sha256": "6d485e7b901cca1b32c1c9acf85e822f72273552901f33257f5859d0327b64ee"
+    },
+    {
+      "nome": "ferramenta/consultas/high-cpu-all.txt",
+      "bytes": 493,
+      "sha256": "7e4780ee5c8f3ef6438aa1dc38a2adea1cadfd0db9f2f2add878b1accc8a6c3f"
+    },
+    {
+      "nome": "ferramenta/consultas/lastpoint.json",
+      "bytes": 951,
+      "sha256": "f5ce40e03dcf5aa23bff0c80fa5beea5b0ed3befebf4c811130e94f37ddffccb"
+    },
+    {
+      "nome": "ferramenta/consultas/lastpoint.txt",
+      "bytes": 462,
+      "sha256": "db76445c67a13bf20959b2b185d445a29e74a0dc1a55ec977587ed3bdf58927d"
+    },
+    {
+      "nome": "ferramenta/consultas/single-groupby-1-1-1.json",
+      "bytes": 1001,
+      "sha256": "d51ca797dfb17a606146a32ddb21e4878c6c053991bc1d4b7e675768813a6548"
+    },
+    {
+      "nome": "ferramenta/consultas/single-groupby-1-1-1.txt",
+      "bytes": 552,
+      "sha256": "d8c5c8881632837491d93c9acc8d90d241460c1f5c73abd38c975e8da68b4a42"
+    },
+    {
+      "nome": "ferramenta/consultas/single-groupby-1-1-12.json",
+      "bytes": 999,
+      "sha256": "885444aeae66b7fc869cb128ba93b3c90373a468ac5a4c2a1ad44a811de3b3ce"
+    },
+    {
+      "nome": "ferramenta/consultas/single-groupby-1-1-12.txt",
+      "bytes": 554,
+      "sha256": "3cd7d0e8e54f0f7357ff29fcbd0cfb6aad551f6520636df9d4ae8f6f447edc46"
+    },
+    {
+      "nome": "ferramenta/consultas/single-groupby-1-8-1.json",
+      "bytes": 1002,
+      "sha256": "698a19a05f80b58472b6b402b471d90307da39ad64985177ca00e57acee8c8f7"
+    },
+    {
+      "nome": "ferramenta/consultas/single-groupby-1-8-1.txt",
+      "bytes": 552,
+      "sha256": "b21eed7f3b7866fd1f5c8477afa9576f3094a31a6c37f04665a9e6e2f7251c67"
+    },
+    {
+      "nome": "ferramenta/consultas/single-groupby-5-1-1.json",
+      "bytes": 1004,
+      "sha256": "2152f80a301820b0396426c4035f5ab4cd7ad9d275eb0d4f798f757c917523c4"
+    },
+    {
+      "nome": "ferramenta/consultas/single-groupby-5-1-1.txt",
+      "bytes": 552,
+      "sha256": "362d0354a3228d7f681ef242db12d796f145325341a16cf17e9b14e554cb4247"
+    },
+    {
+      "nome": "ferramenta/consultas/single-groupby-5-1-12.json",
+      "bytes": 1008,
+      "sha256": "94b03cc8acb23a38887153859de0511b089073b3241436c88ddd437b46b34c36"
+    },
+    {
+      "nome": "ferramenta/consultas/single-groupby-5-1-12.txt",
+      "bytes": 554,
+      "sha256": "563a4b80b71a3826cb009c3c3c80cef84958675449cccdb8ed9f86253df31ed7"
+    },
+    {
+      "nome": "ferramenta/consultas/single-groupby-5-8-1.json",
+      "bytes": 994,
+      "sha256": "2ff953167056157f5c6b8e8e84b4593c52991850ac0c3432027a35296a44d11f"
+    },
+    {
+      "nome": "ferramenta/consultas/single-groupby-5-8-1.txt",
+      "bytes": 551,
+      "sha256": "bb2701834547f1fad9e1099c80929fb55cfb633df955bb706db8fec743db4d77"
+    },
+    {
+      "nome": "ferramenta/influxdb.log",
+      "bytes": 2622609,
+      "sha256": "6b2a541adc654f9ecc453a50b62e983341544a9f8912d95afd28be52e260315c"
+    },
+    {
+      "nome": "ferramenta/orquestrador.log",
+      "bytes": 533,
+      "sha256": "0d991496d40ad407eeece3f588a6f6ca837c0d07ed487cabceea3718514dffd6"
+    },
+    {
+      "nome": "ferramenta/tsbs-carga.json",
+      "bytes": 590,
+      "sha256": "8135fa62443fd40a4950fc0e1b6253ece5813f59788f364a5e2ba198cc84871d"
+    },
+    {
+      "nome": "ferramenta/tsbs-carga.txt",
+      "bytes": 37418,
+      "sha256": "318e457ce22df0bed7a8fba09efaf0e40645d7d190093e27c44013b41f81f822"
+    },
+    {
+      "nome": "gerador.json",
+      "bytes": 823,
+      "sha256": "6f95e8644b28405e6fd5f3b34ab7f7ff32033c46ed7b1108294df76de016ef6b"
+    },
+    {
+      "nome": "instantaneos/docker-inspect.json",
+      "bytes": 8543,
+      "sha256": "02c261eddff0c225a8ced2f031473774dcb43d5d5a2932db83a8e39fcd5a76f1"
+    },
+    {
+      "nome": "metricas-gerador.csv",
+      "bytes": 49109,
+      "sha256": "72a0a4e2c67a3af7992bfb5de6a04980dad7ba6115090f9a64dd45ec4bd1307d"
+    },
+    {
+      "nome": "metricas-host.csv",
+      "bytes": 5376378,
+      "sha256": "b1993215a3740e4f3de0037a0443494691739318264c3ec01324a658ff99962d"
+    },
+    {
+      "nome": "metricas-influxdb.csv",
+      "bytes": 157708,
+      "sha256": "47aa6bd1fc67c4ad58252572a0700dd25a0b64f22416da67866d25c64f8abbc5"
+    },
+    {
+      "nome": "resumo.json",
+      "bytes": 22363,
+      "sha256": "137594eec7060149e7e945c02a5d5fa2bb7aa67e0a7a8d1b16db0016bdc2fe55"
+    }
+  ]
+}

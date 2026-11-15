@@ -1,0 +1,256 @@
+{
+  "versao_formato": 1,
+  "id": "20261111-125659_a_poliglota_curta_c4_r03",
+  "janela": "20261111-0350",
+  "eixo": "a",
+  "arquitetura": "poliglota",
+  "cenario": "curta",
+  "concorrencia": 4,
+  "repeticao": 3,
+  "ordem_na_janela": 19,
+  "semente": 1456962003,
+  "coleta_interna": true,
+  "espera": null,
+  "taxa": null,
+  "duracao_planejada_s": {
+    "aquecimento": 300,
+    "medicao": 300
+  },
+  "repositorio": {
+    "commit": "bb3710ee5b90362de3c528b3e71f7c3c90d2d924",
+    "alteracoes_locais": true
+  },
+  "host": {
+    "kernel": "7.0.0-42-generic",
+    "docker": "29.9.2"
+  },
+  "inicio": "2026-11-11T12:56:59-0300",
+  "estado": "ok",
+  "motivo_falha": null,
+  "tempos_ms": {
+    "repouso_inicio": 1794412623997,
+    "aquecimento_inicio": 1794413836917,
+    "medicao_inicio": 1794414136917,
+    "medicao_fim": 1794414436917
+  },
+  "controles": {
+    "conferidos": [
+      {
+        "controle": "swap desligado",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nenhuma área ativa"
+      },
+      {
+        "controle": "timers parados",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "10 parados"
+      },
+      {
+        "controle": "P510 encontrado",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "controlador nvme0"
+      },
+      {
+        "controle": "APST desligado",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nvme0: pm_qos_latency_tolerance_us = 0"
+      },
+      {
+        "controle": "energia em performance",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "16 processadores em performance, boost ligado"
+      },
+      {
+        "controle": "suspensão e desligamento bloqueados",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "trava tcc-coleta ativa"
+      },
+      {
+        "controle": "nenhum container rodando",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nenhum"
+      },
+      {
+        "controle": "nenhum coletor órfão",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nenhum"
+      },
+      {
+        "controle": "nenhum navegador aberto",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nenhum"
+      },
+      {
+        "controle": "espaço livre de pelo menos 50 GiB",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "729 GiB livres"
+      },
+      {
+        "controle": "sudo sem senha para a coleta",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "fstrim e nvme smart-log liberados"
+      },
+      {
+        "controle": "sem programas pesados abertos",
+        "ok": false,
+        "bloqueante": false,
+        "detalhe": "abertos: claude, code"
+      }
+    ],
+    "volumes_restaurados": true,
+    "fstrim": "/: 2,4 GiB (2546597888 bytes) descartado",
+    "repouso_s": 1200
+  },
+  "imagens": [
+    {
+      "servico": "qdrant",
+      "imagem": "qdrant/qdrant:v1.19.2@sha256:b7b0444c4c351c970b98e90a6f89c2ee4287c65b44e52b4cb503fa5b2aa927ad",
+      "id": "sha256:b7b0444c4c351c970b98e90a6f89c2ee4287c65b44e52b4cb503fa5b2aa927ad",
+      "digests": [
+        "qdrant/qdrant@sha256:b7b0444c4c351c970b98e90a6f89c2ee4287c65b44e52b4cb503fa5b2aa927ad"
+      ]
+    },
+    {
+      "servico": "busca",
+      "imagem": "tcc-busca:1",
+      "id": "sha256:82bbd087272bb16a875b8922a21a9d929763c5a58e9098a99e98f43f2e6c7dc4",
+      "digests": [
+        "tcc-busca@sha256:82bbd087272bb16a875b8922a21a9d929763c5a58e9098a99e98f43f2e6c7dc4"
+      ]
+    },
+    {
+      "servico": "opensearch",
+      "imagem": "opensearchproject/opensearch:3.8.0@sha256:fafe3fc3587088674669235575aa166228c48bdb940294a8cdbbc1da75236a40",
+      "id": "sha256:fafe3fc3587088674669235575aa166228c48bdb940294a8cdbbc1da75236a40",
+      "digests": [
+        "opensearchproject/opensearch@sha256:fafe3fc3587088674669235575aa166228c48bdb940294a8cdbbc1da75236a40"
+      ]
+    }
+  ],
+  "recursos": [
+    {
+      "servico": "qdrant",
+      "cpuset": "0-5,8-13",
+      "memoria_bytes": 9663676416
+    },
+    {
+      "servico": "busca",
+      "cpuset": "0-5,8-13",
+      "memoria_bytes": 1073741824
+    },
+    {
+      "servico": "opensearch",
+      "cpuset": "0-5,8-13",
+      "memoria_bytes": 10737418240
+    }
+  ],
+  "gerador": {
+    "ferramenta": "tcc-gerador-busca",
+    "versao": "1 (aiohttp 3.14.5, Python 3.14.4)",
+    "parametros": {
+      "concorrencia": 4,
+      "processos": 2,
+      "semente": 1456962003,
+      "aquecimento_s": 300,
+      "medicao_s": 300,
+      "consultas": 3452,
+      "tempo_limite_s": 60.0,
+      "servico": "http://busca:8000",
+      "primeiras_consultas": [
+        "test1141",
+        "test2072",
+        "test1591",
+        "test2008",
+        "test178"
+      ]
+    }
+  },
+  "disco": {
+    "ocupado_bytes": 149289766912,
+    "livre_bytes": 782979743744
+  },
+  "fim": "2026-11-11T13:27:19-0300",
+  "arquivos": [
+    {
+      "nome": "ferramenta/busca.log",
+      "bytes": 833,
+      "sha256": "f62f984d6f93c834102c7b8bcfd59d45b0688893fd4a9744d2ad4e30891c6976"
+    },
+    {
+      "nome": "ferramenta/coletor-host.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "nome": "ferramenta/coletor-opensearch.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "nome": "ferramenta/coletor-qdrant.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "nome": "ferramenta/compose.log",
+      "bytes": 1763,
+      "sha256": "50f5676069087c67db31478d7421a23c4b95d0edfdfacc35339d82125361f323"
+    },
+    {
+      "nome": "ferramenta/opensearch.log",
+      "bytes": 51154,
+      "sha256": "1ca204003847969b6042a2b03967e5f6e18e29f6cafb5cef179e326f3f33c824"
+    },
+    {
+      "nome": "ferramenta/orquestrador.log",
+      "bytes": 539,
+      "sha256": "a68e2452475cc33bfef6d76ab8296d6d754105b961ea9a95b35cb74e87552be4"
+    },
+    {
+      "nome": "ferramenta/qdrant.log",
+      "bytes": 5035,
+      "sha256": "aa5e14a89662522d6f97091cbdcce576617bc87fdeaba8a1bd2d5a9a01fde204"
+    },
+    {
+      "nome": "gerador.json",
+      "bytes": 652,
+      "sha256": "39224e85f88f1c9ad61a1140a03650f7bbb930ef3c1f559c9c944e03ad9c8bf9"
+    },
+    {
+      "nome": "instantaneos/docker-inspect.json",
+      "bytes": 25214,
+      "sha256": "72c07cf138b64ecc1938651cf75a86754811fb7647cbbca2c09cfd06874d0555"
+    },
+    {
+      "nome": "metricas-host.csv",
+      "bytes": 3705464,
+      "sha256": "6c5e935b72048168a6a86f61471dde4fe906f4d32ff8bf8984b24525dca03bf1"
+    },
+    {
+      "nome": "metricas-opensearch.csv",
+      "bytes": 44428,
+      "sha256": "ace2a5930d330c50bd8bb4426dc182eb7bdf49a15a72ac675163e5fb99ca0355"
+    },
+    {
+      "nome": "metricas-qdrant.csv",
+      "bytes": 18599,
+      "sha256": "24f0c7362f96dde8eea2eb5130c4bb3dbf61e27c8bfe47edc890932c93b8f0c4"
+    },
+    {
+      "nome": "operacoes.csv",
+      "bytes": 18437354,
+      "sha256": "f407cae1e8166ae63f28c5b83415d734c1f916496d52bceeb93592538c5da61f"
+    }
+  ]
+}

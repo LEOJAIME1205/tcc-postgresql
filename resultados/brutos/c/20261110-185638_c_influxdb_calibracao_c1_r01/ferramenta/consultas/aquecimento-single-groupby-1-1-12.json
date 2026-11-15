@@ -1,0 +1,48 @@
+{
+ "ResultFormatVersion": "0.1",
+ "RunnerConfig": {
+  "DBName": "benchmark",
+  "Limit": 0,
+  "LimitRPS": 0,
+  "MemProfile": "",
+  "HDRLatenciesFile": "",
+  "Workers": 1,
+  "PrintResponses": false,
+  "Debug": 0,
+  "FileName": "",
+  "BurnIn": 0,
+  "PrintInterval": 0,
+  "PrewarmQueries": false,
+  "ResultsFile": "/saida/ferramenta/consultas/aquecimento-single-groupby-1-1-12.json"
+ },
+ "StartTime": 1794349822000,
+ "EndTime": 1794349822000,
+ "DurationMillis": 8,
+ "Totals": {
+  "burnIn": 0,
+  "limit": 0,
+  "overallQuantiles": {
+   "Influx_1_cpu_metric_s_random_1_hosts_random_12h0m0s_by_1m": {
+    "q0": 0,
+    "q100": 1.802,
+    "q50": 1.459,
+    "q95": 1.802,
+    "q99": 1.802,
+    "q999": 1.802
+   },
+   "all_queries": {
+    "q0": 0,
+    "q100": 1.802,
+    "q50": 1.459,
+    "q95": 1.802,
+    "q99": 1.802,
+    "q999": 1.802
+   }
+  },
+  "overallQueryRates": {
+   "Influx_1_cpu_metric_s_random_1_hosts_random_12h0m0s_by_1m": 648.2964519642799,
+   "all_queries": 648.2964519642799
+  },
+  "prewarmQueries": false
+ }
+}

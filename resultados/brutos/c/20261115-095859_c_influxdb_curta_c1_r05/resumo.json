@@ -1,0 +1,845 @@
+{
+  "versao_formato": 1,
+  "valores": [
+    {
+      "metrica": "carga_s",
+      "rotulo": "",
+      "valor": 824.571,
+      "fonte": "gerador.py"
+    },
+    {
+      "metrica": "carga_metricas",
+      "rotulo": "",
+      "valor": 1036800000.0,
+      "fonte": "resumo do tsbs_load"
+    },
+    {
+      "metrica": "carga_linhas",
+      "rotulo": "",
+      "valor": 103680000.0,
+      "fonte": "resumo do tsbs_load"
+    },
+    {
+      "metrica": "espera_compactacao_s",
+      "rotulo": "",
+      "valor": 4.005,
+      "fonte": "gerador.py"
+    },
+    {
+      "metrica": "tsm_bytes",
+      "rotulo": "benchmark",
+      "valor": 586872721.0,
+      "fonte": "/debug/vars, tsm1_filestore"
+    },
+    {
+      "metrica": "consulta_contagem",
+      "rotulo": "single-groupby-1-1-1",
+      "valor": 20.0,
+      "fonte": "saída do tsbs_run_queries"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-1-1:min",
+      "valor": 260.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-1-1:media",
+      "valor": 310.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-1-1:desvio",
+      "valor": 70.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-1-1:p50",
+      "valor": 280.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-1-1:max",
+      "valor": 590.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-1-1:p95",
+      "valor": 395.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-1-1:p99",
+      "valor": 592.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-1-1:p999",
+      "valor": 592.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_contagem",
+      "rotulo": "single-groupby-1-1-12",
+      "valor": 20.0,
+      "fonte": "saída do tsbs_run_queries"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-1-12:min",
+      "valor": 1360.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-1-12:media",
+      "valor": 1610.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-1-12:desvio",
+      "valor": 440.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-1-12:p50",
+      "valor": 1460.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-1-12:max",
+      "valor": 3420.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-1-12:p95",
+      "valor": 1914.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-1-12:p99",
+      "valor": 3422.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-1-12:p999",
+      "valor": 3422.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_contagem",
+      "rotulo": "single-groupby-1-8-1",
+      "valor": 20.0,
+      "fonte": "saída do tsbs_run_queries"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-8-1:min",
+      "valor": 570.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-8-1:media",
+      "valor": 760.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-8-1:desvio",
+      "valor": 340.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-8-1:p50",
+      "valor": 610.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-8-1:max",
+      "valor": 2080.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-8-1:p95",
+      "valor": 1221.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-8-1:p99",
+      "valor": 2076.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-1-8-1:p999",
+      "valor": 2076.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_contagem",
+      "rotulo": "single-groupby-5-1-1",
+      "valor": 20.0,
+      "fonte": "saída do tsbs_run_queries"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-1-1:min",
+      "valor": 600.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-1-1:media",
+      "valor": 680.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-1-1:desvio",
+      "valor": 110.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-1-1:p50",
+      "valor": 640.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-1-1:max",
+      "valor": 1120.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-1-1:p95",
+      "valor": 788.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-1-1:p99",
+      "valor": 1120.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-1-1:p999",
+      "valor": 1120.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_contagem",
+      "rotulo": "single-groupby-5-1-12",
+      "valor": 20.0,
+      "fonte": "saída do tsbs_run_queries"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-1-12:min",
+      "valor": 4980.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-1-12:media",
+      "valor": 5640.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-1-12:desvio",
+      "valor": 890.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-1-12:p50",
+      "valor": 5260.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-1-12:max",
+      "valor": 8080.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-1-12:p95",
+      "valor": 7894.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-1-12:p99",
+      "valor": 8081.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-1-12:p999",
+      "valor": 8081.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_contagem",
+      "rotulo": "single-groupby-5-8-1",
+      "valor": 20.0,
+      "fonte": "saída do tsbs_run_queries"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-8-1:min",
+      "valor": 1510.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-8-1:media",
+      "valor": 1840.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-8-1:desvio",
+      "valor": 590.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-8-1:p50",
+      "valor": 1600.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-8-1:max",
+      "valor": 3850.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-8-1:p95",
+      "valor": 2899.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-8-1:p99",
+      "valor": 3848.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "single-groupby-5-8-1:p999",
+      "valor": 3848.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_contagem",
+      "rotulo": "cpu-max-all-1",
+      "valor": 20.0,
+      "fonte": "saída do tsbs_run_queries"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "cpu-max-all-1:min",
+      "valor": 1010.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "cpu-max-all-1:media",
+      "valor": 1120.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "cpu-max-all-1:desvio",
+      "valor": 180.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "cpu-max-all-1:p50",
+      "valor": 1050.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "cpu-max-all-1:max",
+      "valor": 1710.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "cpu-max-all-1:p95",
+      "valor": 1537.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "cpu-max-all-1:p99",
+      "valor": 1711.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "cpu-max-all-1:p999",
+      "valor": 1711.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_contagem",
+      "rotulo": "cpu-max-all-8",
+      "valor": 20.0,
+      "fonte": "saída do tsbs_run_queries"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "cpu-max-all-8:min",
+      "valor": 1910.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "cpu-max-all-8:media",
+      "valor": 2190.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "cpu-max-all-8:desvio",
+      "valor": 400.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "cpu-max-all-8:p50",
+      "valor": 2030.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "cpu-max-all-8:max",
+      "valor": 3510.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "cpu-max-all-8:p95",
+      "valor": 2975.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "cpu-max-all-8:p99",
+      "valor": 3512.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "cpu-max-all-8:p999",
+      "valor": 3512.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_contagem",
+      "rotulo": "double-groupby-1",
+      "valor": 20.0,
+      "fonte": "saída do tsbs_run_queries"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-1:min",
+      "valor": 757280.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-1:media",
+      "valor": 773260.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-1:desvio",
+      "valor": 13780.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-1:p50",
+      "valor": 772610.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-1:max",
+      "valor": 802050.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-1:p95",
+      "valor": 801567.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-1:p99",
+      "valor": 802047.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-1:p999",
+      "valor": 802047.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_contagem",
+      "rotulo": "double-groupby-5",
+      "valor": 20.0,
+      "fonte": "saída do tsbs_run_queries"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-5:min",
+      "valor": 3356290.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-5:media",
+      "valor": 3440070.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-5:desvio",
+      "valor": 63530.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-5:p50",
+      "valor": 3431930.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-5:max",
+      "valor": 3596160.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-5:p95",
+      "valor": 3547263.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-5:p99",
+      "valor": 3596159.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-5:p999",
+      "valor": 3596159.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_contagem",
+      "rotulo": "double-groupby-all",
+      "valor": 20.0,
+      "fonte": "saída do tsbs_run_queries"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-all:min",
+      "valor": 6650370.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-all:media",
+      "valor": 6745370.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-all:desvio",
+      "valor": 90830.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-all:p50",
+      "valor": 6729220.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-all:max",
+      "valor": 7013630.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-all:p95",
+      "valor": 6925055.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-all:p99",
+      "valor": 7013631.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "double-groupby-all:p999",
+      "valor": 7013631.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_contagem",
+      "rotulo": "high-cpu-all",
+      "valor": 20.0,
+      "fonte": "saída do tsbs_run_queries"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "high-cpu-all:min",
+      "valor": 12535810.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "high-cpu-all:media",
+      "valor": 12821840.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "high-cpu-all:desvio",
+      "valor": 200650.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "high-cpu-all:p50",
+      "valor": 12795390.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "high-cpu-all:max",
+      "valor": 13217280.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "high-cpu-all:p95",
+      "valor": 13094911.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "high-cpu-all:p99",
+      "valor": 13217279.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "high-cpu-all:p999",
+      "valor": 13217279.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_contagem",
+      "rotulo": "high-cpu-1",
+      "valor": 20.0,
+      "fonte": "saída do tsbs_run_queries"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "high-cpu-1:min",
+      "valor": 1250.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "high-cpu-1:media",
+      "valor": 2910.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "high-cpu-1:desvio",
+      "valor": 1820.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "high-cpu-1:p50",
+      "valor": 2030.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "high-cpu-1:max",
+      "valor": 7920.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "high-cpu-1:p95",
+      "valor": 5357.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "high-cpu-1:p99",
+      "valor": 7917.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "high-cpu-1:p999",
+      "valor": 7917.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_contagem",
+      "rotulo": "lastpoint",
+      "valor": 20.0,
+      "fonte": "saída do tsbs_run_queries"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "lastpoint:min",
+      "valor": 272640.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "lastpoint:media",
+      "valor": 288080.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "lastpoint:desvio",
+      "valor": 11800.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "lastpoint:p50",
+      "valor": 288460.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "lastpoint:max",
+      "valor": 320860.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "lastpoint:p95",
+      "valor": 313167.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "lastpoint:p99",
+      "valor": 320863.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "lastpoint:p999",
+      "valor": 320863.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_contagem",
+      "rotulo": "groupby-orderby-limit",
+      "valor": 20.0,
+      "fonte": "saída do tsbs_run_queries"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "groupby-orderby-limit:min",
+      "valor": 929310.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "groupby-orderby-limit:media",
+      "valor": 3918730.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "groupby-orderby-limit:desvio",
+      "valor": 1922730.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "groupby-orderby-limit:p50",
+      "valor": 3854970.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "groupby-orderby-limit:max",
+      "valor": 6653690.0,
+      "fonte": "tsbs_run_queries (saída)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "groupby-orderby-limit:p95",
+      "valor": 6501119.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "groupby-orderby-limit:p99",
+      "valor": 6653695.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    },
+    {
+      "metrica": "consulta_latencia_us",
+      "rotulo": "groupby-orderby-limit:p999",
+      "valor": 6653695.0,
+      "fonte": "tsbs_run_queries (JSON)"
+    }
+  ]
+}

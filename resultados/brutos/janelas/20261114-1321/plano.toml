@@ -1,0 +1,24 @@
+# Execuções curtas do Eixo C (ADR-067, item 7): 8 configurações em 5 blocos completos,
+# 40 execuções, ~22 h. Cada execução carrega o arquivo inteiro e roda as consultas;
+# medicao_s é o prazo máximo da carga (ADR-065).
+nome = "curta-c"
+semente = 20261124
+espaco_livre_min_gib = 50
+
+[[configuracao]]
+eixo = "c"
+arquitetura = "timescaledb"
+cenario = "curta"
+concorrencias = [1, 2, 4, 8]
+repeticoes = 5
+aquecimento_s = 10
+medicao_s = 3590
+
+[[configuracao]]
+eixo = "c"
+arquitetura = "influxdb"
+cenario = "curta"
+concorrencias = [1, 2, 4, 8]
+repeticoes = 5
+aquecimento_s = 10
+medicao_s = 3590

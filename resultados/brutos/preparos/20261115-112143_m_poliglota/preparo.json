@@ -1,0 +1,17 @@
+{
+  "eixo": "m",
+  "arquitetura": "poliglota",
+  "inicio": "2026-11-15T11:21:43-0300",
+  "fim": "2026-11-15T11:23:54-0300",
+  "refeito": false,
+  "copiado_de": "a/poliglota",
+  "copiados_bytes": {
+    "opensearch": 1265908248,
+    "qdrant": 4640463165
+  },
+  "tamanhos_bytes": {
+    "opensearch": 1266335150,
+    "qdrant": 4640463165,
+    "influxdb": 70
+  }
+}

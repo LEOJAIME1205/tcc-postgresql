@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 0.15 queries/sec):
+Influx mean of 10 metrics, all hosts, random 12h0m0s by 1h:
+min:  6639.10ms, med:  6738.43ms, mean:  6743.88ms, max: 6886.91ms, stddev:    83.34ms, sum:  33.7sec, count: 5
+all queries                                               :
+min:  6639.10ms, med:  6738.43ms, mean:  6743.88ms, max: 6886.91ms, stddev:    83.34ms, sum:  33.7sec, count: 5
+wall clock time: 33.734386sec
+Saving results json file to /saida/ferramenta/consultas/aquecimento-double-groupby-all.json

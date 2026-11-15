@@ -1,0 +1,5 @@
+eixo,serie,niveis,saturacao,vazao_maxima_por_s,vazao_sustentavel_por_s,nivel_sustentavel,niveis_com_fila_crescendo,niveis_gerador_gargalo,niveis_acima_do_cache_pslc,niveis_instaveis,niveis_relay_gargalo
+b,consolidada,8 16 32,8,11865.72,,,8 16 32,,,,
+b,consolidada_aviso,8 16 32,8,1875.4133333333334,1875.4133333333334,8,,,,,
+b,ingenua,8 16 32,,9321.266666666666,9321.266666666666,32,,,,,
+b,outbox,8 16 32,16,14871.203333333333,14871.203333333333,16,32,,32,,

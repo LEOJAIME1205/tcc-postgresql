@@ -1,0 +1,48 @@
+{
+ "ResultFormatVersion": "0.1",
+ "RunnerConfig": {
+  "DBName": "benchmark",
+  "Limit": 0,
+  "LimitRPS": 0,
+  "MemProfile": "",
+  "HDRLatenciesFile": "",
+  "Workers": 1,
+  "PrintResponses": false,
+  "Debug": 0,
+  "FileName": "",
+  "BurnIn": 0,
+  "PrintInterval": 0,
+  "PrewarmQueries": false,
+  "ResultsFile": "/saida/ferramenta/consultas/aquecimento-high-cpu-1.json"
+ },
+ "StartTime": 1794679510000,
+ "EndTime": 1794679510000,
+ "DurationMillis": 18,
+ "Totals": {
+  "burnIn": 0,
+  "limit": 0,
+  "overallQuantiles": {
+   "Influx_CPU_over_threshold_1_host_s_": {
+    "q0": 0,
+    "q100": 7.475,
+    "q50": 3.153,
+    "q95": 7.475,
+    "q99": 7.475,
+    "q999": 7.475
+   },
+   "all_queries": {
+    "q0": 0,
+    "q100": 7.475,
+    "q50": 3.153,
+    "q95": 7.475,
+    "q99": 7.475,
+    "q999": 7.475
+   }
+  },
+  "overallQueryRates": {
+   "Influx_CPU_over_threshold_1_host_s_": 276.95936286052495,
+   "all_queries": 276.95936286052495
+  },
+  "prewarmQueries": false
+ }
+}

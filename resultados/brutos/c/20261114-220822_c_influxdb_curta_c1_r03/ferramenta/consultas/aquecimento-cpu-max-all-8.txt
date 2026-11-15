@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 389.81 queries/sec):
+Influx max of all CPU metrics, random    8 hosts, random 8h0m0s by 1h:
+min:     2.02ms, med:     2.29ms, mean:     2.55ms, max:    3.30ms, stddev:     0.51ms, sum:   0.0sec, count: 5
+all queries                                                          :
+min:     2.02ms, med:     2.29ms, mean:     2.55ms, max:    3.30ms, stddev:     0.51ms, sum:   0.0sec, count: 5
+wall clock time: 0.013435sec
+Saving results json file to /saida/ferramenta/consultas/aquecimento-cpu-max-all-8.json

@@ -1,0 +1,239 @@
+{
+  "arquitetura": "consolidada",
+  "criterio": "menor ef com recall@100 médio >= 0.95, com os 2 valores seguintes da grade (passo 10) também >= 0.95; piso 100 (ADR-038 e ADR-067)",
+  "escolhido": 260,
+  "busca": "SELECT id FROM passagens ORDER BY embedding <#> %s LIMIT 100",
+  "imagem": "tcc-postgres:18.6-ts2.31.0-pgv0.8.7",
+  "vizinhos_exatos_sha256": "c4915e2d5ac25973739975cd9ce16a99acc378a1d6f7d807db7044023fbd7b36",
+  "medidas": [
+    {
+      "ef": 100,
+      "recall_medio": 0.8826882966396292,
+      "recall_minimo": 0.0,
+      "recall_p05": 0.63,
+      "consultas_abaixo_de_0_9": 1324,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 38.1,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    },
+    {
+      "ef": 110,
+      "recall_medio": 0.8914484356894553,
+      "recall_minimo": 0.0,
+      "recall_p05": 0.65,
+      "consultas_abaixo_de_0_9": 1247,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 8.8,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    },
+    {
+      "ef": 120,
+      "recall_medio": 0.8995104287369641,
+      "recall_minimo": 0.0,
+      "recall_p05": 0.67,
+      "consultas_abaixo_de_0_9": 1159,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 9.1,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    },
+    {
+      "ef": 130,
+      "recall_medio": 0.9062224797219003,
+      "recall_minimo": 0.0,
+      "recall_p05": 0.68,
+      "consultas_abaixo_de_0_9": 1096,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 9.5,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    },
+    {
+      "ef": 140,
+      "recall_medio": 0.9122740440324449,
+      "recall_minimo": 0.0,
+      "recall_p05": 0.7,
+      "consultas_abaixo_de_0_9": 1033,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 10.0,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    },
+    {
+      "ef": 150,
+      "recall_medio": 0.9172711471610661,
+      "recall_minimo": 0.0,
+      "recall_p05": 0.71,
+      "consultas_abaixo_de_0_9": 976,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 11.0,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    },
+    {
+      "ef": 160,
+      "recall_medio": 0.9222132097334879,
+      "recall_minimo": 0.0,
+      "recall_p05": 0.72,
+      "consultas_abaixo_de_0_9": 913,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 12.6,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    },
+    {
+      "ef": 170,
+      "recall_medio": 0.9262340672074159,
+      "recall_minimo": 0.0,
+      "recall_p05": 0.73,
+      "consultas_abaixo_de_0_9": 869,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 17.2,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    },
+    {
+      "ef": 180,
+      "recall_medio": 0.929968134414832,
+      "recall_minimo": 0.0,
+      "recall_p05": 0.74,
+      "consultas_abaixo_de_0_9": 814,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 12.5,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    },
+    {
+      "ef": 190,
+      "recall_medio": 0.9337224797219004,
+      "recall_minimo": 0.0,
+      "recall_p05": 0.75,
+      "consultas_abaixo_de_0_9": 775,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 12.8,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    },
+    {
+      "ef": 200,
+      "recall_medio": 0.936752607184241,
+      "recall_minimo": 0.0,
+      "recall_p05": 0.76,
+      "consultas_abaixo_de_0_9": 744,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 16.5,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    },
+    {
+      "ef": 210,
+      "recall_medio": 0.9394438006952491,
+      "recall_minimo": 0.0,
+      "recall_p05": 0.76,
+      "consultas_abaixo_de_0_9": 706,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 16.0,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    },
+    {
+      "ef": 220,
+      "recall_medio": 0.9419640787949015,
+      "recall_minimo": 0.0,
+      "recall_p05": 0.77,
+      "consultas_abaixo_de_0_9": 674,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 13.7,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    },
+    {
+      "ef": 230,
+      "recall_medio": 0.9445538818076478,
+      "recall_minimo": 0.0,
+      "recall_p05": 0.78,
+      "consultas_abaixo_de_0_9": 638,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 14.4,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    },
+    {
+      "ef": 240,
+      "recall_medio": 0.9469785631517962,
+      "recall_minimo": 0.25,
+      "recall_p05": 0.79,
+      "consultas_abaixo_de_0_9": 612,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 21.5,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    },
+    {
+      "ef": 250,
+      "recall_medio": 0.9489687137891079,
+      "recall_minimo": 0.31,
+      "recall_p05": 0.79,
+      "consultas_abaixo_de_0_9": 587,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 16.2,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    },
+    {
+      "ef": 260,
+      "recall_medio": 0.950582271147161,
+      "recall_minimo": 0.31,
+      "recall_p05": 0.8,
+      "consultas_abaixo_de_0_9": 554,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 15.4,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    },
+    {
+      "ef": 270,
+      "recall_medio": 0.9524971031286211,
+      "recall_minimo": 0.51,
+      "recall_p05": 0.8055000000000002,
+      "consultas_abaixo_de_0_9": 523,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 15.8,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    },
+    {
+      "ef": 280,
+      "recall_medio": 0.9542149478563152,
+      "recall_minimo": 0.51,
+      "recall_p05": 0.81,
+      "consultas_abaixo_de_0_9": 502,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 16.3,
+      "detalhes": {
+        "pgvector": "0.8.7"
+      }
+    }
+  ],
+  "medido_em": "2026-11-09T16:20:05-0300"
+}

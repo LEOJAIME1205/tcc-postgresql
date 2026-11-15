@@ -1,0 +1,7 @@
+Run complete after 20 queries with 1 workers (Overall query rate 0.59 queries/sec):
+TimescaleDB mean of 10 metrics, all hosts, random 12h0m0s by 1h:
+min:  1623.30ms, med:  1691.84ms, mean:  1686.90ms, max: 1703.68ms, stddev:    21.95ms, sum:  33.7sec, count: 20
+all queries                                                    :
+min:  1623.30ms, med:  1691.84ms, mean:  1686.90ms, max: 1703.68ms, stddev:    21.95ms, sum:  33.7sec, count: 20
+wall clock time: 33.749500sec
+Saving results json file to /saida/ferramenta/consultas/double-groupby-all.json

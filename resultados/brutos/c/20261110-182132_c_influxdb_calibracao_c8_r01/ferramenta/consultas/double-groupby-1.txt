@@ -1,0 +1,7 @@
+Run complete after 20 queries with 1 workers (Overall query rate 1.35 queries/sec):
+Influx mean of 1 metrics, all hosts, random 12h0m0s by 1h:
+min:   729.15ms, med:   738.65ms, mean:   742.40ms, max:  770.85ms, stddev:    10.07ms, sum:  14.8sec, count: 20
+all queries                                              :
+min:   729.15ms, med:   738.65ms, mean:   742.40ms, max:  770.85ms, stddev:    10.07ms, sum:  14.8sec, count: 20
+wall clock time: 14.858044sec
+Saving results json file to /saida/ferramenta/consultas/double-groupby-1.json

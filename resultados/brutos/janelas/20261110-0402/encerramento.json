@@ -1,0 +1,186 @@
+{
+  "versao_formato": 1,
+  "janela": "20261110-0402",
+  "plano": "calibracao-b1",
+  "semente": 20261112,
+  "repouso_s": 1200,
+  "ordem": [
+    "b_consolidada_calibracao_c4_r01",
+    "b_consolidada_calibracao_c4_r01_aviso",
+    "b_outbox_calibracao_c2_r01",
+    "b_ingenua_calibracao_c2_r01",
+    "b_consolidada_calibracao_c2_r01",
+    "b_consolidada_calibracao_c1_r01",
+    "b_consolidada_calibracao_c2_r01_aviso",
+    "b_outbox_calibracao_c1_r01",
+    "b_ingenua_calibracao_c1_r01",
+    "b_outbox_calibracao_c4_r01",
+    "b_ingenua_calibracao_c4_r01",
+    "b_consolidada_calibracao_c1_r01_aviso"
+  ],
+  "motivo": "concluída",
+  "sessoes": [
+    {
+      "inicio": "2026-11-10T04:02:26-0300",
+      "fim": "2026-11-10T09:28:43-0300",
+      "motivo": "concluída"
+    }
+  ],
+  "execucoes": [
+    {
+      "ordem": 1,
+      "id": "20261110-040226_b_consolidada_calibracao_c4_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 2,
+      "id": "20261110-042945_b_consolidada_calibracao_c4_r01_aviso",
+      "estado": "ok"
+    },
+    {
+      "ordem": 3,
+      "id": "20261110-045656_b_outbox_calibracao_c2_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 4,
+      "id": "20261110-052414_b_ingenua_calibracao_c2_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 5,
+      "id": "20261110-055124_b_consolidada_calibracao_c2_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 6,
+      "id": "20261110-061834_b_consolidada_calibracao_c1_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 7,
+      "id": "20261110-064543_b_consolidada_calibracao_c2_r01_aviso",
+      "estado": "ok"
+    },
+    {
+      "ordem": 8,
+      "id": "20261110-071252_b_outbox_calibracao_c1_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 9,
+      "id": "20261110-074003_b_ingenua_calibracao_c1_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 10,
+      "id": "20261110-080712_b_outbox_calibracao_c4_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 11,
+      "id": "20261110-083422_b_ingenua_calibracao_c4_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 12,
+      "id": "20261110-090134_b_consolidada_calibracao_c1_r01_aviso",
+      "estado": "ok"
+    }
+  ],
+  "momento": "2026-11-10T09:28:43-0300",
+  "controles": [
+    {
+      "controle": "swap desligado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhuma área ativa"
+    },
+    {
+      "controle": "timers parados",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "10 parados"
+    },
+    {
+      "controle": "P510 encontrado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "controlador nvme0"
+    },
+    {
+      "controle": "APST desligado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nvme0: pm_qos_latency_tolerance_us = 0"
+    },
+    {
+      "controle": "energia em performance",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "16 processadores em performance, boost ligado"
+    },
+    {
+      "controle": "suspensão e desligamento bloqueados",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "trava tcc-coleta ativa"
+    },
+    {
+      "controle": "nenhum container rodando",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "nenhum coletor órfão",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "nenhum navegador aberto",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "espaço livre de pelo menos 50 GiB",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "744 GiB livres"
+    },
+    {
+      "controle": "sudo sem senha para a coleta",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "fstrim e nvme smart-log liberados"
+    },
+    {
+      "controle": "sem programas pesados abertos",
+      "ok": false,
+      "bloqueante": false,
+      "detalhe": "abertos: claude, code"
+    }
+  ],
+  "disco": {
+    "ocupado_bytes": 132996825088,
+    "livre_bytes": 799272685568
+  },
+  "smart": {
+    "temperature": "51 °C (324 K, 123 °F)",
+    "percentage_used": "0%",
+    "Data Units Written": "10549203 (5.40 TB)",
+    "power_on_hours": "116",
+    "unsafe_shutdowns": "0",
+    "media_errors": "0"
+  },
+  "host": {
+    "kernel": "7.0.0-42-generic",
+    "docker": "29.9.2"
+  },
+  "repositorio": {
+    "commit": "bb3710ee5b90362de3c528b3e71f7c3c90d2d924",
+    "alteracoes_locais": true
+  }
+}

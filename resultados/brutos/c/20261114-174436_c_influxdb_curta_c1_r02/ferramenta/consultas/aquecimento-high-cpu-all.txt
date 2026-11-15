@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 0.08 queries/sec):
+Influx CPU over threshold, all hosts:
+min: 12346.37ms, med: 12582.91ms, mean: 12596.07ms, max: 12967.42ms, stddev:   227.23ms, sum:  63.0sec, count: 5
+all queries                         :
+min: 12346.37ms, med: 12582.91ms, mean: 12596.07ms, max: 12967.42ms, stddev:   227.23ms, sum:  63.0sec, count: 5
+wall clock time: 62.996277sec
+Saving results json file to /saida/ferramenta/consultas/aquecimento-high-cpu-all.json

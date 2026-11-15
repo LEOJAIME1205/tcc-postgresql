@@ -1,0 +1,38 @@
+{
+  "ferramenta": "tcc-gerador-fila",
+  "versao": "2 (psycopg 3.3.6, aio-pika 10.1.1, uvloop 0.23.0, Python 3.14.4)",
+  "aquecimento_inicio_ms": 1794519277882,
+  "medicao_inicio_ms": 1794519397882,
+  "medicao_fim_ms": 1794519697882,
+  "processo_fim_ms": 1794519697919,
+  "parametros": {
+    "arquitetura": "ingenua",
+    "concorrencia": 16,
+    "produtores": 16,
+    "consumidores": 16,
+    "processos": 2,
+    "semente": 1963029487,
+    "modo": "laço fechado",
+    "taxa": null,
+    "aquecimento_s": 120,
+    "medicao_s": 300,
+    "carga_bytes": 1024,
+    "carga_sha256": "5cec24991766fa8827034dbaaaee82c7fcd4b47601bc4bd042f00e5cdb04c836",
+    "prefetch": 100,
+    "espera": null,
+    "intervalo_ms": null,
+    "tempo_limite_s": 60.0
+  },
+  "operacoes": {
+    "enfileira": 2438893,
+    "consome": 2438879,
+    "fim_a_fim": 2438879
+  },
+  "erros": 0,
+  "erros_por_tipo": {},
+  "retiradas_vazias": 0,
+  "fila_restante": {
+    "rabbitmq": 14
+  },
+  "agenda": null
+}

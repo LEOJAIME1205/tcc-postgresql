@@ -1,0 +1,3 @@
+eixo,serie,niveis,saturacao,vazao_maxima_por_s,niveis_gerador_gargalo,niveis_acima_do_cache_pslc,niveis_instaveis
+c,influxdb,1 2 4 8 16 32,8,5238172.043010753,,,
+c,timescaledb,1 2 4 8 16 32,8,10247191.011235954,8 16 32,1 2 4 8 16 32,1 2 4

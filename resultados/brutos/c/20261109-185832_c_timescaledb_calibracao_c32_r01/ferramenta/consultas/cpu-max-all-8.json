@@ -1,0 +1,48 @@
+{
+ "ResultFormatVersion": "0.1",
+ "RunnerConfig": {
+  "DBName": "benchmark",
+  "Limit": 0,
+  "LimitRPS": 0,
+  "MemProfile": "",
+  "HDRLatenciesFile": "",
+  "Workers": 1,
+  "PrintResponses": false,
+  "Debug": 0,
+  "FileName": "",
+  "BurnIn": 0,
+  "PrintInterval": 0,
+  "PrewarmQueries": false,
+  "ResultsFile": "/saida/ferramenta/consultas/cpu-max-all-8.json"
+ },
+ "StartTime": 1794262883000,
+ "EndTime": 1794262883000,
+ "DurationMillis": 88,
+ "Totals": {
+  "burnIn": 0,
+  "limit": 0,
+  "overallQuantiles": {
+   "TimescaleDB_max_of_all_CPU_metrics_random_8_hosts_random_8h0m0s_by_1h": {
+    "q0": 0,
+    "q100": 8.143,
+    "q50": 4.032,
+    "q95": 4.536,
+    "q99": 8.143,
+    "q999": 8.143
+   },
+   "all_queries": {
+    "q0": 0,
+    "q100": 8.143,
+    "q50": 4.032,
+    "q95": 4.536,
+    "q99": 8.143,
+    "q999": 8.143
+   }
+  },
+  "overallQueryRates": {
+   "TimescaleDB_max_of_all_CPU_metrics_random_8_hosts_random_8h0m0s_by_1h": 227.7893327713315,
+   "all_queries": 227.7893327713315
+  },
+  "prewarmQueries": false
+ }
+}

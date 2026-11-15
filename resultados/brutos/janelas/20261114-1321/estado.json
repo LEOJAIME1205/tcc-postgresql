@@ -1,0 +1,326 @@
+{
+  "janela": "20261114-1321",
+  "atualizado": "2026-11-15T11:19:29-0300",
+  "execucoes": [
+    {
+      "ordem": 1,
+      "execucao": "c_influxdb_curta_c1_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-132102_c_influxdb_curta_c1_r01"
+      ]
+    },
+    {
+      "ordem": 2,
+      "execucao": "c_timescaledb_curta_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-140618_c_timescaledb_curta_c8_r01"
+      ]
+    },
+    {
+      "ordem": 3,
+      "execucao": "c_influxdb_curta_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-143129_c_influxdb_curta_c8_r01"
+      ]
+    },
+    {
+      "ordem": 4,
+      "execucao": "c_timescaledb_curta_c2_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-150647_c_timescaledb_curta_c2_r01"
+      ]
+    },
+    {
+      "ordem": 5,
+      "execucao": "c_influxdb_curta_c4_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-153339_c_influxdb_curta_c4_r01"
+      ]
+    },
+    {
+      "ordem": 6,
+      "execucao": "c_timescaledb_curta_c1_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-161006_c_timescaledb_curta_c1_r01"
+      ]
+    },
+    {
+      "ordem": 7,
+      "execucao": "c_influxdb_curta_c2_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-163908_c_influxdb_curta_c2_r01"
+      ]
+    },
+    {
+      "ordem": 8,
+      "execucao": "c_timescaledb_curta_c4_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-171850_c_timescaledb_curta_c4_r01"
+      ]
+    },
+    {
+      "ordem": 9,
+      "execucao": "c_influxdb_curta_c1_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-174436_c_influxdb_curta_c1_r02"
+      ]
+    },
+    {
+      "ordem": 10,
+      "execucao": "c_timescaledb_curta_c4_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-183008_c_timescaledb_curta_c4_r02"
+      ]
+    },
+    {
+      "ordem": 11,
+      "execucao": "c_timescaledb_curta_c1_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-185553_c_timescaledb_curta_c1_r02"
+      ]
+    },
+    {
+      "ordem": 12,
+      "execucao": "c_influxdb_curta_c4_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-192508_c_influxdb_curta_c4_r02"
+      ]
+    },
+    {
+      "ordem": 13,
+      "execucao": "c_influxdb_curta_c2_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-200140_c_influxdb_curta_c2_r02"
+      ]
+    },
+    {
+      "ordem": 14,
+      "execucao": "c_timescaledb_curta_c8_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-204102_c_timescaledb_curta_c8_r02"
+      ]
+    },
+    {
+      "ordem": 15,
+      "execucao": "c_timescaledb_curta_c2_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-210611_c_timescaledb_curta_c2_r02"
+      ]
+    },
+    {
+      "ordem": 16,
+      "execucao": "c_influxdb_curta_c8_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-213313_c_influxdb_curta_c8_r02"
+      ]
+    },
+    {
+      "ordem": 17,
+      "execucao": "c_influxdb_curta_c1_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-220822_c_influxdb_curta_c1_r03"
+      ]
+    },
+    {
+      "ordem": 18,
+      "execucao": "c_influxdb_curta_c4_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-225334_c_influxdb_curta_c4_r03"
+      ]
+    },
+    {
+      "ordem": 19,
+      "execucao": "c_influxdb_curta_c8_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-232948_c_influxdb_curta_c8_r03"
+      ]
+    },
+    {
+      "ordem": 20,
+      "execucao": "c_timescaledb_curta_c4_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-000447_c_timescaledb_curta_c4_r03"
+      ]
+    },
+    {
+      "ordem": 21,
+      "execucao": "c_timescaledb_curta_c8_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-003034_c_timescaledb_curta_c8_r03"
+      ]
+    },
+    {
+      "ordem": 22,
+      "execucao": "c_influxdb_curta_c2_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-005556_c_influxdb_curta_c2_r03"
+      ]
+    },
+    {
+      "ordem": 23,
+      "execucao": "c_timescaledb_curta_c2_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-013540_c_timescaledb_curta_c2_r03"
+      ]
+    },
+    {
+      "ordem": 24,
+      "execucao": "c_timescaledb_curta_c1_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-020232_c_timescaledb_curta_c1_r03"
+      ]
+    },
+    {
+      "ordem": 25,
+      "execucao": "c_timescaledb_curta_c2_r04",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-023147_c_timescaledb_curta_c2_r04"
+      ]
+    },
+    {
+      "ordem": 26,
+      "execucao": "c_influxdb_curta_c2_r04",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-025850_c_influxdb_curta_c2_r04"
+      ]
+    },
+    {
+      "ordem": 27,
+      "execucao": "c_timescaledb_curta_c8_r04",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-033820_c_timescaledb_curta_c8_r04"
+      ]
+    },
+    {
+      "ordem": 28,
+      "execucao": "c_timescaledb_curta_c4_r04",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-040330_c_timescaledb_curta_c4_r04"
+      ]
+    },
+    {
+      "ordem": 29,
+      "execucao": "c_influxdb_curta_c8_r04",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-042927_c_influxdb_curta_c8_r04"
+      ]
+    },
+    {
+      "ordem": 30,
+      "execucao": "c_influxdb_curta_c4_r04",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-050431_c_influxdb_curta_c4_r04"
+      ]
+    },
+    {
+      "ordem": 31,
+      "execucao": "c_timescaledb_curta_c1_r04",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-054045_c_timescaledb_curta_c1_r04"
+      ]
+    },
+    {
+      "ordem": 32,
+      "execucao": "c_influxdb_curta_c1_r04",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-060949_c_influxdb_curta_c1_r04"
+      ]
+    },
+    {
+      "ordem": 33,
+      "execucao": "c_timescaledb_curta_c1_r05",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-065527_c_timescaledb_curta_c1_r05"
+      ]
+    },
+    {
+      "ordem": 34,
+      "execucao": "c_influxdb_curta_c4_r05",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-072434_c_influxdb_curta_c4_r05"
+      ]
+    },
+    {
+      "ordem": 35,
+      "execucao": "c_timescaledb_curta_c8_r05",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-080105_c_timescaledb_curta_c8_r05"
+      ]
+    },
+    {
+      "ordem": 36,
+      "execucao": "c_timescaledb_curta_c2_r05",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-082613_c_timescaledb_curta_c2_r05"
+      ]
+    },
+    {
+      "ordem": 37,
+      "execucao": "c_timescaledb_curta_c4_r05",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-085320_c_timescaledb_curta_c4_r05"
+      ]
+    },
+    {
+      "ordem": 38,
+      "execucao": "c_influxdb_curta_c2_r05",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-091915_c_influxdb_curta_c2_r05"
+      ]
+    },
+    {
+      "ordem": 39,
+      "execucao": "c_influxdb_curta_c1_r05",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-095859_c_influxdb_curta_c1_r05"
+      ]
+    },
+    {
+      "ordem": 40,
+      "execucao": "c_influxdb_curta_c8_r05",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-104423_c_influxdb_curta_c8_r05"
+      ]
+    }
+  ]
+}

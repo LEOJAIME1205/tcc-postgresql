@@ -1,0 +1,102 @@
+{
+  "janela": "20261110-0928",
+  "atualizado": "2026-11-10T14:55:34-0300",
+  "execucoes": [
+    {
+      "ordem": 1,
+      "execucao": "b_ingenua_calibracao_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-092844_b_ingenua_calibracao_c8_r01"
+      ]
+    },
+    {
+      "ordem": 2,
+      "execucao": "b_outbox_calibracao_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-095554_b_outbox_calibracao_c8_r01"
+      ]
+    },
+    {
+      "ordem": 3,
+      "execucao": "b_ingenua_calibracao_c32_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-102308_b_ingenua_calibracao_c32_r01"
+      ]
+    },
+    {
+      "ordem": 4,
+      "execucao": "b_consolidada_calibracao_c16_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-105022_b_consolidada_calibracao_c16_r01"
+      ]
+    },
+    {
+      "ordem": 5,
+      "execucao": "b_consolidada_calibracao_c16_r01_aviso",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-111738_b_consolidada_calibracao_c16_r01_aviso"
+      ]
+    },
+    {
+      "ordem": 6,
+      "execucao": "b_ingenua_calibracao_c16_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-114449_b_ingenua_calibracao_c16_r01"
+      ]
+    },
+    {
+      "ordem": 7,
+      "execucao": "b_consolidada_calibracao_c8_r01_aviso",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-121200_b_consolidada_calibracao_c8_r01_aviso"
+      ]
+    },
+    {
+      "ordem": 8,
+      "execucao": "b_outbox_calibracao_c16_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-123910_b_outbox_calibracao_c16_r01"
+      ]
+    },
+    {
+      "ordem": 9,
+      "execucao": "b_consolidada_calibracao_c32_r01_aviso",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-130627_b_consolidada_calibracao_c32_r01_aviso"
+      ]
+    },
+    {
+      "ordem": 10,
+      "execucao": "b_outbox_calibracao_c32_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-133338_b_outbox_calibracao_c32_r01"
+      ]
+    },
+    {
+      "ordem": 11,
+      "execucao": "b_consolidada_calibracao_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-140101_b_consolidada_calibracao_c8_r01"
+      ]
+    },
+    {
+      "ordem": 12,
+      "execucao": "b_consolidada_calibracao_c32_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-142818_b_consolidada_calibracao_c32_r01"
+      ]
+    }
+  ]
+}

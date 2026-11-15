@@ -1,0 +1,48 @@
+{
+ "ResultFormatVersion": "0.1",
+ "RunnerConfig": {
+  "DBName": "benchmark",
+  "Limit": 0,
+  "LimitRPS": 0,
+  "MemProfile": "",
+  "HDRLatenciesFile": "",
+  "Workers": 1,
+  "PrintResponses": false,
+  "Debug": 0,
+  "FileName": "",
+  "BurnIn": 0,
+  "PrintInterval": 0,
+  "PrewarmQueries": false,
+  "ResultsFile": "/saida/ferramenta/consultas/aquecimento-lastpoint.json"
+ },
+ "StartTime": 1794747441000,
+ "EndTime": 1794747443000,
+ "DurationMillis": 1439,
+ "Totals": {
+  "burnIn": 0,
+  "limit": 0,
+  "overallQuantiles": {
+   "Influx_last_row_per_host": {
+    "q0": 0,
+    "q100": 300.127,
+    "q50": 284.591,
+    "q95": 300.127,
+    "q99": 300.127,
+    "q999": 300.127
+   },
+   "all_queries": {
+    "q0": 0,
+    "q100": 300.127,
+    "q50": 284.591,
+    "q95": 300.127,
+    "q99": 300.127,
+    "q999": 300.127
+   }
+  },
+  "overallQueryRates": {
+   "Influx_last_row_per_host": 3.473029245686756,
+   "all_queries": 3.473029245686756
+  },
+  "prewarmQueries": false
+ }
+}

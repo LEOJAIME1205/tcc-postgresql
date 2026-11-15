@@ -1,0 +1,7 @@
+Run complete after 20 queries with 1 workers (Overall query rate 24.91 queries/sec):
+TimescaleDB last row per host:
+min:    37.63ms, med:    38.65ms, mean:    40.13ms, max:   56.57ms, stddev:     4.14ms, sum:   0.8sec, count: 20
+all queries                  :
+min:    37.63ms, med:    38.65ms, mean:    40.13ms, max:   56.57ms, stddev:     4.14ms, sum:   0.8sec, count: 20
+wall clock time: 0.806737sec
+Saving results json file to /saida/ferramenta/consultas/lastpoint.json

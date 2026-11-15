@@ -1,0 +1,366 @@
+{
+  "janela": "20261113-1656",
+  "atualizado": "2026-11-14T13:21:02-0300",
+  "execucoes": [
+    {
+      "ordem": 1,
+      "execucao": "b_outbox_curta_c32_r01_t4200",
+      "estado": "ok",
+      "tentativas": [
+        "20261113-165644_b_outbox_curta_c32_r01_t4200"
+      ]
+    },
+    {
+      "ordem": 2,
+      "execucao": "b_ingenua_curta_c32_r01_t4200",
+      "estado": "ok",
+      "tentativas": [
+        "20261113-172358_b_ingenua_curta_c32_r01_t4200"
+      ]
+    },
+    {
+      "ordem": 3,
+      "execucao": "b_outbox_curta_c32_r01_t1400",
+      "estado": "ok",
+      "tentativas": [
+        "20261113-175110_b_outbox_curta_c32_r01_t1400"
+      ]
+    },
+    {
+      "ordem": 4,
+      "execucao": "b_ingenua_curta_c32_r01_t1400",
+      "estado": "ok",
+      "tentativas": [
+        "20261113-181823_b_ingenua_curta_c32_r01_t1400"
+      ]
+    },
+    {
+      "ordem": 5,
+      "execucao": "b_consolidada_curta_c32_r01_t1400",
+      "estado": "ok",
+      "tentativas": [
+        "20261113-184534_b_consolidada_curta_c32_r01_t1400"
+      ]
+    },
+    {
+      "ordem": 6,
+      "execucao": "b_ingenua_curta_c32_r01_t2800",
+      "estado": "ok",
+      "tentativas": [
+        "20261113-191244_b_ingenua_curta_c32_r01_t2800"
+      ]
+    },
+    {
+      "ordem": 7,
+      "execucao": "b_consolidada_curta_c32_r01_t2800",
+      "estado": "ok",
+      "tentativas": [
+        "20261113-193955_b_consolidada_curta_c32_r01_t2800"
+      ]
+    },
+    {
+      "ordem": 8,
+      "execucao": "b_consolidada_curta_c32_r01_t4200",
+      "estado": "ok",
+      "tentativas": [
+        "20261113-200707_b_consolidada_curta_c32_r01_t4200"
+      ]
+    },
+    {
+      "ordem": 9,
+      "execucao": "b_outbox_curta_c32_r01_t2800",
+      "estado": "ok",
+      "tentativas": [
+        "20261113-203418_b_outbox_curta_c32_r01_t2800"
+      ]
+    },
+    {
+      "ordem": 10,
+      "execucao": "b_outbox_curta_c32_r02_t2800",
+      "estado": "ok",
+      "tentativas": [
+        "20261113-210132_b_outbox_curta_c32_r02_t2800"
+      ]
+    },
+    {
+      "ordem": 11,
+      "execucao": "b_ingenua_curta_c32_r02_t4200",
+      "estado": "ok",
+      "tentativas": [
+        "20261113-212846_b_ingenua_curta_c32_r02_t4200"
+      ]
+    },
+    {
+      "ordem": 12,
+      "execucao": "b_ingenua_curta_c32_r02_t2800",
+      "estado": "ok",
+      "tentativas": [
+        "20261113-215559_b_ingenua_curta_c32_r02_t2800"
+      ]
+    },
+    {
+      "ordem": 13,
+      "execucao": "b_outbox_curta_c32_r02_t1400",
+      "estado": "ok",
+      "tentativas": [
+        "20261113-222312_b_outbox_curta_c32_r02_t1400"
+      ]
+    },
+    {
+      "ordem": 14,
+      "execucao": "b_consolidada_curta_c32_r02_t4200",
+      "estado": "ok",
+      "tentativas": [
+        "20261113-225024_b_consolidada_curta_c32_r02_t4200"
+      ]
+    },
+    {
+      "ordem": 15,
+      "execucao": "b_ingenua_curta_c32_r02_t1400",
+      "estado": "ok",
+      "tentativas": [
+        "20261113-231737_b_ingenua_curta_c32_r02_t1400"
+      ]
+    },
+    {
+      "ordem": 16,
+      "execucao": "b_outbox_curta_c32_r02_t4200",
+      "estado": "ok",
+      "tentativas": [
+        "20261113-234449_b_outbox_curta_c32_r02_t4200"
+      ]
+    },
+    {
+      "ordem": 17,
+      "execucao": "b_consolidada_curta_c32_r02_t2800",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-001202_b_consolidada_curta_c32_r02_t2800"
+      ]
+    },
+    {
+      "ordem": 18,
+      "execucao": "b_consolidada_curta_c32_r02_t1400",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-003913_b_consolidada_curta_c32_r02_t1400"
+      ]
+    },
+    {
+      "ordem": 19,
+      "execucao": "b_outbox_curta_c32_r03_t4200",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-010624_b_outbox_curta_c32_r03_t4200"
+      ]
+    },
+    {
+      "ordem": 20,
+      "execucao": "b_consolidada_curta_c32_r03_t2800",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-013338_b_consolidada_curta_c32_r03_t2800"
+      ]
+    },
+    {
+      "ordem": 21,
+      "execucao": "b_outbox_curta_c32_r03_t1400",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-020049_b_outbox_curta_c32_r03_t1400"
+      ]
+    },
+    {
+      "ordem": 22,
+      "execucao": "b_consolidada_curta_c32_r03_t1400",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-022802_b_consolidada_curta_c32_r03_t1400"
+      ]
+    },
+    {
+      "ordem": 23,
+      "execucao": "b_consolidada_curta_c32_r03_t4200",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-025513_b_consolidada_curta_c32_r03_t4200"
+      ]
+    },
+    {
+      "ordem": 24,
+      "execucao": "b_outbox_curta_c32_r03_t2800",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-032225_b_outbox_curta_c32_r03_t2800"
+      ]
+    },
+    {
+      "ordem": 25,
+      "execucao": "b_ingenua_curta_c32_r03_t1400",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-034937_b_ingenua_curta_c32_r03_t1400"
+      ]
+    },
+    {
+      "ordem": 26,
+      "execucao": "b_ingenua_curta_c32_r03_t4200",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-041650_b_ingenua_curta_c32_r03_t4200"
+      ]
+    },
+    {
+      "ordem": 27,
+      "execucao": "b_ingenua_curta_c32_r03_t2800",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-044401_b_ingenua_curta_c32_r03_t2800"
+      ]
+    },
+    {
+      "ordem": 28,
+      "execucao": "b_outbox_curta_c32_r04_t4200",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-051113_b_outbox_curta_c32_r04_t4200"
+      ]
+    },
+    {
+      "ordem": 29,
+      "execucao": "b_ingenua_curta_c32_r04_t1400",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-053827_b_ingenua_curta_c32_r04_t1400"
+      ]
+    },
+    {
+      "ordem": 30,
+      "execucao": "b_consolidada_curta_c32_r04_t4200",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-060539_b_consolidada_curta_c32_r04_t4200"
+      ]
+    },
+    {
+      "ordem": 31,
+      "execucao": "b_ingenua_curta_c32_r04_t4200",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-063252_b_ingenua_curta_c32_r04_t4200"
+      ]
+    },
+    {
+      "ordem": 32,
+      "execucao": "b_consolidada_curta_c32_r04_t2800",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-070005_b_consolidada_curta_c32_r04_t2800"
+      ]
+    },
+    {
+      "ordem": 33,
+      "execucao": "b_ingenua_curta_c32_r04_t2800",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-072717_b_ingenua_curta_c32_r04_t2800"
+      ]
+    },
+    {
+      "ordem": 34,
+      "execucao": "b_outbox_curta_c32_r04_t1400",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-075429_b_outbox_curta_c32_r04_t1400"
+      ]
+    },
+    {
+      "ordem": 35,
+      "execucao": "b_outbox_curta_c32_r04_t2800",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-082142_b_outbox_curta_c32_r04_t2800"
+      ]
+    },
+    {
+      "ordem": 36,
+      "execucao": "b_consolidada_curta_c32_r04_t1400",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-084855_b_consolidada_curta_c32_r04_t1400"
+      ]
+    },
+    {
+      "ordem": 37,
+      "execucao": "b_consolidada_curta_c32_r05_t1400",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-091607_b_consolidada_curta_c32_r05_t1400"
+      ]
+    },
+    {
+      "ordem": 38,
+      "execucao": "b_outbox_curta_c32_r05_t4200",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-094318_b_outbox_curta_c32_r05_t4200"
+      ]
+    },
+    {
+      "ordem": 39,
+      "execucao": "b_ingenua_curta_c32_r05_t2800",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-101032_b_ingenua_curta_c32_r05_t2800"
+      ]
+    },
+    {
+      "ordem": 40,
+      "execucao": "b_consolidada_curta_c32_r05_t4200",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-103745_b_consolidada_curta_c32_r05_t4200"
+      ]
+    },
+    {
+      "ordem": 41,
+      "execucao": "b_outbox_curta_c32_r05_t2800",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-110458_b_outbox_curta_c32_r05_t2800"
+      ]
+    },
+    {
+      "ordem": 42,
+      "execucao": "b_ingenua_curta_c32_r05_t1400",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-113211_b_ingenua_curta_c32_r05_t1400"
+      ]
+    },
+    {
+      "ordem": 43,
+      "execucao": "b_outbox_curta_c32_r05_t1400",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-115924_b_outbox_curta_c32_r05_t1400"
+      ]
+    },
+    {
+      "ordem": 44,
+      "execucao": "b_ingenua_curta_c32_r05_t4200",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-122637_b_ingenua_curta_c32_r05_t4200"
+      ]
+    },
+    {
+      "ordem": 45,
+      "execucao": "b_consolidada_curta_c32_r05_t2800",
+      "estado": "ok",
+      "tentativas": [
+        "20261114-125349_b_consolidada_curta_c32_r05_t2800"
+      ]
+    }
+  ]
+}

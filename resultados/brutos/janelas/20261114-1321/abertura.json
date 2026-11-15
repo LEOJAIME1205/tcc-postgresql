@@ -1,0 +1,144 @@
+{
+  "versao_formato": 1,
+  "janela": "20261114-1321",
+  "plano": "curta-c",
+  "semente": 20261124,
+  "repouso_s": 1200,
+  "ordem": [
+    "c_influxdb_curta_c1_r01",
+    "c_timescaledb_curta_c8_r01",
+    "c_influxdb_curta_c8_r01",
+    "c_timescaledb_curta_c2_r01",
+    "c_influxdb_curta_c4_r01",
+    "c_timescaledb_curta_c1_r01",
+    "c_influxdb_curta_c2_r01",
+    "c_timescaledb_curta_c4_r01",
+    "c_influxdb_curta_c1_r02",
+    "c_timescaledb_curta_c4_r02",
+    "c_timescaledb_curta_c1_r02",
+    "c_influxdb_curta_c4_r02",
+    "c_influxdb_curta_c2_r02",
+    "c_timescaledb_curta_c8_r02",
+    "c_timescaledb_curta_c2_r02",
+    "c_influxdb_curta_c8_r02",
+    "c_influxdb_curta_c1_r03",
+    "c_influxdb_curta_c4_r03",
+    "c_influxdb_curta_c8_r03",
+    "c_timescaledb_curta_c4_r03",
+    "c_timescaledb_curta_c8_r03",
+    "c_influxdb_curta_c2_r03",
+    "c_timescaledb_curta_c2_r03",
+    "c_timescaledb_curta_c1_r03",
+    "c_timescaledb_curta_c2_r04",
+    "c_influxdb_curta_c2_r04",
+    "c_timescaledb_curta_c8_r04",
+    "c_timescaledb_curta_c4_r04",
+    "c_influxdb_curta_c8_r04",
+    "c_influxdb_curta_c4_r04",
+    "c_timescaledb_curta_c1_r04",
+    "c_influxdb_curta_c1_r04",
+    "c_timescaledb_curta_c1_r05",
+    "c_influxdb_curta_c4_r05",
+    "c_timescaledb_curta_c8_r05",
+    "c_timescaledb_curta_c2_r05",
+    "c_timescaledb_curta_c4_r05",
+    "c_influxdb_curta_c2_r05",
+    "c_influxdb_curta_c1_r05",
+    "c_influxdb_curta_c8_r05"
+  ],
+  "momento": "2026-11-14T13:21:02-0300",
+  "controles": [
+    {
+      "controle": "swap desligado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhuma área ativa"
+    },
+    {
+      "controle": "timers parados",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "10 parados"
+    },
+    {
+      "controle": "P510 encontrado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "controlador nvme0"
+    },
+    {
+      "controle": "APST desligado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nvme0: pm_qos_latency_tolerance_us = 0"
+    },
+    {
+      "controle": "energia em performance",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "16 processadores em performance, boost ligado"
+    },
+    {
+      "controle": "suspensão e desligamento bloqueados",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "trava tcc-coleta ativa"
+    },
+    {
+      "controle": "nenhum container rodando",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "nenhum coletor órfão",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "nenhum navegador aberto",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "espaço livre de pelo menos 50 GiB",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "694 GiB livres"
+    },
+    {
+      "controle": "sudo sem senha para a coleta",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "fstrim e nvme smart-log liberados"
+    },
+    {
+      "controle": "sem programas pesados abertos",
+      "ok": false,
+      "bloqueante": false,
+      "detalhe": "abertos: claude, code"
+    }
+  ],
+  "disco": {
+    "ocupado_bytes": 186819137536,
+    "livre_bytes": 745450373120
+  },
+  "smart": {
+    "temperature": "52 °C (325 K, 125 °F)",
+    "percentage_used": "0%",
+    "Data Units Written": "20301370 (10.39 TB)",
+    "power_on_hours": "216",
+    "unsafe_shutdowns": "0",
+    "media_errors": "0"
+  },
+  "host": {
+    "kernel": "7.0.0-42-generic",
+    "docker": "29.9.2"
+  },
+  "repositorio": {
+    "commit": "bb3710ee5b90362de3c528b3e71f7c3c90d2d924",
+    "alteracoes_locais": true
+  }
+}

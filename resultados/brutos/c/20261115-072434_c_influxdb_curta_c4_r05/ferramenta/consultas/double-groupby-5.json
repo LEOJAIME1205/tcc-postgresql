@@ -1,0 +1,48 @@
+{
+ "ResultFormatVersion": "0.1",
+ "RunnerConfig": {
+  "DBName": "benchmark",
+  "Limit": 0,
+  "LimitRPS": 0,
+  "MemProfile": "",
+  "HDRLatenciesFile": "",
+  "Workers": 1,
+  "PrintResponses": false,
+  "Debug": 0,
+  "FileName": "",
+  "BurnIn": 0,
+  "PrintInterval": 0,
+  "PrewarmQueries": false,
+  "ResultsFile": "/saida/ferramenta/consultas/double-groupby-5.json"
+ },
+ "StartTime": 1794739829000,
+ "EndTime": 1794739896000,
+ "DurationMillis": 66924,
+ "Totals": {
+  "burnIn": 0,
+  "limit": 0,
+  "overallQuantiles": {
+   "Influx_mean_of_5_metrics_all_hosts_random_12h0m0s_by_1h": {
+    "q0": 0,
+    "q100": 3431.039,
+    "q50": 3337.599,
+    "q95": 3408.895,
+    "q99": 3431.039,
+    "q999": 3431.039
+   },
+   "all_queries": {
+    "q0": 0,
+    "q100": 3431.039,
+    "q50": 3337.599,
+    "q95": 3408.895,
+    "q99": 3431.039,
+    "q999": 3431.039
+   }
+  },
+  "overallQueryRates": {
+   "Influx_mean_of_5_metrics_all_hosts_random_12h0m0s_by_1h": 0.2988461258212837,
+   "all_queries": 0.2988461258212837
+  },
+  "prewarmQueries": false
+ }
+}

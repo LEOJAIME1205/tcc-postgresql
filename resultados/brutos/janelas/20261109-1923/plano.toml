@@ -1,0 +1,24 @@
+# Busca do max_wal_size no Eixo B (ADR-067, item 3), continuação da calibracao-wal.toml:
+# a fila consolidada no valor seguinte da busca e a conferência na outbox com 32 clientes,
+# no mesmo valor. Sem aviso na outbox, um valor maior também não avisa. ~55 min por janela.
+nome = "calibracao-wal-b"
+semente = 20261111
+espaco_livre_min_gib = 50
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "consolidada"
+cenario = "calibracao"
+concorrencias = [32]
+repeticoes = 1
+aquecimento_s = 120
+medicao_s = 300
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "outbox"
+cenario = "calibracao"
+concorrencias = [32]
+repeticoes = 1
+aquecimento_s = 120
+medicao_s = 300

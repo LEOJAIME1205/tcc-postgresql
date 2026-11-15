@@ -1,0 +1,48 @@
+{
+ "ResultFormatVersion": "0.1",
+ "RunnerConfig": {
+  "DBName": "benchmark",
+  "Limit": 0,
+  "LimitRPS": 0,
+  "MemProfile": "",
+  "HDRLatenciesFile": "",
+  "Workers": 1,
+  "PrintResponses": false,
+  "Debug": 0,
+  "FileName": "",
+  "BurnIn": 0,
+  "PrintInterval": 0,
+  "PrewarmQueries": false,
+  "ResultsFile": "/saida/ferramenta/consultas/high-cpu-all.json"
+ },
+ "StartTime": 1794340488000,
+ "EndTime": 1794340737000,
+ "DurationMillis": 248417,
+ "Totals": {
+  "burnIn": 0,
+  "limit": 0,
+  "overallQuantiles": {
+   "Influx_CPU_over_threshold_all_hosts": {
+    "q0": 0,
+    "q100": 12809.215,
+    "q50": 12383.743,
+    "q95": 12760.575,
+    "q99": 12809.215,
+    "q999": 12809.215
+   },
+   "all_queries": {
+    "q0": 0,
+    "q100": 12809.215,
+    "q50": 12383.743,
+    "q95": 12760.575,
+    "q99": 12809.215,
+    "q999": 12809.215
+   }
+  },
+  "overallQueryRates": {
+   "Influx_CPU_over_threshold_all_hosts": 0.08050976310185347,
+   "all_queries": 0.08050976310185347
+  },
+  "prewarmQueries": false
+ }
+}

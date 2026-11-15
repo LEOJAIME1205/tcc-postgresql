@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 1293.47 queries/sec):
+Influx 1 cpu metric(s), random    8 hosts, random 1h0m0s by 1m:
+min:     0.62ms, med:     0.67ms, mean:     0.77ms, max:    1.20ms, stddev:     0.22ms, sum:   0.0sec, count: 5
+all queries                                                   :
+min:     0.62ms, med:     0.67ms, mean:     0.77ms, max:    1.20ms, stddev:     0.22ms, sum:   0.0sec, count: 5
+wall clock time: 0.004327sec
+Saving results json file to /saida/ferramenta/consultas/aquecimento-single-groupby-1-8-1.json

@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 7.39 queries/sec):
+TimescaleDB max cpu over last 5 min-intervals (random end):
+min:    66.54ms, med:   122.99ms, mean:   135.19ms, max:  220.98ms, stddev:    51.98ms, sum:   0.7sec, count: 5
+all queries                                               :
+min:    66.54ms, med:   122.99ms, mean:   135.19ms, max:  220.98ms, stddev:    51.98ms, sum:   0.7sec, count: 5
+wall clock time: 0.682623sec
+Saving results json file to /saida/ferramenta/consultas/aquecimento-groupby-orderby-limit.json

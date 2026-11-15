@@ -1,0 +1,102 @@
+{
+  "janela": "20261110-1455",
+  "atualizado": "2026-11-10T21:18:18-0300",
+  "execucoes": [
+    {
+      "ordem": 1,
+      "execucao": "c_timescaledb_calibracao_c4_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-145534_c_timescaledb_calibracao_c4_r01"
+      ]
+    },
+    {
+      "ordem": 2,
+      "execucao": "c_timescaledb_calibracao_c32_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-152117_c_timescaledb_calibracao_c32_r01"
+      ]
+    },
+    {
+      "ordem": 3,
+      "execucao": "c_influxdb_calibracao_c16_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-154619_c_influxdb_calibracao_c16_r01"
+      ]
+    },
+    {
+      "ordem": 4,
+      "execucao": "c_influxdb_calibracao_c2_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-162120_c_influxdb_calibracao_c2_r01"
+      ]
+    },
+    {
+      "ordem": 5,
+      "execucao": "c_timescaledb_calibracao_c2_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-170032_c_timescaledb_calibracao_c2_r01"
+      ]
+    },
+    {
+      "ordem": 6,
+      "execucao": "c_timescaledb_calibracao_c1_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-172719_c_timescaledb_calibracao_c1_r01"
+      ]
+    },
+    {
+      "ordem": 7,
+      "execucao": "c_timescaledb_calibracao_c16_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-175626_c_timescaledb_calibracao_c16_r01"
+      ]
+    },
+    {
+      "ordem": 8,
+      "execucao": "c_influxdb_calibracao_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-182132_c_influxdb_calibracao_c8_r01"
+      ]
+    },
+    {
+      "ordem": 9,
+      "execucao": "c_influxdb_calibracao_c1_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-185638_c_influxdb_calibracao_c1_r01"
+      ]
+    },
+    {
+      "ordem": 10,
+      "execucao": "c_influxdb_calibracao_c32_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-194146_c_influxdb_calibracao_c32_r01"
+      ]
+    },
+    {
+      "ordem": 11,
+      "execucao": "c_influxdb_calibracao_c4_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-201657_c_influxdb_calibracao_c4_r01"
+      ]
+    },
+    {
+      "ordem": 12,
+      "execucao": "c_timescaledb_calibracao_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-205321_c_timescaledb_calibracao_c8_r01"
+      ]
+    }
+  ]
+}

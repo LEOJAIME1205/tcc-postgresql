@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 567.39 queries/sec):
+TimescaleDB CPU over threshold, 1 host(s):
+min:     0.49ms, med:     0.92ms, mean:     1.76ms, max:    5.75ms, stddev:     2.00ms, sum:   0.0sec, count: 5
+all queries                              :
+min:     0.49ms, med:     0.92ms, mean:     1.76ms, max:    5.75ms, stddev:     2.00ms, sum:   0.0sec, count: 5
+wall clock time: 0.009567sec
+Saving results json file to /saida/ferramenta/consultas/aquecimento-high-cpu-1.json

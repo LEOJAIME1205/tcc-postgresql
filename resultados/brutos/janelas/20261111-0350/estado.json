@@ -1,0 +1,326 @@
+{
+  "janela": "20261111-0350",
+  "atualizado": "2026-11-12T00:04:27-0300",
+  "execucoes": [
+    {
+      "ordem": 1,
+      "execucao": "a_poliglota_curta_c2_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-035045_a_poliglota_curta_c2_r01"
+      ]
+    },
+    {
+      "ordem": 2,
+      "execucao": "a_consolidada_curta_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-042118_a_consolidada_curta_c8_r01"
+      ]
+    },
+    {
+      "ordem": 3,
+      "execucao": "a_consolidada_curta_c2_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-045140_a_consolidada_curta_c2_r01"
+      ]
+    },
+    {
+      "ordem": 4,
+      "execucao": "a_consolidada_curta_c1_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-052200_a_consolidada_curta_c1_r01"
+      ]
+    },
+    {
+      "ordem": 5,
+      "execucao": "a_poliglota_curta_c1_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-055219_a_poliglota_curta_c1_r01"
+      ]
+    },
+    {
+      "ordem": 6,
+      "execucao": "a_poliglota_curta_c4_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-062240_a_poliglota_curta_c4_r01"
+      ]
+    },
+    {
+      "ordem": 7,
+      "execucao": "a_poliglota_curta_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-065258_a_poliglota_curta_c8_r01"
+      ]
+    },
+    {
+      "ordem": 8,
+      "execucao": "a_consolidada_curta_c4_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-072318_a_consolidada_curta_c4_r01"
+      ]
+    },
+    {
+      "ordem": 9,
+      "execucao": "a_poliglota_curta_c2_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-075339_a_poliglota_curta_c2_r02"
+      ]
+    },
+    {
+      "ordem": 10,
+      "execucao": "a_consolidada_curta_c8_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-082400_a_consolidada_curta_c8_r02"
+      ]
+    },
+    {
+      "ordem": 11,
+      "execucao": "a_poliglota_curta_c8_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-085422_a_poliglota_curta_c8_r02"
+      ]
+    },
+    {
+      "ordem": 12,
+      "execucao": "a_poliglota_curta_c1_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-092442_a_poliglota_curta_c1_r02"
+      ]
+    },
+    {
+      "ordem": 13,
+      "execucao": "a_consolidada_curta_c4_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-095500_a_consolidada_curta_c4_r02"
+      ]
+    },
+    {
+      "ordem": 14,
+      "execucao": "a_poliglota_curta_c4_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-102521_a_poliglota_curta_c4_r02"
+      ]
+    },
+    {
+      "ordem": 15,
+      "execucao": "a_consolidada_curta_c2_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-105541_a_consolidada_curta_c2_r02"
+      ]
+    },
+    {
+      "ordem": 16,
+      "execucao": "a_consolidada_curta_c1_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-112600_a_consolidada_curta_c1_r02"
+      ]
+    },
+    {
+      "ordem": 17,
+      "execucao": "a_poliglota_curta_c1_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-115620_a_poliglota_curta_c1_r03"
+      ]
+    },
+    {
+      "ordem": 18,
+      "execucao": "a_consolidada_curta_c2_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-122640_a_consolidada_curta_c2_r03"
+      ]
+    },
+    {
+      "ordem": 19,
+      "execucao": "a_poliglota_curta_c4_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-125659_a_poliglota_curta_c4_r03"
+      ]
+    },
+    {
+      "ordem": 20,
+      "execucao": "a_consolidada_curta_c1_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-132719_a_consolidada_curta_c1_r03"
+      ]
+    },
+    {
+      "ordem": 21,
+      "execucao": "a_poliglota_curta_c8_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-135738_a_poliglota_curta_c8_r03"
+      ]
+    },
+    {
+      "ordem": 22,
+      "execucao": "a_consolidada_curta_c4_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-142758_a_consolidada_curta_c4_r03"
+      ]
+    },
+    {
+      "ordem": 23,
+      "execucao": "a_consolidada_curta_c8_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-145819_a_consolidada_curta_c8_r03"
+      ]
+    },
+    {
+      "ordem": 24,
+      "execucao": "a_poliglota_curta_c2_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-152841_a_poliglota_curta_c2_r03"
+      ]
+    },
+    {
+      "ordem": 25,
+      "execucao": "a_poliglota_curta_c4_r04",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-155902_a_poliglota_curta_c4_r04"
+      ]
+    },
+    {
+      "ordem": 26,
+      "execucao": "a_poliglota_curta_c1_r04",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-162921_a_poliglota_curta_c1_r04"
+      ]
+    },
+    {
+      "ordem": 27,
+      "execucao": "a_poliglota_curta_c2_r04",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-165940_a_poliglota_curta_c2_r04"
+      ]
+    },
+    {
+      "ordem": 28,
+      "execucao": "a_poliglota_curta_c8_r04",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-172959_a_poliglota_curta_c8_r04"
+      ]
+    },
+    {
+      "ordem": 29,
+      "execucao": "a_consolidada_curta_c4_r04",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-180019_a_consolidada_curta_c4_r04"
+      ]
+    },
+    {
+      "ordem": 30,
+      "execucao": "a_consolidada_curta_c1_r04",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-183040_a_consolidada_curta_c1_r04"
+      ]
+    },
+    {
+      "ordem": 31,
+      "execucao": "a_consolidada_curta_c8_r04",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-190100_a_consolidada_curta_c8_r04"
+      ]
+    },
+    {
+      "ordem": 32,
+      "execucao": "a_consolidada_curta_c2_r04",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-193123_a_consolidada_curta_c2_r04"
+      ]
+    },
+    {
+      "ordem": 33,
+      "execucao": "a_consolidada_curta_c2_r05",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-200144_a_consolidada_curta_c2_r05"
+      ]
+    },
+    {
+      "ordem": 34,
+      "execucao": "a_poliglota_curta_c1_r05",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-203202_a_poliglota_curta_c1_r05"
+      ]
+    },
+    {
+      "ordem": 35,
+      "execucao": "a_poliglota_curta_c2_r05",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-210223_a_poliglota_curta_c2_r05"
+      ]
+    },
+    {
+      "ordem": 36,
+      "execucao": "a_poliglota_curta_c8_r05",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-213243_a_poliglota_curta_c8_r05"
+      ]
+    },
+    {
+      "ordem": 37,
+      "execucao": "a_poliglota_curta_c4_r05",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-220304_a_poliglota_curta_c4_r05"
+      ]
+    },
+    {
+      "ordem": 38,
+      "execucao": "a_consolidada_curta_c1_r05",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-223325_a_consolidada_curta_c1_r05"
+      ]
+    },
+    {
+      "ordem": 39,
+      "execucao": "a_consolidada_curta_c4_r05",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-230345_a_consolidada_curta_c4_r05"
+      ]
+    },
+    {
+      "ordem": 40,
+      "execucao": "a_consolidada_curta_c8_r05",
+      "estado": "ok",
+      "tentativas": [
+        "20261111-233405_a_consolidada_curta_c8_r05"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 1.74 queries/sec):
+TimescaleDB mean of 1 metrics, all hosts, random 12h0m0s by 1h:
+min:   572.00ms, med:   576.64ms, mean:   576.18ms, max:  580.22ms, stddev:     2.76ms, sum:   2.9sec, count: 5
+all queries                                                   :
+min:   572.00ms, med:   576.64ms, mean:   576.18ms, max:  580.22ms, stddev:     2.76ms, sum:   2.9sec, count: 5
+wall clock time: 2.890104sec
+Saving results json file to /saida/ferramenta/consultas/aquecimento-double-groupby-1.json

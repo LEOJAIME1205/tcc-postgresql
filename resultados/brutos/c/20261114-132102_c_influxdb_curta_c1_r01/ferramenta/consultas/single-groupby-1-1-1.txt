@@ -1,0 +1,7 @@
+Run complete after 20 queries with 1 workers (Overall query rate 2904.49 queries/sec):
+Influx 1 cpu metric(s), random    1 hosts, random 1h0m0s by 1m:
+min:     0.26ms, med:     0.31ms, mean:     0.34ms, max:    0.67ms, stddev:     0.09ms, sum:   0.0sec, count: 20
+all queries                                                   :
+min:     0.26ms, med:     0.31ms, mean:     0.34ms, max:    0.67ms, stddev:     0.09ms, sum:   0.0sec, count: 20
+wall clock time: 0.007252sec
+Saving results json file to /saida/ferramenta/consultas/single-groupby-1-1-1.json

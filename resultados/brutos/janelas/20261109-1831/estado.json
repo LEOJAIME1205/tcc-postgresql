@@ -1,0 +1,22 @@
+{
+  "janela": "20261109-1831",
+  "atualizado": "2026-11-09T19:23:14-0300",
+  "execucoes": [
+    {
+      "ordem": 1,
+      "execucao": "b_consolidada_calibracao_c32_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261109-183108_b_consolidada_calibracao_c32_r01"
+      ]
+    },
+    {
+      "ordem": 2,
+      "execucao": "c_timescaledb_calibracao_c32_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261109-185832_c_timescaledb_calibracao_c32_r01"
+      ]
+    }
+  ]
+}

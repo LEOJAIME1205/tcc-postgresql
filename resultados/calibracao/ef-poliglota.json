@@ -1,0 +1,76 @@
+{
+  "arquitetura": "poliglota",
+  "criterio": "menor ef com recall@100 médio >= 0.95, com os 2 valores seguintes da grade (passo 10) também >= 0.95; piso 100 (ADR-038 e ADR-067)",
+  "escolhido": 120,
+  "busca": "query_points('passagens', limit=100, search_params=SearchParams(hnsw_ef=ef))",
+  "imagem": "qdrant/qdrant:v1.19.2@sha256:b7b0444c4c351c970b98e90a6f89c2ee4287c65b44e52b4cb503fa5b2aa927ad",
+  "vizinhos_exatos_sha256": "c4915e2d5ac25973739975cd9ce16a99acc378a1d6f7d807db7044023fbd7b36",
+  "medidas": [
+    {
+      "ef": 100,
+      "recall_medio": 0.9434791425260718,
+      "recall_minimo": 0.33,
+      "recall_p05": 0.77,
+      "consultas_abaixo_de_0_9": 641,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 4.7,
+      "detalhes": {
+        "segmentos": 6,
+        "pontos": 2681468
+      }
+    },
+    {
+      "ef": 110,
+      "recall_medio": 0.9487427578215527,
+      "recall_minimo": 0.37,
+      "recall_p05": 0.79,
+      "consultas_abaixo_de_0_9": 573,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 4.8,
+      "detalhes": {
+        "segmentos": 6,
+        "pontos": 2681468
+      }
+    },
+    {
+      "ef": 120,
+      "recall_medio": 0.9531402085747394,
+      "recall_minimo": 0.38,
+      "recall_p05": 0.81,
+      "consultas_abaixo_de_0_9": 518,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 4.8,
+      "detalhes": {
+        "segmentos": 6,
+        "pontos": 2681468
+      }
+    },
+    {
+      "ef": 130,
+      "recall_medio": 0.956529548088065,
+      "recall_minimo": 0.39,
+      "recall_p05": 0.82,
+      "consultas_abaixo_de_0_9": 472,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 5.0,
+      "detalhes": {
+        "segmentos": 6,
+        "pontos": 2681468
+      }
+    },
+    {
+      "ef": 140,
+      "recall_medio": 0.9594322132097335,
+      "recall_minimo": 0.41,
+      "recall_p05": 0.83,
+      "consultas_abaixo_de_0_9": 435,
+      "respostas_com_menos_de_100": 0,
+      "duracao_s": 5.2,
+      "detalhes": {
+        "segmentos": 6,
+        "pontos": 2681468
+      }
+    }
+  ],
+  "medido_em": "2026-11-09T16:18:08-0300"
+}

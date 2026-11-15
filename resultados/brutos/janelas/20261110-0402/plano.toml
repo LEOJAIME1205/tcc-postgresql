@@ -1,0 +1,42 @@
+# Rampa de concorrência do Eixo B, níveis 1 a 4 (ADR-067, itens 4 e 5): 12 execuções,
+# ~5,5 h. Inclui a fila consolidada com espera por aviso (teto do aviso, ADR-051).
+nome = "calibracao-b1"
+semente = 20261112
+espaco_livre_min_gib = 50
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "consolidada"
+cenario = "calibracao"
+concorrencias = [1, 2, 4]
+repeticoes = 1
+aquecimento_s = 120
+medicao_s = 300
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "consolidada"
+cenario = "calibracao"
+concorrencias = [1, 2, 4]
+repeticoes = 1
+aquecimento_s = 120
+medicao_s = 300
+espera = "aviso"
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "ingenua"
+cenario = "calibracao"
+concorrencias = [1, 2, 4]
+repeticoes = 1
+aquecimento_s = 120
+medicao_s = 300
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "outbox"
+cenario = "calibracao"
+concorrencias = [1, 2, 4]
+repeticoes = 1
+aquecimento_s = 120
+medicao_s = 300

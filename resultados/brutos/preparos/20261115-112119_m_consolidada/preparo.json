@@ -1,0 +1,14 @@
+{
+  "eixo": "m",
+  "arquitetura": "consolidada",
+  "inicio": "2026-11-15T11:21:19-0300",
+  "fim": "2026-11-15T11:21:43-0300",
+  "refeito": false,
+  "copiado_de": "a/consolidada",
+  "copiados_bytes": {
+    "postgres": 14831830887
+  },
+  "tamanhos_bytes": {
+    "postgres": 14841338769
+  }
+}

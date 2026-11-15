@@ -1,0 +1,102 @@
+{
+  "janela": "20261110-0402",
+  "atualizado": "2026-11-10T09:28:43-0300",
+  "execucoes": [
+    {
+      "ordem": 1,
+      "execucao": "b_consolidada_calibracao_c4_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-040226_b_consolidada_calibracao_c4_r01"
+      ]
+    },
+    {
+      "ordem": 2,
+      "execucao": "b_consolidada_calibracao_c4_r01_aviso",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-042945_b_consolidada_calibracao_c4_r01_aviso"
+      ]
+    },
+    {
+      "ordem": 3,
+      "execucao": "b_outbox_calibracao_c2_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-045656_b_outbox_calibracao_c2_r01"
+      ]
+    },
+    {
+      "ordem": 4,
+      "execucao": "b_ingenua_calibracao_c2_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-052414_b_ingenua_calibracao_c2_r01"
+      ]
+    },
+    {
+      "ordem": 5,
+      "execucao": "b_consolidada_calibracao_c2_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-055124_b_consolidada_calibracao_c2_r01"
+      ]
+    },
+    {
+      "ordem": 6,
+      "execucao": "b_consolidada_calibracao_c1_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-061834_b_consolidada_calibracao_c1_r01"
+      ]
+    },
+    {
+      "ordem": 7,
+      "execucao": "b_consolidada_calibracao_c2_r01_aviso",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-064543_b_consolidada_calibracao_c2_r01_aviso"
+      ]
+    },
+    {
+      "ordem": 8,
+      "execucao": "b_outbox_calibracao_c1_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-071252_b_outbox_calibracao_c1_r01"
+      ]
+    },
+    {
+      "ordem": 9,
+      "execucao": "b_ingenua_calibracao_c1_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-074003_b_ingenua_calibracao_c1_r01"
+      ]
+    },
+    {
+      "ordem": 10,
+      "execucao": "b_outbox_calibracao_c4_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-080712_b_outbox_calibracao_c4_r01"
+      ]
+    },
+    {
+      "ordem": 11,
+      "execucao": "b_ingenua_calibracao_c4_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-083422_b_ingenua_calibracao_c4_r01"
+      ]
+    },
+    {
+      "ordem": 12,
+      "execucao": "b_consolidada_calibracao_c1_r01_aviso",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-090134_b_consolidada_calibracao_c1_r01_aviso"
+      ]
+    }
+  ]
+}

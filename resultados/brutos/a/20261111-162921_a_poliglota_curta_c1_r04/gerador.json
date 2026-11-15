@@ -1,0 +1,28 @@
+{
+  "ferramenta": "tcc-gerador-busca",
+  "versao": "1 (aiohttp 3.14.5, Python 3.14.4)",
+  "aquecimento_inicio_ms": 1794426578922,
+  "medicao_inicio_ms": 1794426878922,
+  "medicao_fim_ms": 1794427178922,
+  "processo_fim_ms": 1794427179165,
+  "parametros": {
+    "concorrencia": 1,
+    "processos": 1,
+    "semente": 3297123116,
+    "aquecimento_s": 300,
+    "medicao_s": 300,
+    "consultas": 3452,
+    "tempo_limite_s": 60.0,
+    "servico": "http://busca:8000",
+    "primeiras_consultas": [
+      "test633",
+      "test37",
+      "test1500",
+      "test1378",
+      "test450"
+    ]
+  },
+  "operacoes": 148342,
+  "erros": 0,
+  "erros_por_tipo": {}
+}

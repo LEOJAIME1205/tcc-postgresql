@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 0.53 queries/sec):
+Influx max cpu over last 5 min-intervals (random end):
+min:   294.77ms, med:  1410.17ms, mean:  1902.46ms, max: 4494.34ms, stddev:  1550.99ms, sum:   9.5sec, count: 5
+all queries                                          :
+min:   294.77ms, med:  1410.17ms, mean:  1902.46ms, max: 4494.34ms, stddev:  1550.99ms, sum:   9.5sec, count: 5
+wall clock time: 9.524924sec
+Saving results json file to /saida/ferramenta/consultas/aquecimento-groupby-orderby-limit.json

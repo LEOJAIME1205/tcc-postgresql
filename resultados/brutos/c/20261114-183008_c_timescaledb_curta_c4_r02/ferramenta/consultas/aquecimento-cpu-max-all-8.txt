@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 180.76 queries/sec):
+TimescaleDB max of all CPU metrics, random    8 hosts, random 8h0m0s by 1h:
+min:     4.07ms, med:     4.50ms, mean:     5.53ms, max:   10.29ms, stddev:     2.39ms, sum:   0.0sec, count: 5
+all queries                                                               :
+min:     4.07ms, med:     4.50ms, mean:     5.53ms, max:   10.29ms, stddev:     2.39ms, sum:   0.0sec, count: 5
+wall clock time: 0.028759sec
+Saving results json file to /saida/ferramenta/consultas/aquecimento-cpu-max-all-8.json

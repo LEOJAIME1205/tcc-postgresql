@@ -1,0 +1,7 @@
+Run complete after 20 queries with 1 workers (Overall query rate 1.31 queries/sec):
+TimescaleDB CPU over threshold, all hosts:
+min:   740.32ms, med:   760.51ms, mean:   762.62ms, max:  795.36ms, stddev:    13.83ms, sum:  15.3sec, count: 20
+all queries                              :
+min:   740.32ms, med:   760.51ms, mean:   762.62ms, max:  795.36ms, stddev:    13.83ms, sum:  15.3sec, count: 20
+wall clock time: 15.262338sec
+Saving results json file to /saida/ferramenta/consultas/high-cpu-all.json

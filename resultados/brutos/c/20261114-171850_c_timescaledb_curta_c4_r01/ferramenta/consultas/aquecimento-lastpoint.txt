@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 22.68 queries/sec):
+TimescaleDB last row per host:
+min:    39.15ms, med:    40.70ms, mean:    44.09ms, max:   57.23ms, stddev:     6.77ms, sum:   0.2sec, count: 5
+all queries                  :
+min:    39.15ms, med:    40.70ms, mean:    44.09ms, max:   57.23ms, stddev:     6.77ms, sum:   0.2sec, count: 5
+wall clock time: 0.224498sec
+Saving results json file to /saida/ferramenta/consultas/aquecimento-lastpoint.json

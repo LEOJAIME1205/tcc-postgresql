@@ -1,0 +1,7 @@
+Run complete after 20 queries with 1 workers (Overall query rate 3.89 queries/sec):
+Influx last row per host:
+min:   246.13ms, med:   255.58ms, mean:   257.03ms, max:  279.15ms, stddev:     6.61ms, sum:   5.1sec, count: 20
+all queries             :
+min:   246.13ms, med:   255.58ms, mean:   257.03ms, max:  279.15ms, stddev:     6.61ms, sum:   5.1sec, count: 20
+wall clock time: 5.148330sec
+Saving results json file to /saida/ferramenta/consultas/lastpoint.json

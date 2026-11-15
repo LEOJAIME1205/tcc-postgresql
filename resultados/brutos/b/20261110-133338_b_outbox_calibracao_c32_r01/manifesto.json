@@ -1,0 +1,259 @@
+{
+  "versao_formato": 1,
+  "id": "20261110-133338_b_outbox_calibracao_c32_r01",
+  "janela": "20261110-0928",
+  "eixo": "b",
+  "arquitetura": "outbox",
+  "cenario": "calibracao",
+  "concorrencia": 32,
+  "repeticao": 1,
+  "ordem_na_janela": 10,
+  "semente": 2242670500,
+  "coleta_interna": true,
+  "espera": null,
+  "duracao_planejada_s": {
+    "aquecimento": 120,
+    "medicao": 300
+  },
+  "repositorio": {
+    "commit": "bb3710ee5b90362de3c528b3e71f7c3c90d2d924",
+    "alteracoes_locais": true
+  },
+  "host": {
+    "kernel": "7.0.0-42-generic",
+    "docker": "29.9.2"
+  },
+  "inicio": "2026-11-10T13:33:38-0300",
+  "estado": "ok",
+  "motivo_falha": null,
+  "tempos_ms": {
+    "repouso_inicio": 1794328424378,
+    "aquecimento_inicio": 1794329629703,
+    "medicao_inicio": 1794329749703,
+    "medicao_fim": 1794330049703
+  },
+  "controles": {
+    "conferidos": [
+      {
+        "controle": "swap desligado",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nenhuma área ativa"
+      },
+      {
+        "controle": "timers parados",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "10 parados"
+      },
+      {
+        "controle": "P510 encontrado",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "controlador nvme0"
+      },
+      {
+        "controle": "APST desligado",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nvme0: pm_qos_latency_tolerance_us = 0"
+      },
+      {
+        "controle": "energia em performance",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "16 processadores em performance, boost ligado"
+      },
+      {
+        "controle": "suspensão e desligamento bloqueados",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "trava tcc-coleta ativa"
+      },
+      {
+        "controle": "nenhum container rodando",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nenhum"
+      },
+      {
+        "controle": "nenhum coletor órfão",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nenhum"
+      },
+      {
+        "controle": "nenhum navegador aberto",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nenhum"
+      },
+      {
+        "controle": "espaço livre de pelo menos 50 GiB",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "734 GiB livres"
+      },
+      {
+        "controle": "sudo sem senha para a coleta",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "fstrim e nvme smart-log liberados"
+      },
+      {
+        "controle": "sem programas pesados abertos",
+        "ok": false,
+        "bloqueante": false,
+        "detalhe": "abertos: claude, code"
+      }
+    ],
+    "volumes_restaurados": true,
+    "fstrim": "/: 13 GiB (13925064704 bytes) descartado",
+    "repouso_s": 1200
+  },
+  "imagens": [
+    {
+      "servico": "rabbitmq",
+      "imagem": "rabbitmq:4.4.0-management@sha256:af6f50d38098d8bd52fef7f3fa85015dd8b2bf6def58e995bf584ae9ba0f6407",
+      "id": "sha256:af6f50d38098d8bd52fef7f3fa85015dd8b2bf6def58e995bf584ae9ba0f6407",
+      "digests": [
+        "rabbitmq@sha256:af6f50d38098d8bd52fef7f3fa85015dd8b2bf6def58e995bf584ae9ba0f6407"
+      ]
+    },
+    {
+      "servico": "postgres",
+      "imagem": "tcc-postgres:18.6-ts2.31.0-pgv0.8.7",
+      "id": "sha256:3c71fe3d3acb92bc6b4c2a1dfce722e9eff10c352252a6450051cd04880067ec",
+      "digests": [
+        "tcc-postgres@sha256:3c71fe3d3acb92bc6b4c2a1dfce722e9eff10c352252a6450051cd04880067ec"
+      ]
+    },
+    {
+      "servico": "relay",
+      "imagem": "tcc-relay:1",
+      "id": "sha256:69903774f532132a4dedca8c0cb97573fde9f969f4b0752bfcfff968dff581ec",
+      "digests": [
+        "tcc-relay@sha256:69903774f532132a4dedca8c0cb97573fde9f969f4b0752bfcfff968dff581ec"
+      ]
+    }
+  ],
+  "recursos": [
+    {
+      "servico": "rabbitmq",
+      "cpuset": "0-5,8-13",
+      "memoria_bytes": 7516192768
+    },
+    {
+      "servico": "postgres",
+      "cpuset": "0-5,8-13",
+      "memoria_bytes": 12884901888
+    },
+    {
+      "servico": "relay",
+      "cpuset": "0-5,8-13",
+      "memoria_bytes": 1073741824
+    }
+  ],
+  "gerador": {
+    "ferramenta": "tcc-gerador-fila",
+    "versao": "1 (psycopg 3.3.6, aio-pika 10.1.1, uvloop 0.23.0, Python 3.14.4)",
+    "parametros": {
+      "arquitetura": "outbox",
+      "concorrencia": 32,
+      "produtores": 32,
+      "consumidores": 32,
+      "processos": 2,
+      "semente": 2242670500,
+      "aquecimento_s": 120,
+      "medicao_s": 300,
+      "carga_bytes": 1024,
+      "carga_sha256": "aa0ec00539928a6889b1b38948b6b564db046cf82c5b178d4d25f98cfa6c6466",
+      "prefetch": 100,
+      "espera": "consulta",
+      "intervalo_ms": 100,
+      "tempo_limite_s": 60.0
+    }
+  },
+  "disco": {
+    "ocupado_bytes": 152091488256,
+    "livre_bytes": 780178022400
+  },
+  "fim": "2026-11-10T14:01:01-0300",
+  "arquivos": [
+    {
+      "nome": "ferramenta/coletor-host.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "nome": "ferramenta/coletor-postgres.log",
+      "bytes": 21,
+      "sha256": "f22c9624500aa9c777a33f1fbfedfc44e79b2589e6d26601067a7e17d22c576d"
+    },
+    {
+      "nome": "ferramenta/coletor-rabbitmq.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "nome": "ferramenta/compose.log",
+      "bytes": 1765,
+      "sha256": "18a65537e830c4ebe6c90f374ce45d9dae825d0b6cf85ef5feab2bc4b6e41a60"
+    },
+    {
+      "nome": "ferramenta/orquestrador.log",
+      "bytes": 558,
+      "sha256": "f871196fec351cf8706ad607e229fa23d6a72c6b1957e666580b770d9a5e0464"
+    },
+    {
+      "nome": "ferramenta/postgres.log",
+      "bytes": 2021,
+      "sha256": "0536bb76eef48970a9e7ba63522e634b4b1a59844642bbb323daa55f751e8bd2"
+    },
+    {
+      "nome": "ferramenta/rabbitmq.log",
+      "bytes": 30773,
+      "sha256": "ff13ac78148afb77d0faad4089d1d040464674cc58b3f0e3dbeccb46ac95f675"
+    },
+    {
+      "nome": "ferramenta/relay.log",
+      "bytes": 2198,
+      "sha256": "2e22a2ec147bec276cd312f463ae30f49adc9237c334c05bd2c03ff4ca22173b"
+    },
+    {
+      "nome": "gerador.json",
+      "bytes": 932,
+      "sha256": "dc7dd2830bf7c1ebc9a065919af16a4524aba14b98365507646da4702826c97e"
+    },
+    {
+      "nome": "instantaneos/docker-inspect.json",
+      "bytes": 26359,
+      "sha256": "a04626703d0e9dad5afafc97bfc6e038212cf81485513ef420d94e1b0e9a7bcf"
+    },
+    {
+      "nome": "instantaneos/pg_stat_statements-postgres.csv",
+      "bytes": 5815,
+      "sha256": "42319e6d40488db38e9e23cfd0e15e1f44508ae21ead657bb467a3652bf9994b"
+    },
+    {
+      "nome": "metricas-host.csv",
+      "bytes": 2566517,
+      "sha256": "b6cc0b57bb80267cebb8af4f250133c684f426faf4b18917479969f4715b4806"
+    },
+    {
+      "nome": "metricas-postgres.csv",
+      "bytes": 48620,
+      "sha256": "58a07a0d9d0be8d58789d1cb9d4a1e20eee40ade860eb5998bf49be4817b7753"
+    },
+    {
+      "nome": "metricas-rabbitmq.csv",
+      "bytes": 29803,
+      "sha256": "f62f3b3468a640f6c5b7254008da8a2f67eb3892dd641ff76885f307179d4585"
+    },
+    {
+      "nome": "operacoes.csv",
+      "bytes": 747711190,
+      "sha256": "118f85c275f24dd5292e82d06fb406dfa96534ea4bcaae8156cca8fb0112a471"
+    }
+  ]
+}

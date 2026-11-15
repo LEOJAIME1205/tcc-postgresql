@@ -1,0 +1,25 @@
+# Busca do max_wal_size (ADR-067, item 3): o nível mais pesado da rampa, contando os
+# avisos "checkpoints are occurring too frequently" da execução inteira. O valor testado
+# está nas composições (eixo-b-fila/*/compose.yaml e eixo-c-temporal/timescaledb/compose.yaml)
+# e fica registrado no docker-inspect.json de cada execução. ~52 min por janela.
+nome = "calibracao-wal"
+semente = 20261111
+espaco_livre_min_gib = 50
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "consolidada"
+cenario = "calibracao"
+concorrencias = [32]
+repeticoes = 1
+aquecimento_s = 120
+medicao_s = 300
+
+[[configuracao]]
+eixo = "c"
+arquitetura = "timescaledb"
+cenario = "calibracao"
+concorrencias = [32]
+repeticoes = 1
+aquecimento_s = 10
+medicao_s = 3590

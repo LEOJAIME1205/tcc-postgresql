@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 4.13 queries/sec):
+Influx last row per host:
+min:   238.45ms, med:   239.14ms, mean:   241.88ms, max:  251.57ms, stddev:     4.95ms, sum:   1.2sec, count: 5
+all queries             :
+min:   238.45ms, med:   239.14ms, mean:   241.88ms, max:  251.57ms, stddev:     4.95ms, sum:   1.2sec, count: 5
+wall clock time: 1.216860sec
+Saving results json file to /saida/ferramenta/consultas/aquecimento-lastpoint.json

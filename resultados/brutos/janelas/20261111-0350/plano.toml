@@ -1,0 +1,23 @@
+# Execuções curtas do Eixo A (ADR-067, item 7): 8 configurações em 5 blocos completos,
+# 40 execuções, ~20 h. Aquecimento de 300 s (revisão da ADR-048).
+nome = "curta-a"
+semente = 20261121
+espaco_livre_min_gib = 50
+
+[[configuracao]]
+eixo = "a"
+arquitetura = "consolidada"
+cenario = "curta"
+concorrencias = [1, 2, 4, 8]
+repeticoes = 5
+aquecimento_s = 300
+medicao_s = 300
+
+[[configuracao]]
+eixo = "a"
+arquitetura = "poliglota"
+cenario = "curta"
+concorrencias = [1, 2, 4, 8]
+repeticoes = 5
+aquecimento_s = 300
+medicao_s = 300

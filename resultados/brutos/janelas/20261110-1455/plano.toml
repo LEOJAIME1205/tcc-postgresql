@@ -1,0 +1,23 @@
+# Rampa de concorrência do Eixo C (ADR-067, item 5): 12 execuções, ~6,7 h. Cada execução
+# carrega o arquivo inteiro; medicao_s é o prazo máximo da carga (ADR-065).
+nome = "calibracao-c"
+semente = 20261112
+espaco_livre_min_gib = 50
+
+[[configuracao]]
+eixo = "c"
+arquitetura = "timescaledb"
+cenario = "calibracao"
+concorrencias = [1, 2, 4, 8, 16, 32]
+repeticoes = 1
+aquecimento_s = 10
+medicao_s = 3590
+
+[[configuracao]]
+eixo = "c"
+arquitetura = "influxdb"
+cenario = "calibracao"
+concorrencias = [1, 2, 4, 8, 16, 32]
+repeticoes = 1
+aquecimento_s = 10
+medicao_s = 3590

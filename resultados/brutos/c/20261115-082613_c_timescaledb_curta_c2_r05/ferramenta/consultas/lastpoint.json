@@ -1,0 +1,48 @@
+{
+ "ResultFormatVersion": "0.1",
+ "RunnerConfig": {
+  "DBName": "benchmark",
+  "Limit": 0,
+  "LimitRPS": 0,
+  "MemProfile": "",
+  "HDRLatenciesFile": "",
+  "Workers": 1,
+  "PrintResponses": false,
+  "Debug": 0,
+  "FileName": "",
+  "BurnIn": 0,
+  "PrintInterval": 0,
+  "PrewarmQueries": false,
+  "ResultsFile": "/saida/ferramenta/consultas/lastpoint.json"
+ },
+ "StartTime": 1794743590000,
+ "EndTime": 1794743591000,
+ "DurationMillis": 812,
+ "Totals": {
+  "burnIn": 0,
+  "limit": 0,
+  "overallQuantiles": {
+   "TimescaleDB_last_row_per_host": {
+    "q0": 0,
+    "q100": 58.147,
+    "q50": 39.195,
+    "q95": 44.717,
+    "q99": 58.147,
+    "q999": 58.147
+   },
+   "all_queries": {
+    "q0": 0,
+    "q100": 58.147,
+    "q50": 39.195,
+    "q95": 44.717,
+    "q99": 58.147,
+    "q999": 58.147
+   }
+  },
+  "overallQueryRates": {
+   "TimescaleDB_last_row_per_host": 24.62641958518562,
+   "all_queries": 24.62641958518562
+  },
+  "prewarmQueries": false
+ }
+}

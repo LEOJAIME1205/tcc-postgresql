@@ -1,0 +1,7 @@
+Run complete after 20 queries with 1 workers (Overall query rate 0.08 queries/sec):
+Influx CPU over threshold, all hosts:
+min: 12161.02ms, med: 12426.24ms, mean: 12469.07ms, max: 12792.32ms, stddev:   202.52ms, sum: 249.4sec, count: 20
+all queries                         :
+min: 12161.02ms, med: 12426.24ms, mean: 12469.07ms, max: 12792.32ms, stddev:   202.52ms, sum: 249.4sec, count: 20
+wall clock time: 249.396497sec
+Saving results json file to /saida/ferramenta/consultas/high-cpu-all.json

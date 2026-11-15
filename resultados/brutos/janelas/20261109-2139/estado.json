@@ -1,0 +1,118 @@
+{
+  "janela": "20261109-2139",
+  "atualizado": "2026-11-10T04:02:26-0300",
+  "execucoes": [
+    {
+      "ordem": 1,
+      "execucao": "a_consolidada_calibracao_c16_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261109-213947_a_consolidada_calibracao_c16_r01"
+      ]
+    },
+    {
+      "ordem": 2,
+      "execucao": "a_consolidada_calibracao_c32_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261109-220708_a_consolidada_calibracao_c32_r01"
+      ]
+    },
+    {
+      "ordem": 3,
+      "execucao": "a_consolidada_calibracao_c1_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261109-223431_a_consolidada_calibracao_c1_r01"
+      ]
+    },
+    {
+      "ordem": 4,
+      "execucao": "a_consolidada_calibracao_c4_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261109-230148_a_consolidada_calibracao_c4_r01"
+      ]
+    },
+    {
+      "ordem": 5,
+      "execucao": "a_poliglota_calibracao_c16_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261109-232906_a_poliglota_calibracao_c16_r01"
+      ]
+    },
+    {
+      "ordem": 6,
+      "execucao": "a_poliglota_calibracao_c1_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261109-235627_a_poliglota_calibracao_c1_r01"
+      ]
+    },
+    {
+      "ordem": 7,
+      "execucao": "a_poliglota_calibracao_c4_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-002346_a_poliglota_calibracao_c4_r01"
+      ]
+    },
+    {
+      "ordem": 8,
+      "execucao": "a_consolidada_calibracao_c2_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-005103_a_consolidada_calibracao_c2_r01"
+      ]
+    },
+    {
+      "ordem": 9,
+      "execucao": "a_poliglota_calibracao_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-011821_a_poliglota_calibracao_c8_r01"
+      ]
+    },
+    {
+      "ordem": 10,
+      "execucao": "a_consolidada_calibracao_c64_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-014540_a_consolidada_calibracao_c64_r01"
+      ]
+    },
+    {
+      "ordem": 11,
+      "execucao": "a_poliglota_calibracao_c64_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-021310_a_poliglota_calibracao_c64_r01"
+      ]
+    },
+    {
+      "ordem": 12,
+      "execucao": "a_poliglota_calibracao_c2_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-024031_a_poliglota_calibracao_c2_r01"
+      ]
+    },
+    {
+      "ordem": 13,
+      "execucao": "a_poliglota_calibracao_c32_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-030749_a_poliglota_calibracao_c32_r01"
+      ]
+    },
+    {
+      "ordem": 14,
+      "execucao": "a_consolidada_calibracao_c8_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261110-033507_a_consolidada_calibracao_c8_r01"
+      ]
+    }
+  ]
+}

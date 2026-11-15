@@ -1,0 +1,354 @@
+{
+  "versao_formato": 1,
+  "janela": "20261114-1321",
+  "plano": "curta-c",
+  "semente": 20261124,
+  "repouso_s": 1200,
+  "ordem": [
+    "c_influxdb_curta_c1_r01",
+    "c_timescaledb_curta_c8_r01",
+    "c_influxdb_curta_c8_r01",
+    "c_timescaledb_curta_c2_r01",
+    "c_influxdb_curta_c4_r01",
+    "c_timescaledb_curta_c1_r01",
+    "c_influxdb_curta_c2_r01",
+    "c_timescaledb_curta_c4_r01",
+    "c_influxdb_curta_c1_r02",
+    "c_timescaledb_curta_c4_r02",
+    "c_timescaledb_curta_c1_r02",
+    "c_influxdb_curta_c4_r02",
+    "c_influxdb_curta_c2_r02",
+    "c_timescaledb_curta_c8_r02",
+    "c_timescaledb_curta_c2_r02",
+    "c_influxdb_curta_c8_r02",
+    "c_influxdb_curta_c1_r03",
+    "c_influxdb_curta_c4_r03",
+    "c_influxdb_curta_c8_r03",
+    "c_timescaledb_curta_c4_r03",
+    "c_timescaledb_curta_c8_r03",
+    "c_influxdb_curta_c2_r03",
+    "c_timescaledb_curta_c2_r03",
+    "c_timescaledb_curta_c1_r03",
+    "c_timescaledb_curta_c2_r04",
+    "c_influxdb_curta_c2_r04",
+    "c_timescaledb_curta_c8_r04",
+    "c_timescaledb_curta_c4_r04",
+    "c_influxdb_curta_c8_r04",
+    "c_influxdb_curta_c4_r04",
+    "c_timescaledb_curta_c1_r04",
+    "c_influxdb_curta_c1_r04",
+    "c_timescaledb_curta_c1_r05",
+    "c_influxdb_curta_c4_r05",
+    "c_timescaledb_curta_c8_r05",
+    "c_timescaledb_curta_c2_r05",
+    "c_timescaledb_curta_c4_r05",
+    "c_influxdb_curta_c2_r05",
+    "c_influxdb_curta_c1_r05",
+    "c_influxdb_curta_c8_r05"
+  ],
+  "motivo": "concluída",
+  "sessoes": [
+    {
+      "inicio": "2026-11-14T13:21:02-0300",
+      "fim": "2026-11-15T11:19:29-0300",
+      "motivo": "concluída"
+    }
+  ],
+  "execucoes": [
+    {
+      "ordem": 1,
+      "id": "20261114-132102_c_influxdb_curta_c1_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 2,
+      "id": "20261114-140618_c_timescaledb_curta_c8_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 3,
+      "id": "20261114-143129_c_influxdb_curta_c8_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 4,
+      "id": "20261114-150647_c_timescaledb_curta_c2_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 5,
+      "id": "20261114-153339_c_influxdb_curta_c4_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 6,
+      "id": "20261114-161006_c_timescaledb_curta_c1_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 7,
+      "id": "20261114-163908_c_influxdb_curta_c2_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 8,
+      "id": "20261114-171850_c_timescaledb_curta_c4_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 9,
+      "id": "20261114-174436_c_influxdb_curta_c1_r02",
+      "estado": "ok"
+    },
+    {
+      "ordem": 10,
+      "id": "20261114-183008_c_timescaledb_curta_c4_r02",
+      "estado": "ok"
+    },
+    {
+      "ordem": 11,
+      "id": "20261114-185553_c_timescaledb_curta_c1_r02",
+      "estado": "ok"
+    },
+    {
+      "ordem": 12,
+      "id": "20261114-192508_c_influxdb_curta_c4_r02",
+      "estado": "ok"
+    },
+    {
+      "ordem": 13,
+      "id": "20261114-200140_c_influxdb_curta_c2_r02",
+      "estado": "ok"
+    },
+    {
+      "ordem": 14,
+      "id": "20261114-204102_c_timescaledb_curta_c8_r02",
+      "estado": "ok"
+    },
+    {
+      "ordem": 15,
+      "id": "20261114-210611_c_timescaledb_curta_c2_r02",
+      "estado": "ok"
+    },
+    {
+      "ordem": 16,
+      "id": "20261114-213313_c_influxdb_curta_c8_r02",
+      "estado": "ok"
+    },
+    {
+      "ordem": 17,
+      "id": "20261114-220822_c_influxdb_curta_c1_r03",
+      "estado": "ok"
+    },
+    {
+      "ordem": 18,
+      "id": "20261114-225334_c_influxdb_curta_c4_r03",
+      "estado": "ok"
+    },
+    {
+      "ordem": 19,
+      "id": "20261114-232948_c_influxdb_curta_c8_r03",
+      "estado": "ok"
+    },
+    {
+      "ordem": 20,
+      "id": "20261115-000447_c_timescaledb_curta_c4_r03",
+      "estado": "ok"
+    },
+    {
+      "ordem": 21,
+      "id": "20261115-003034_c_timescaledb_curta_c8_r03",
+      "estado": "ok"
+    },
+    {
+      "ordem": 22,
+      "id": "20261115-005556_c_influxdb_curta_c2_r03",
+      "estado": "ok"
+    },
+    {
+      "ordem": 23,
+      "id": "20261115-013540_c_timescaledb_curta_c2_r03",
+      "estado": "ok"
+    },
+    {
+      "ordem": 24,
+      "id": "20261115-020232_c_timescaledb_curta_c1_r03",
+      "estado": "ok"
+    },
+    {
+      "ordem": 25,
+      "id": "20261115-023147_c_timescaledb_curta_c2_r04",
+      "estado": "ok"
+    },
+    {
+      "ordem": 26,
+      "id": "20261115-025850_c_influxdb_curta_c2_r04",
+      "estado": "ok"
+    },
+    {
+      "ordem": 27,
+      "id": "20261115-033820_c_timescaledb_curta_c8_r04",
+      "estado": "ok"
+    },
+    {
+      "ordem": 28,
+      "id": "20261115-040330_c_timescaledb_curta_c4_r04",
+      "estado": "ok"
+    },
+    {
+      "ordem": 29,
+      "id": "20261115-042927_c_influxdb_curta_c8_r04",
+      "estado": "ok"
+    },
+    {
+      "ordem": 30,
+      "id": "20261115-050431_c_influxdb_curta_c4_r04",
+      "estado": "ok"
+    },
+    {
+      "ordem": 31,
+      "id": "20261115-054045_c_timescaledb_curta_c1_r04",
+      "estado": "ok"
+    },
+    {
+      "ordem": 32,
+      "id": "20261115-060949_c_influxdb_curta_c1_r04",
+      "estado": "ok"
+    },
+    {
+      "ordem": 33,
+      "id": "20261115-065527_c_timescaledb_curta_c1_r05",
+      "estado": "ok"
+    },
+    {
+      "ordem": 34,
+      "id": "20261115-072434_c_influxdb_curta_c4_r05",
+      "estado": "ok"
+    },
+    {
+      "ordem": 35,
+      "id": "20261115-080105_c_timescaledb_curta_c8_r05",
+      "estado": "ok"
+    },
+    {
+      "ordem": 36,
+      "id": "20261115-082613_c_timescaledb_curta_c2_r05",
+      "estado": "ok"
+    },
+    {
+      "ordem": 37,
+      "id": "20261115-085320_c_timescaledb_curta_c4_r05",
+      "estado": "ok"
+    },
+    {
+      "ordem": 38,
+      "id": "20261115-091915_c_influxdb_curta_c2_r05",
+      "estado": "ok"
+    },
+    {
+      "ordem": 39,
+      "id": "20261115-095859_c_influxdb_curta_c1_r05",
+      "estado": "ok"
+    },
+    {
+      "ordem": 40,
+      "id": "20261115-104423_c_influxdb_curta_c8_r05",
+      "estado": "ok"
+    }
+  ],
+  "momento": "2026-11-15T11:19:29-0300",
+  "controles": [
+    {
+      "controle": "swap desligado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhuma área ativa"
+    },
+    {
+      "controle": "timers parados",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "10 parados"
+    },
+    {
+      "controle": "P510 encontrado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "controlador nvme0"
+    },
+    {
+      "controle": "APST desligado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nvme0: pm_qos_latency_tolerance_us = 0"
+    },
+    {
+      "controle": "energia em performance",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "16 processadores em performance, boost ligado"
+    },
+    {
+      "controle": "suspensão e desligamento bloqueados",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "trava tcc-coleta ativa"
+    },
+    {
+      "controle": "nenhum container rodando",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "nenhum coletor órfão",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "nenhum navegador aberto",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "espaço livre de pelo menos 50 GiB",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "694 GiB livres"
+    },
+    {
+      "controle": "sudo sem senha para a coleta",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "fstrim e nvme smart-log liberados"
+    },
+    {
+      "controle": "sem programas pesados abertos",
+      "ok": false,
+      "bloqueante": false,
+      "detalhe": "abertos: claude, code"
+    }
+  ],
+  "disco": {
+    "ocupado_bytes": 187473297408,
+    "livre_bytes": 744796213248
+  },
+  "smart": {
+    "temperature": "38 °C (311 K, 100 °F)",
+    "percentage_used": "1%",
+    "Data Units Written": "25053608 (12.83 TB)",
+    "power_on_hours": "238",
+    "unsafe_shutdowns": "0",
+    "media_errors": "0"
+  },
+  "host": {
+    "kernel": "7.0.0-42-generic",
+    "docker": "29.9.2"
+  },
+  "repositorio": {
+    "commit": "bb3710ee5b90362de3c528b3e71f7c3c90d2d924",
+    "alteracoes_locais": true
+  }
+}
