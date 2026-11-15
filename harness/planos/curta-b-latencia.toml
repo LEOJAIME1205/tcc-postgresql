@@ -1,0 +1,36 @@
+# Execuções curtas de latência fim a fim do Eixo B (ADR-067, item 7): 9 configurações em
+# 5 blocos completos, 45 execuções, ~20 h. Produtores em taxa fixa, com 32 produtores e
+# 32 consumidores, a 25%, 50% e 75% de 5.681/s (revisão da ADR-054).
+nome = "curta-b-latencia"
+semente = 20261123
+espaco_livre_min_gib = 50
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "consolidada"
+cenario = "curta"
+concorrencias = [32]
+taxas = [1400, 2800, 4200]
+repeticoes = 5
+aquecimento_s = 120
+medicao_s = 300
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "ingenua"
+cenario = "curta"
+concorrencias = [32]
+taxas = [1400, 2800, 4200]
+repeticoes = 5
+aquecimento_s = 120
+medicao_s = 300
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "outbox"
+cenario = "curta"
+concorrencias = [32]
+taxas = [1400, 2800, 4200]
+repeticoes = 5
+aquecimento_s = 120
+medicao_s = 300

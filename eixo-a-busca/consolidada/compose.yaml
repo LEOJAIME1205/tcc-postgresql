@@ -34,7 +34,7 @@ services:
     environment:
       TCC_MOTOR: consolidada
       TCC_CONEXOES: "11"
-      TCC_EF_BUSCA: "100"
+      TCC_EF_BUSCA: "260"  # calibrado: recall@100 de 0,95 (ADR-038 e ADR-067)
       PGHOST: postgres
       PGUSER: postgres
       PGPASSWORD: tcc

@@ -2,12 +2,15 @@
 
     gerador.py preparar [--saida DIR]
     gerador.py executar --saida DIR --concorrencia N --aquecimento-s A --medicao-s M --semente S
+                        [--taxa R]
     gerador.py produzir --produtores N --semente S
     gerador.py consumir --consumidores N --registro ARQUIVO
 
 `preparar` aplica o esquema da arquitetura de TCC_ARQUITETURA e, nas poliglotas, declara a
-fila no RabbitMQ (TCC_RABBITMQ). `executar` mantém N produtores e N consumidores em laço
-fechado e grava o operacoes.csv e o gerador.json. `produzir` e `consumir` rodam cada metade
+fila no RabbitMQ (TCC_RABBITMQ). `executar` mantém N produtores e N consumidores e grava o
+operacoes.csv e o gerador.json. Sem --taxa, os produtores ficam em laço fechado (vazão
+sustentável); com --taxa, enviam R mensagens/s no total, em agenda uniforme (latência fim a
+fim, revisão de 10/11/2026 da ADR-054). `produzir` e `consumir` rodam cada metade
 até receber SIGTERM; `consumir` grava os pedidos consumidos, um por linha. São usados pela
 verificação de equivalência (ADR-056) e pela medida da vazão isolada do relay (ADR-053).
 O PostgreSQL é lido pelas variáveis PG* da libpq.
@@ -16,6 +19,7 @@ O PostgreSQL é lido pelas variáveis PG* da libpq.
 import argparse
 import asyncio
 import hashlib
+import importlib.metadata
 import json
 import multiprocessing
 import os
@@ -38,7 +42,7 @@ import uvloop
 EIXO_B: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ARQUITETURAS: Tuple[str, ...] = ("consolidada", "ingenua", "outbox")
 POLIGLOTAS: Tuple[str, ...] = ("ingenua", "outbox")
-VERSAO: str = "1"
+VERSAO: str = "2"  # 2: modo de taxa fixa (ADR-054, revisão de 10/11/2026)
 FILA: str = "tarefas"  # fila do RabbitMQ (ADR-052)
 CARGA_BYTES: int = 1024
 PREFETCH: int = 100
@@ -47,6 +51,7 @@ ESPERA_PRONTO_S: float = 300.0
 ESPERA_AVISO_S: float = 1.0
 PAUSA_APOS_FALHA_S: float = 0.1
 ATRASO_INICIO_S: float = 3.0
+ATRASO_TOLERADO_NS: int = 1_000_000  # envio agendado que sai mais tarde que isso é contado
 MAX_PROCESSOS: int = 2
 NUCLEOS_GERADOR: Tuple[Set[int], ...] = ({6, 14}, {7, 15})  # um por núcleo físico (ADR-018)
 CABECALHO: List[str] = ["ts_us", "operacao", "latencia_us", "ok", "cliente", "itens"]
@@ -165,6 +170,61 @@ class Aviso:
                 self._esperando.remove(futuro)
 
 
+class Agenda:
+    """Envios de um produtor em taxa fixa (ADR-054, revisão de 10/11/2026).
+
+    O envio k de todos os produtores está agendado para inicio + k/taxa e cabe ao produtor
+    k mod produtores. A origem da latência é o instante agendado quando o produtor ainda
+    está ocupado com o envio anterior nessa hora (correção da omissão coordenada) e o
+    início real quando ele está livre, para a resolução do temporizador não entrar.
+    """
+
+    def __init__(self, inicio: float, taxa: int, produtores: int, numero: int) -> None:
+        if taxa < 1 or produtores < 1 or not 0 <= numero < produtores:
+            raise ValueError(f"agenda inválida: taxa {taxa}, produtor {numero} de {produtores}")
+        self._inicio_ns = round(inicio * 1_000_000_000)
+        self._taxa = taxa
+        self._passo = produtores
+        self._indice = numero
+        self._unix_menos_monotonico_ns = time.time_ns() - time.monotonic_ns()
+        self.envios = 0
+        self.ocupados = 0
+        self.atrasados = 0
+        self.atraso_max_ns = 0
+
+    def agendado_ns(self) -> Tuple[int, int]:
+        """Próximo envio agendado, em Unix e no relógio monotônico, em ns; avança a agenda."""
+        unix_ns = self._inicio_ns + self._indice * 1_000_000_000 // self._taxa
+        self._indice += self._passo
+        return unix_ns, unix_ns - self._unix_menos_monotonico_ns
+
+    async def esperar_vez(self, parada: Parada) -> Optional[Tuple[int, int]]:
+        """Espera o próximo envio e devolve a origem da latência (Unix em µs, monotônico em
+        ns), ou None se a carga acabou durante a espera."""
+        unix_ns, monotonico_ns = self.agendado_ns()
+        agora = time.monotonic_ns()
+        self.envios += 1
+        if agora >= monotonico_ns:
+            atraso = agora - monotonico_ns
+            self.ocupados += 1
+            if atraso > ATRASO_TOLERADO_NS:
+                self.atrasados += 1
+            self.atraso_max_ns = max(self.atraso_max_ns, atraso)
+            return unix_ns // 1000, monotonico_ns
+        await asyncio.sleep((monotonico_ns - agora) / 1_000_000_000)
+        if not parada.ativa():
+            self.envios -= 1
+            return None
+        return time.time_ns() // 1000, time.monotonic_ns()
+
+
+def resumo_das_agendas(agendas: List[Agenda]) -> Dict[str, Any]:
+    return {"envios": sum(a.envios for a in agendas),
+            "produtor_ocupado": sum(a.ocupados for a in agendas),
+            "atrasados_mais_de_1ms": sum(a.atrasados for a in agendas),
+            "atraso_max_ms": max((a.atraso_max_ns for a in agendas), default=0) / 1_000_000}
+
+
 async def escutar(aviso: Aviso, parada: Parada) -> None:
     """Uma conexão por processo escuta o canal das tarefas e repassa cada aviso."""
     async with await psycopg.AsyncConnection.connect(autocommit=True) as conn:
@@ -178,8 +238,17 @@ async def conectar_pg() -> psycopg.AsyncConnection[Tuple[Any, ...]]:
     return await psycopg.AsyncConnection.connect(autocommit=True)
 
 
+async def origem(agenda: Optional[Agenda], parada: Parada) -> Optional[Tuple[int, int]]:
+    """Origem da latência do próximo envio (Unix em µs, monotônico em ns): agora, em laço
+    fechado; pela agenda, em taxa fixa. None se a carga acabou durante a espera."""
+    if agenda is None:
+        return time.time_ns() // 1000, time.monotonic_ns()
+    return await agenda.esperar_vez(parada)
+
+
 async def produtor_tabela(arquitetura: str, numero: int, semente: int, carga: bytes,
-                          parada: Parada, registro: Registro, erros: Counter[str]) -> None:
+                          parada: Parada, registro: Registro, erros: Counter[str],
+                          agenda: Optional[Agenda]) -> None:
     """Consolidada e outbox: pedido e tarefa (ou linha de saída) num comando só."""
     sorteio = random.Random(f"{semente}:{numero}")
     comando = ENFILEIRA[(arquitetura, ESPERA)]
@@ -187,8 +256,10 @@ async def produtor_tabela(arquitetura: str, numero: int, semente: int, carga: by
     try:
         while parada.ativa():
             cliente, valor = sorteio.randint(1, 100_000), sorteio.randint(100, 1_000_000)
-            ts_us = time.time_ns() // 1000
-            t0 = time.monotonic_ns()
+            inicio = await origem(agenda, parada)
+            if inicio is None:
+                break
+            ts_us, t0 = inicio
             mensagem = CABECALHO_MENSAGEM.pack(ts_us, t0) + carga
             ok = 0
             try:
@@ -208,7 +279,8 @@ async def produtor_tabela(arquitetura: str, numero: int, semente: int, carga: by
 
 async def produtor_ingenua(numero: int, semente: int, carga: bytes,
                            conexao: aio_pika.abc.AbstractConnection, parada: Parada,
-                           registro: Registro, erros: Counter[str]) -> None:
+                           registro: Registro, erros: Counter[str],
+                           agenda: Optional[Agenda]) -> None:
     """Ingênua: o pedido é confirmado no banco e só então publicado no broker (ADR-050)."""
     sorteio = random.Random(f"{semente}:{numero}")
     conn = await conectar_pg()
@@ -217,8 +289,10 @@ async def produtor_ingenua(numero: int, semente: int, carga: bytes,
     try:
         while parada.ativa():
             cliente, valor = sorteio.randint(1, 100_000), sorteio.randint(100, 1_000_000)
-            ts_us = time.time_ns() // 1000
-            t0 = time.monotonic_ns()
+            inicio = await origem(agenda, parada)
+            if inicio is None:
+                break
+            ts_us, t0 = inicio
             mensagem = CABECALHO_MENSAGEM.pack(ts_us, t0) + carga
             ok = 0
             try:
@@ -322,10 +396,15 @@ async def consumidor_rabbitmq(numero: int, conexao: aio_pika.abc.AbstractConnect
 
 async def carga(arquitetura: str, produtores: List[int], consumidores: List[int], semente: int,
                 parada: Parada, inicio: float, registro: Registro,
-                consumidos: Optional[List[int]]) -> Tuple[Counter[str], Counter[str]]:
-    """Produtores e consumidores de um processo; devolve os erros e as retiradas vazias."""
+                consumidos: Optional[List[int]], taxa: Optional[int] = None,
+                total_produtores: int = 0) -> Tuple[Counter[str], Counter[str], List[Agenda]]:
+    """Produtores e consumidores de um processo; devolve os erros, as retiradas vazias e,
+    em taxa fixa, as agendas dos produtores (`total_produtores` somando os processos)."""
     erros: Counter[str] = Counter()
     vazias: Counter[str] = Counter()
+    agendas: Dict[int, Agenda] = {}
+    if taxa is not None:
+        agendas = {n: Agenda(inicio, taxa, total_produtores, n) for n in produtores}
     bytes_carga = carga_util(semente)
     url = url_rabbitmq()
     # Conexões separadas para publicação e consumo (ADR-052, item 5).
@@ -340,10 +419,10 @@ async def carga(arquitetura: str, produtores: List[int], consumidores: List[int]
         for n in produtores:
             if publicacao is not None:
                 tarefas.append(asyncio.create_task(produtor_ingenua(
-                    n, semente, bytes_carga, publicacao, parada, registro, erros)))
+                    n, semente, bytes_carga, publicacao, parada, registro, erros, agendas.get(n))))
             else:
                 tarefas.append(asyncio.create_task(produtor_tabela(
-                    arquitetura, n, semente, bytes_carga, parada, registro, erros)))
+                    arquitetura, n, semente, bytes_carga, parada, registro, erros, agendas.get(n))))
         for n in consumidores:
             if consumo is not None:
                 tarefas.append(asyncio.create_task(consumidor_rabbitmq(
@@ -358,26 +437,27 @@ async def carga(arquitetura: str, produtores: List[int], consumidores: List[int]
         for conexao in (publicacao, consumo):
             if conexao is not None:
                 await conexao.close()
-    return erros, vazias
+    return erros, vazias, list(agendas.values())
 
 
 def processo(k: int, arquitetura: str, produtores: List[int], consumidores: List[int],
-             cpus: List[int], semente: int, inicio: float, fim: float, pasta: str) -> None:
+             cpus: List[int], semente: int, inicio: float, fim: float, pasta: str,
+             taxa: Optional[int], total_produtores: int) -> None:
     """Um processo do gerador: grava a sua parte das operações e as suas contagens."""
     os.sched_setaffinity(0, cpus)
     registro = Registro(os.path.join(pasta, f"operacoes-{k}.csv"))
 
-    async def principal() -> Tuple[Counter[str], Counter[str]]:
+    async def principal() -> Tuple[Counter[str], Counter[str], List[Agenda]]:
         return await carga(arquitetura, produtores, consumidores, semente, Parada(fim), inicio,
-                           registro, None)
+                           registro, None, taxa, total_produtores)
 
     try:
-        erros, vazias = uvloop.run(principal())
+        erros, vazias, agendas = uvloop.run(principal())
     finally:
         registro.fechar()
     with open(os.path.join(pasta, f"contagens-{k}.json"), "w", encoding="utf-8") as f:
         json.dump({"operacoes": dict(registro.contagem), "erros": dict(erros),
-                   "vazias": dict(vazias)}, f)
+                   "vazias": dict(vazias), "agenda": resumo_das_agendas(agendas)}, f)
 
 
 def grupos_de_cpus(processos: int) -> List[List[int]]:
@@ -441,7 +521,7 @@ def ordenar(partes: List[str], destino: str, temporaria: str) -> None:
 
 
 def executar(saida: str, concorrencia: int, aquecimento_s: int, medicao_s: int,
-             semente: int) -> int:
+             semente: int, taxa: Optional[int]) -> int:
     arquitetura = arquitetura_do_ambiente()
     if not asyncio.run(esperar_pronto(arquitetura)):
         avisar(f"a arquitetura {arquitetura} não ficou pronta em {ESPERA_PRONTO_S:.0f} s")
@@ -455,7 +535,8 @@ def executar(saida: str, concorrencia: int, aquecimento_s: int, medicao_s: int,
     contexto = multiprocessing.get_context("spawn")
     filhos = [contexto.Process(target=processo, args=(
         k, arquitetura, list(range(k, concorrencia, processos)),
-        list(range(k, concorrencia, processos)), cpus, semente, inicio, fim, temporaria))
+        list(range(k, concorrencia, processos)), cpus, semente, inicio, fim, temporaria,
+        taxa, concorrencia))
         for k, cpus in enumerate(grupos_de_cpus(processos))]
     for filho in filhos:
         filho.start()
@@ -471,14 +552,20 @@ def executar(saida: str, concorrencia: int, aquecimento_s: int, medicao_s: int,
     operacoes: Counter[str] = Counter()
     erros: Counter[str] = Counter()
     vazias: Counter[str] = Counter()
+    agenda: Dict[str, float] = {"envios": 0, "produtor_ocupado": 0, "atrasados_mais_de_1ms": 0,
+                                "atraso_max_ms": 0.0}
     partes = [os.path.join(temporaria, f"operacoes-{k}.csv") for k in range(processos)]
     for k in range(processos):
         caminho = os.path.join(temporaria, f"contagens-{k}.json")
         with open(caminho, encoding="utf-8") as f:
-            contagens = cast(Dict[str, Dict[str, int]], json.load(f))
-        operacoes.update(contagens["operacoes"])
-        erros.update(contagens["erros"])
-        vazias.update(contagens["vazias"])
+            contagens = cast(Dict[str, Dict[str, Any]], json.load(f))
+        operacoes.update(cast(Dict[str, int], contagens["operacoes"]))
+        erros.update(cast(Dict[str, int], contagens["erros"]))
+        vazias.update(cast(Dict[str, int], contagens["vazias"]))
+        parte_agenda = cast(Dict[str, float], contagens.get("agenda", {}))
+        for chave in ("envios", "produtor_ocupado", "atrasados_mais_de_1ms"):
+            agenda[chave] += parte_agenda.get(chave, 0)
+        agenda["atraso_max_ms"] = max(agenda["atraso_max_ms"], parte_agenda.get("atraso_max_ms", 0.0))
         os.remove(caminho)
     ordenar(partes, os.path.join(saida, "operacoes.csv"), temporaria)
     for parte in partes:
@@ -488,7 +575,7 @@ def executar(saida: str, concorrencia: int, aquecimento_s: int, medicao_s: int,
     registro: Dict[str, Any] = {
         "ferramenta": "tcc-gerador-fila",
         "versao": (f"{VERSAO} (psycopg {psycopg.__version__}, aio-pika {aio_pika.__version__}, "
-                   f"uvloop {uvloop.__version__}, Python {platform.python_version()})"),
+                   f"uvloop {importlib.metadata.version('uvloop')}, Python {platform.python_version()})"),
         "aquecimento_inicio_ms": int(inicio * 1000),
         "medicao_inicio_ms": int((inicio + aquecimento_s) * 1000),
         "medicao_fim_ms": int(fim * 1000),
@@ -496,6 +583,7 @@ def executar(saida: str, concorrencia: int, aquecimento_s: int, medicao_s: int,
         "parametros": {
             "arquitetura": arquitetura, "concorrencia": concorrencia, "produtores": concorrencia,
             "consumidores": concorrencia, "processos": processos, "semente": semente,
+            "modo": "taxa fixa" if taxa is not None else "laço fechado", "taxa": taxa,
             "aquecimento_s": aquecimento_s, "medicao_s": medicao_s, "carga_bytes": CARGA_BYTES,
             "carga_sha256": hashlib.sha256(carga_util(semente)).hexdigest(),
             "prefetch": PREFETCH if arquitetura in POLIGLOTAS else None,
@@ -508,6 +596,10 @@ def executar(saida: str, concorrencia: int, aquecimento_s: int, medicao_s: int,
         "erros_por_tipo": dict(erros),
         "retiradas_vazias": vazias["retiradas_vazias"],
         "fila_restante": restante,
+        "agenda": {**agenda, "envios": int(agenda["envios"]),
+                   "produtor_ocupado": int(agenda["produtor_ocupado"]),
+                   "atrasados_mais_de_1ms": int(agenda["atrasados_mais_de_1ms"])}
+        if taxa is not None else None,
     }
     with open(os.path.join(saida, "gerador.json"), "w", encoding="utf-8") as f:
         json.dump(registro, f, indent=2, ensure_ascii=False)
@@ -612,6 +704,8 @@ def main() -> int:
     pe.add_argument("--aquecimento-s", type=int, required=True)
     pe.add_argument("--medicao-s", type=int, required=True)
     pe.add_argument("--semente", type=int, required=True)
+    pe.add_argument("--taxa", type=int, default=None,
+                    help="mensagens/s somando os produtores, em agenda uniforme (ADR-054)")
     pr = sub.add_parser("produzir", help="só produtores, até SIGTERM")
     pr.add_argument("--produtores", type=int, required=True)
     pr.add_argument("--semente", type=int, required=True)
@@ -628,8 +722,12 @@ def main() -> int:
         if concorrencia < 1:
             avisar("--concorrencia precisa ser pelo menos 1")
             return 2
+        taxa = cast(Optional[int], args.taxa)
+        if taxa is not None and taxa < 1:
+            avisar("--taxa precisa ser pelo menos 1 mensagem/s")
+            return 2
         return executar(cast(str, args.saida), concorrencia, cast(int, args.aquecimento_s),
-                        cast(int, args.medicao_s), cast(int, args.semente))
+                        cast(int, args.medicao_s), cast(int, args.semente), taxa)
     if comando == "produzir":
         return metade(cast(int, args.produtores), 0, cast(int, args.semente), None)
     caminho = cast(str, args.registro)

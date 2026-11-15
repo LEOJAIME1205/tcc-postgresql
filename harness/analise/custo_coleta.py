@@ -9,64 +9,22 @@ a variação entre repetições.
 """
 
 import argparse
-import csv
-import json
 import os
 import statistics
-import sys
-from typing import Any, Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from harness.orquestracao import arquitetura
+from harness.analise.comum import (PROCESSADOS, cpu_nucleos, execucoes_da_janela, gravar_csv,
+                                   ler_json, servico_do_container)
 
-BRUTOS: str = os.path.join(arquitetura.RAIZ, "resultados", "brutos")
-PROCESSADOS: str = os.path.join(arquitetura.RAIZ, "resultados", "processados")
 PERCENTIS: Tuple[int, ...] = (50, 95, 99)
-
-
-def _ler_json(caminho: str) -> Dict[str, Any]:
-    with open(caminho, encoding="utf-8") as f:
-        return cast(Dict[str, Any], json.load(f))
-
-
-def execucoes_da_janela(janela: str) -> List[str]:
-    """Diretórios das execuções que terminaram em ok, na ordem da janela."""
-    estado = _ler_json(os.path.join(BRUTOS, "janelas", janela, "estado.json"))
-    diretorios: List[str] = []
-    for item in cast(List[Dict[str, Any]], estado.get("execucoes", [])):
-        tentativas = cast(List[str], item.get("tentativas", []))
-        if item.get("estado") != "ok" or not tentativas:
-            print(f"aviso: {item.get('execucao')} não terminou em ok; fica de fora", file=sys.stderr)
-            continue
-        identificador = tentativas[-1]
-        eixo = identificador.split("_")[1]
-        diretorios.append(os.path.join(BRUTOS, eixo, identificador))
-    return diretorios
-
-
-def _cpu_nucleos(caminho: str, inicio_ms: int, fim_ms: int) -> Dict[str, float]:
-    """Núcleos médios de cada container entre inicio_ms e fim_ms (cont_cpu_us_total)."""
-    series: Dict[str, List[Tuple[int, int]]] = {}
-    with open(caminho, encoding="utf-8") as f:
-        for linha in csv.DictReader(f):
-            if linha["metrica"] != "cont_cpu_us_total":
-                continue
-            ts = int(linha["ts_ms"])
-            if inicio_ms <= ts <= fim_ms:
-                series.setdefault(linha["rotulo"], []).append((ts, int(linha["valor"])))
-    nucleos: Dict[str, float] = {}
-    for rotulo, serie in series.items():
-        if len(serie) >= 2 and serie[-1][0] > serie[0][0]:
-            (t0, v0), (t1, v1) = serie[0], serie[-1]
-            nucleos[rotulo] = (v1 - v0) / ((t1 - t0) * 1000)
-    return nucleos
 
 
 def resumir(diretorio: str) -> Dict[str, Any]:
     """Vazão, percentis e CPU de uma execução, só na janela de medição."""
-    manifesto = _ler_json(os.path.join(diretorio, "manifesto.json"))
-    gerador = _ler_json(os.path.join(diretorio, "gerador.json"))
+    manifesto = ler_json(os.path.join(diretorio, "manifesto.json"))
+    gerador = ler_json(os.path.join(diretorio, "gerador.json"))
     inicio_ms = int(gerador["medicao_inicio_ms"])
     fim_ms = int(gerador["medicao_fim_ms"])
     if fim_ms <= inicio_ms:
@@ -96,10 +54,9 @@ def resumir(diretorio: str) -> Dict[str, Any]:
         r[f"{operacao}_por_s"] = valores.size / duracao_s
         for p in PERCENTIS:
             r[f"{operacao}_p{p}_ms"] = float(np.percentile(valores, p)) / 1000
-    for rotulo, nucleos in sorted(_cpu_nucleos(os.path.join(diretorio, "metricas-host.csv"),
-                                               inicio_ms, fim_ms).items()):
-        servico = "gerador" if "-gerador-run-" in rotulo else rotulo.rsplit("-", 2)[-2]
-        r[f"cpu_{servico}_nucleos"] = nucleos
+    for rotulo, nucleos in sorted(cpu_nucleos(os.path.join(diretorio, "metricas-host.csv"),
+                                              inicio_ms, fim_ms).items()):
+        r[f"cpu_{servico_do_container(rotulo)}_nucleos"] = nucleos
     return r
 
 
@@ -140,16 +97,6 @@ def comparar(resumos: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return linhas
 
 
-def _gravar(caminho: str, linhas: List[Dict[str, Any]]) -> None:
-    colunas: List[str] = []
-    for linha in linhas:
-        colunas += [c for c in linha if c not in colunas]
-    with open(caminho, "w", encoding="utf-8", newline="") as f:
-        escritor = csv.DictWriter(f, fieldnames=colunas)
-        escritor.writeheader()
-        escritor.writerows(linhas)
-
-
 def main() -> None:
     p = argparse.ArgumentParser(description="Custo da coleta interna (ADR-021 e ADR-066)")
     p.add_argument("janela", help="identificador da janela, ex.: 20261108-2233")
@@ -159,8 +106,8 @@ def main() -> None:
     resumos = [resumir(d) for d in execucoes_da_janela(janela)]
     linhas = comparar(resumos)
     os.makedirs(str(args.saida), exist_ok=True)
-    _gravar(os.path.join(str(args.saida), f"custo-coleta-{janela}-execucoes.csv"), resumos)
-    _gravar(os.path.join(str(args.saida), f"custo-coleta-{janela}-comparacao.csv"), linhas)
+    gravar_csv(os.path.join(str(args.saida), f"custo-coleta-{janela}-execucoes.csv"), resumos)
+    gravar_csv(os.path.join(str(args.saida), f"custo-coleta-{janela}-comparacao.csv"), linhas)
     print(f"{'métrica':26s} {'média com':>12s} {'média sem':>12s} {'dif. %':>7s} "
           f"{'dp entre rep.':>13s} {'|dif|/dp':>8s}  diferenças por par de semente (%)")
     for linha in linhas:

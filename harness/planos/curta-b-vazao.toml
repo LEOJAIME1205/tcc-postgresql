@@ -1,0 +1,32 @@
+# Execuções curtas de vazão do Eixo B (ADR-067, item 7): 18 configurações em 5 blocos
+# completos, 90 execuções, ~41 h. Produtores e consumidores em laço fechado (ADR-054).
+nome = "curta-b-vazao"
+semente = 20261122
+espaco_livre_min_gib = 50
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "consolidada"
+cenario = "curta"
+concorrencias = [1, 2, 4, 8, 16, 32]
+repeticoes = 5
+aquecimento_s = 120
+medicao_s = 300
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "ingenua"
+cenario = "curta"
+concorrencias = [1, 2, 4, 8, 16, 32]
+repeticoes = 5
+aquecimento_s = 120
+medicao_s = 300
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "outbox"
+cenario = "curta"
+concorrencias = [1, 2, 4, 8, 16, 32]
+repeticoes = 5
+aquecimento_s = 120
+medicao_s = 300

@@ -111,3 +111,27 @@ Os descritores `consolidada/arquitetura.toml` e `poliglota/arquitetura.toml`
 ligam cada arquitetura ao orquestrador: serviços sob teste (os motores e o
 serviço de busca), diretórios de dados e coletores internos (PostgreSQL na
 consolidada; OpenSearch e Qdrant na poliglota, ADR-049).
+
+## Calibração do esforço de busca e qualidade
+
+O `ef` de cada motor é o menor valor da grade (de 100 em diante, de 10 em 10)
+com recall@100 médio de pelo menos 0,95 contra os 100 vizinhos exatos, desde que
+os dois valores seguintes também passem (ADR-038 e ADR-067). Os vizinhos exatos
+das 3.452 consultas são calculados uma vez e conferidos pelo hash:
+
+```bash
+uv run python eixo-a-busca/preparo/calibrar_ef.py vizinhos
+uv run python eixo-a-busca/preparo/calibrar_ef.py varrer consolidada   # com a arquitetura no ar
+uv run python eixo-a-busca/preparo/calibrar_ef.py varrer poliglota
+```
+
+Resultado de 09/11/2026, já no `TCC_EF_BUSCA` das duas composições:
+
+| | `ef` | recall@100 | nDCG@10 | recall@10 |
+|---|---|---|---|---|
+| Consolidada (`hnsw.ef_search`) | 260 | 0,9506 | 0,3698 | 0,5906 |
+| Poliglota (`hnsw_ef`) | 120 | 0,9531 | 0,4443 | 0,6538 |
+
+O nDCG@10 e o recall@10 são da busca híbrida, medidos pelo `qualidade` com o
+`ef` calibrado (ADR-048, item 5). Os registros estão em `resultados/calibracao/`
+e `resultados/qualidade/`.

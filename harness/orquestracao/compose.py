@@ -2,7 +2,7 @@
 
 import os
 import subprocess
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from harness.orquestracao.arquitetura import Arquitetura
 
@@ -25,10 +25,15 @@ class Compose:
         """Sobe só os serviços sob teste; o gerador roda à parte."""
         return self._rodar(["up", "-d", *self.arq.servicos_sob_teste])
 
-    def gerador(self, argumentos: List[str]) -> int:
-        """Roda o gerador com o seu usuário, para os resultados não pertencerem ao root."""
+    def gerador(self, argumentos: List[str], ambiente: Optional[Dict[str, str]] = None) -> int:
+        """Roda o gerador com o seu usuário, para os resultados não pertencerem ao root.
+
+        `ambiente` sobrepõe variáveis do serviço gerador da composição (ex.: TCC_ESPERA)."""
         usuario = f"{os.getuid()}:{os.getgid()}"
-        return self._rodar(["run", "--rm", "--no-deps", "--user", usuario,
+        variaveis: List[str] = []
+        for nome, valor in sorted((ambiente or {}).items()):
+            variaveis += ["-e", f"{nome}={valor}"]
+        return self._rodar(["run", "--rm", "--no-deps", "--user", usuario, *variaveis,
                             self.arq.servico_gerador, *argumentos])
 
     def desligar(self) -> int:

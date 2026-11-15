@@ -1,0 +1,22 @@
+# Rampa de concorrência do Eixo A (ADR-067, item 5): 14 execuções, ~6,4 h.
+nome = "calibracao-a"
+semente = 20261112
+espaco_livre_min_gib = 50
+
+[[configuracao]]
+eixo = "a"
+arquitetura = "consolidada"
+cenario = "calibracao"
+concorrencias = [1, 2, 4, 8, 16, 32, 64]
+repeticoes = 1
+aquecimento_s = 120
+medicao_s = 300
+
+[[configuracao]]
+eixo = "a"
+arquitetura = "poliglota"
+cenario = "calibracao"
+concorrencias = [1, 2, 4, 8, 16, 32, 64]
+repeticoes = 1
+aquecimento_s = 120
+medicao_s = 300

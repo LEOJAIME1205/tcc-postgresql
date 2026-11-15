@@ -1,0 +1,15 @@
+# Busca do max_wal_size no Eixo B (ADR-067, item 3): a outbox com 32 clientes, que com 2 GB
+# avisou mais que a fila consolidada. O valor vale para os três PostgreSQL do eixo (ADR-055).
+# ~27 min por janela.
+nome = "calibracao-wal-outbox"
+semente = 20261111
+espaco_livre_min_gib = 50
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "outbox"
+cenario = "calibracao"
+concorrencias = [32]
+repeticoes = 1
+aquecimento_s = 120
+medicao_s = 300

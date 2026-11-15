@@ -50,7 +50,7 @@ O gerador (ADR-054) cumpre o contrato do harness. As imagens são construídas a
 partir da raiz do repositório:
 
 ```bash
-docker build -f eixo-b-fila/cargas/Dockerfile -t tcc-gerador-fila:1 .
+docker build -f eixo-b-fila/cargas/Dockerfile -t tcc-gerador-fila:2 .
 docker build -f eixo-b-fila/outbox/Dockerfile -t tcc-relay:1 .
 ```
 
@@ -61,6 +61,15 @@ docker build -f eixo-b-fila/outbox/Dockerfile -t tcc-relay:1 .
   32) e grava o `operacoes.csv`, com as operações `enfileira`, `consome` e
   `fim_a_fim`, e o `gerador.json`, com as contagens, as retiradas vazias e as
   mensagens que restaram no sistema ao fim.
+- Com `--taxa R` (chave `taxas` do plano), os N produtores enviam R mensagens/s
+  no total, em agenda uniforme: o envio k sai em início + k/R e cabe ao produtor
+  k mod N. É o modo da latência fim a fim (revisão de 10/11/2026 da ADR-054),
+  com 32 produtores e 32 consumidores. A latência parte do instante agendado
+  quando o produtor ainda estava ocupado nessa hora, e do início real quando
+  estava livre. O `gerador.json` registra o modo, a taxa e, em `agenda`, os
+  envios, quantos encontraram o produtor ocupado, quantos saíram mais de 1 ms
+  depois do agendado e o maior atraso. A imagem `tcc-gerador-fila:2` traz esse
+  modo; em laço fechado ela se comporta como a `:1`.
 - A latência de `consome` não é comparada entre arquiteturas: no PostgreSQL ela
   inclui a ida ao banco; no RabbitMQ, o broker já entregou a mensagem. A
   comparação usa a vazão e a latência fim a fim.

@@ -16,6 +16,8 @@ services:
       - effective_cache_size=15360MB
       - -c
       - work_mem=4MB
+      - -c
+      - max_wal_size=8GB  # calibrado pelo aviso de checkpoints (ADR-055 e ADR-067)
     volumes:
       - ${TCC_DADOS_POSTGRES:?defina TCC_DADOS_POSTGRES}:/var/lib/postgresql
 
@@ -23,7 +25,7 @@ services:
     extends:
       file: ../../harness/orquestracao/modelos.yaml
       service: gerador
-    image: tcc-gerador-fila:1
+    image: tcc-gerador-fila:2
     environment:
       TCC_ARQUITETURA: consolidada
       TCC_ESPERA: consulta
