@@ -920,6 +920,35 @@ A poliglota tem qualidade maior. Isso já estava previsto como diferença declar
 - **Justificativa.** A consolidada ainda está esquentando no fim dos 120 s. Com 300 s de aquecimento, a medição começa no sexto minuto, onde a curva já estabilizou nos quatro níveis. A falha do critério com 2 clientes vem sobretudo do ruído, então aumentar a medição não resolveria. A variação entre repetições das execuções curtas mede esse ruído diretamente.
 - **Efeito sobre a comparação.** Favorece a consolidada, que é a que ainda esquentava. Com 120 s, o primeiro minuto da medição ficava em média 1,4% abaixo da média da medição (de 1 a 8 clientes), um viés de cerca de 0,3% contra ela na média dos 5 minutos. A poliglota não muda, porque já estava estável. Cada execução do A fica 3 minutos mais longa.
 
+**Complemento do item 5 (20/11/2026): qualidade por ramo.** Aprovado pelo Léo em 20/11/2026, antes da medida.
+- **Contexto.** A passagem de qualidade de 09/11 mediu só a fusão e deixou para a Fase 4 a separação por ramo, que mostra quanto da diferença de nDCG@10 (0,3698 contra 0,4443) vem do ramo léxico. O serviço de busca não expõe os ramos. Mudar a imagem dele mudaria o sistema medido.
+- **Decisão.**
+  1. Um script à parte, `eixo-a-busca/cargas/qualidade_ramos.py`, consulta cada ramo direto nos motores, com o código e os parâmetros do serviço:
+     - **consolidada:** as subconsultas `lexico` e `vetorial` da consulta de `servico/consolidada.py` (consulta OU com `ts_rank_cd` e `LIMIT 100`; produto interno com `hnsw.ef_search` de 260);
+     - **poliglota:** `ramo_lexico` e `ramo_vetorial` de `servico/poliglota.py` (`match` com 100 resultados; Qdrant com `hnsw_ef` de 120 e 100 resultados).
+  2. **Qualidade de cada ramo:** nDCG@10 e recall@10 dos 10 primeiros resultados, com os mesmos julgamentos e a mesma função do item 5.
+  3. **Conferência:** a fusão das duas listas, refeita com a RRF do serviço (`motor.fundir`, k = 60), precisa dar os mesmos 10 identificadores gravados em `resultados/qualidade/a-<arquitetura>.json` para cada consulta. As diferenças são contadas e reportadas.
+  4. **Execução:** as 3.452 consultas julgadas, uma de cada vez, com os contêineres de cada arquitetura subindo da cópia do estado inicial do preparo, a mesma das execuções. Fica fora das janelas e sem o protocolo, porque não mede tempo. Resultado em `resultados/qualidade/a-<arquitetura>-ramos.json`.
+  5. **Sem teste:** médias descritivas, como no item 5.
+- **Justificativa.** Usar o código do próprio serviço garante que os ramos medidos são os que entram na fusão, e a conferência mostra isso consulta a consulta.
+- **Efeito sobre a comparação.** Neutro: decompõe uma diferença já medida, sem mudar nenhum resultado. Se o ramo vetorial também diferir entre as arquiteturas, a diferença vem dos grafos HNSW, já que o recall@100 foi calibrado para o mesmo patamar (ADR-038).
+- **Estado.** Aprovado em 20/11/2026 e executado no mesmo dia, nas 3.452 consultas.
+
+  | | Consolidada | Poliglota |
+  |---|---|---|
+  | Ramo léxico, nDCG@10 | 0,0268 | 0,2922 |
+  | Ramo léxico, recall@10 | 0,0556 | 0,4570 |
+  | Ramo vetorial, nDCG@10 | 0,4976 | 0,4975 |
+  | Ramo vetorial, recall@10 | 0,7012 | 0,6996 |
+  | Fusão refeita, nDCG@10 | 0,3698 | 0,4443 |
+  | Duração | 1.887 s | 29 s |
+
+  - **Conferência:** a fusão refeita deu os mesmos 10 identificadores gravados em 09/11 nas 3.452 consultas das duas arquiteturas.
+  - **Empates no Qdrant:** num teste de 20 consultas, a ordem de uma fusão mudou entre duas subidas, por causa de um empate exato no Qdrant. As passagens 140 e 145 têm embeddings idênticos.
+  - **Ramo vetorial:** igual nas duas arquiteturas, com o mesmo conjunto de 10 em 3.038 das 3.452 consultas.
+  - **Ramo léxico:** toda a diferença de qualidade vem dele. O `ts_rank_cd` põe algum documento relevante entre os 10 primeiros em 221 consultas, contra 1.705 do BM25. As listas não têm sinal de desempate pelo identificador. A função pontua cada documento sozinho, sem estatísticas da coleção como o IDF do BM25.
+  - **Fusão:** nas duas arquiteturas, a fusão fica abaixo do ramo vetorial sozinho, e a perda é maior na consolidada.
+
 ---
 
 ## ADR-049 — Coletores internos do OpenSearch e do Qdrant
@@ -1373,6 +1402,25 @@ Pela ADR-004 (revisão de 24/10/2026), essa queda é reportada como custo do Tim
 **Efeito sobre a comparação.** A ingestão do TimescaleDB não paga a compressão, enquanto o InfluxDB compacta em segundo plano durante a carga. Por isso o artigo compara também a soma do tempo de carga com o de compressão.
 
 **Estado.** Aceita.
+
+**Complemento (20/11/2026): medidas de espaço e de tempo.** Aprovado pelo Léo em 20/11/2026, antes do cálculo.
+- **Contexto.** O item 3 manda reportar o tempo de compressão e o espaço antes e depois, e a proposta pede a razão de compressão e o espaço por ponto. Nenhuma análise calcula esses números. O gerador gravou no `resumo.json` de cada execução curta, depois da fase seguinte à carga:
+  - **TimescaleDB:** tempos de compressão e de `ANALYZE` e o espaço antes e depois da compressão, por `hypertable_compression_stats` (dados, índices e TOAST dos chunks);
+  - **InfluxDB:** espera das compactações e os bytes TSM do banco `benchmark` (`/debug/vars`), que não incluem o índice TSI nem o WAL.
+
+  O coletor do InfluxDB grava também `influx_dados_bytes`, o `du` do diretório de dados inteiro.
+- **Decisão.**
+  1. **Espaço principal:** o tamanho final do conjunto no formato nativo de cada sistema, a hipertabela comprimida contra os arquivos TSM. É reportado em GiB, em bytes por métrica e em bytes por linha do TSBS.
+  2. **Razão de compressão:** só no TimescaleDB, o espaço antes da compressão dividido pelo de depois. O InfluxDB não tem um "antes" comparável e fica com o espaço por métrica.
+  3. **Tempo:** carga mais compressão no TimescaleDB, e carga mais espera das compactações no InfluxDB, como pede o efeito acima. O `ANALYZE` fica à parte (ADR-065).
+  4. **Variante do InfluxDB:** o `influx_dados_bytes` da última amostra da execução, como limite superior. Inclui o WAL, o índice TSI e o banco `_internal`.
+  5. **Análise:** descritivas por configuração, com mediana, mínimo e máximo (ADR-070, item 5), sem teste. Implementada no `_carga_c` de `harness/analise/curtas.py`.
+- **Justificativa.** Os dois números principais saem da fonte de cada sistema, lidos no mesmo ponto da execução e já gravados pelo gerador, sem coleta nova. A variante mostra o tamanho do que fica fora do TSM.
+- **Efeito sobre a comparação.**
+  - **Principal:** favorece o InfluxDB. O índice TSI e o WAL dele ficam fora, enquanto os índices do TimescaleDB entram.
+  - **Variante:** favorece o TimescaleDB. Inclui o WAL e o `_internal` do InfluxDB, enquanto o total da hipertabela não inclui o WAL do PostgreSQL.
+  - **Tempo somado:** o TimescaleDB paga a compressão numa fase separada. O InfluxDB paga parte das compactações dentro da própria carga, que já está no tempo de carga.
+- **Estado.** Aprovado em 20/11/2026.
 
 ---
 
@@ -2126,3 +2174,6 @@ O que já existe nos brutos:
 | 19/11/2026 | ADR-071 aceita |
 | 20/11/2026 | ADR-071: complemento aprovado; contagem de linhas mantida como principal, com variante de sensibilidade que conta cada par `-c` e o valor como uma linha; disco do PostgreSQL e do TimescaleDB sem o WAL declarado, com limite superior de US$ 2,56 por mês no Eixo C |
 | 20/11/2026 | ADR-071: complemento do pico de memória aprovado, antes do cálculo; `memory.peak` do cgroup somado por arquitetura como principal e `anon` mais `shmem` como variante descritiva, nas curtas e na mista |
+| 20/11/2026 | ADR-062: complemento aprovado, antes do cálculo; espaço nativo (hipertabela comprimida contra TSM) por métrica e por linha, razão de compressão do TimescaleDB, carga mais compressão ou compactação, e diretório inteiro do InfluxDB como variante |
+| 20/11/2026 | ADR-048, complemento do item 5, aprovado: qualidade por ramo medida direto nos motores com o código do serviço, com conferência da fusão consulta a consulta |
+| 20/11/2026 | ADR-048, complemento do item 5, executado: ramo léxico com nDCG@10 de 0,027 na consolidada contra 0,292 na poliglota, ramo vetorial igual (0,498), fusão conferida nas 3.452 consultas |
