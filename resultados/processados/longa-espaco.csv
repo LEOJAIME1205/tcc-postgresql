@@ -1,0 +1,3 @@
+execucao,eixo,arquitetura,estado,espaco_gib,bytes_por_metrica,bytes_por_linha,espaco_antes_compressao_gib,razao_compressao,compressao_ou_compactacao_s,analyze_s,espaco_diretorio_gib,bytes_por_metrica_diretorio
+20261116-094353_c_timescaledb_longa_c4_r01_t250000,c,timescaledb,ok,9.193077087402344,0.9139806814814815,9.139806814814815,199.01473999023438,21.648327115950387,709.142,0.808,,
+20261119-040156_c_influxdb_longa_c4_r01_t250000,c,influxdb,ok,4.7567128809168935,0.4729149597222222,4.729149597222222,,,4.007,,4.855792642571032,0.48276552305555553
