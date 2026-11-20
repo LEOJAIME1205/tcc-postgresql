@@ -580,6 +580,26 @@ O limite de 4 GiB fica. O piloto só usou 8 clientes; o gerador com 32 é confer
 
 **Estado.** Aceita.
 
+**Complemento (18/11/2026): execução concluída com o ambiente contaminado por falha externa.**
+
+- **Contexto:** a execução longa `20261116-222128_b_consolidada_longa_c32_r01_t2800` terminou `ok`, mas a interface gráfica falhou durante a medição.
+  - Às 04:06 de 17/11, o `gnome-shell` começou a falhar no KMS da placa NVIDIA. Às 04:20 ele travou e foi reiniciado.
+  - A partir de 04:30, o driver da NVIDIA gravou 12,3 milhões de linhas de erro no diário até 10:47. Nas seis horas anteriores houve 4 linhas.
+  - A CPU dos núcleos do sistema sob teste (`0-5,8-13`), lida do `/proc/stat` do host, passou de 0,17 para ~1,1 núcleo da 6ª à 12ª hora de medição, sem mudança na carga. No mesmo período, a CPU do contêiner do PostgreSQL, lida do cgroup, seguiu a reta das horas anteriores.
+  - Às 10:00, o `systemd-logind` travou e foi morto, e as travas de suspensão caíram. Às 10:46, a conferência antes da execução seguinte encerrou a janela pelo item 2.
+  - Os itens 1 a 4 não cobrem esse caso: a execução não falhou nem foi interrompida, mas o ambiente deixou de ser válido no meio da medição.
+- **Decisão:**
+  1. Uma execução concluída é tratada como `abortada` quando há evidência objetiva, registrada fora do sistema sob teste, de uma falha da máquina que não pertence às arquiteturas comparadas. Valem o diário do sistema, a CPU dos núcleos do sistema sob teste sem relação com a carga e as travas do protocolo. O resultado da execução não entra no critério.
+  2. O manifesto recebe o estado `abortada`, com o motivo, a evidência e o estado original (`ok`). A execução continua registrada e é reportada.
+  3. A janela é retomada pelo item 4: a execução abortada é repetida como nova execução, na posição original da ordem sorteada.
+  4. Para não depender só da conferência entre execuções, um vigia lê o diário do kernel a cada 5 min durante as janelas. Se os erros da NVIDIA voltarem, ele interrompe a execução em curso com um único SIGINT, como o operador faria pelo item 3.
+- **Justificativa:** a falha é da máquina, não das arquiteturas. Manter a execução misturaria ~7 h de interferência a uma medição de 12 h, e descartá-la sem registro esconderia o incidente. O critério depende só de registros do sistema, nunca do valor medido, o que impede o uso do complemento para repetir execuções desfavoráveis.
+- **Efeito sobre a comparação:**
+  - Neutro por desenho, porque o critério não olha o resultado.
+  - Neste caso, a execução repetida é a da fila consolidada no PostgreSQL. A versão contaminada favoreceria a *outbox*, porque a interferência caiu só sobre a consolidada.
+  - As ~5,5 h iniciais limpas da execução contaminada podem ser mostradas como dado complementar, nunca no lugar da repetição.
+- **Estado:** aprovado pelo Léo em 18/11/2026.
+
 ---
 
 ## ADR-034 — `pg_stat_statements` zerado no início do gerador
@@ -1668,6 +1688,46 @@ No piloto (ADR-066), o PostgreSQL avisou "checkpoints are occurring too frequent
 - **Limites inferiores já declarados:** a ingênua e a *outbox* no B (revisão dos itens 5 e 6 e da ADR-053) e o TimescaleDB com 8 trabalhadores no C (revisão da ADR-065, item 3). Eles favorecem a consolidada no B e o InfluxDB no C, sempre no tamanho da diferença.
 - **Volume no SSD:** as execuções do TimescaleDB passam de 60 GiB e são marcadas (revisão dos itens 5 e 6). Pela ADR-004, a queda depois do cache é custo dele.
 
+**Complemento do item 7, teste (19/11/2026): métricas testadas e famílias de Holm.** Aprovado pelo Léo em 19/11/2026, antes de qualquer teste sobre os dados.
+
+*Contexto.* O item 7 fixou o teste "por nível e por métrica", com Holm dentro de cada nível, e o tamanho das famílias do B. Ficaram em aberto:
+- quais métricas do A e do C entram no teste;
+- a família das consultas do C, que não dependem do nível;
+- o que é só descrição.
+
+O tamanho da família muda o limiar de cada comparação. Por isso a lista precisa ser fixada antes de ver os resultados, como os critérios da calibração (item 6). Até aqui só foram vistos os resumos preliminares de cada janela, sem nenhum teste.
+
+*Decisão.* Implementada em `harness/analise/curtas.py`, ainda sem rodar.
+
+| Grupo | Métricas testadas, consolidada contra cada poliglota | Família de Holm |
+|---|---|---|
+| A | vazão, p50 e p99 da busca híbrida (ADR-048: "pela vazão e pela latência em cada nível") | 3 por nível |
+| B, vazão | consumo por segundo | 2 por nível (item 7) |
+| B, latência | p50 e p99 fim a fim | 4 por taxa (item 7) |
+| C, carga | vazão da carga inteira (ADR-065, item 2); núcleos-segundo do sistema sob teste por milhão de métricas; MiB gravados no SSD por milhão de métricas, os dois na carga (ADR-065, item 4) | 3 por nível |
+| C, consultas | média de cada tipo em cada execução (ADR-061), 20 contra 20 | os 15 tipos |
+
+1. **Significância:** p ajustado de Holm de no máximo 0,05.
+2. **Descritivas:** todo o resto, com mediana, mínimo e máximo por configuração (ADR-070, item 5). Inclui o p95, a latência fim a fim em laço fechado, a CPU, o crescimento da fila, as retiradas vazias, o desvio da taxa, a vazão do C antes dos 60 GiB e o volume gravado.
+3. **Marcas:** contadas por configuração. São a execução acima de 60 GiB gravados (revisão dos itens 5 e 6), o gerador como gargalo (item 6 e revisão da ADR-065, item 3) e a fila crescendo no B.
+4. **Leitura:** o Â12 e a razão são sempre da consolidada contra a poliglota. A tabela traz também o Â12 no sentido da métrica, como a probabilidade de a consolidada ser melhor.
+5. **Alcance:** a tabela marca quando o teste não alcançaria 0,05, mesmo sem empates, com o tamanho de amostra e de família da linha. Com 5 contra 5, isso só acontece numa família de 7 ou mais.
+
+*Justificativa.*
+- As métricas testadas são as que as ADRs já nomeiam como comparação de cada eixo. Nenhuma foi escolhida olhando os dados.
+- No C, a eficiência é a medida que não depende do limite do gerador (ADR-065, item 4). Testá-la dá ao C uma comparação inferencial também nos níveis em que a vazão do TimescaleDB é limite inferior.
+- As consultas formam uma família única porque os 15 tipos são perguntas diferentes sobre os mesmos dados. Corrigir sobre eles evita que algum tipo passe por acaso.
+- Com 20 contra 20, o menor p é da ordem de 10⁻¹¹, então a família de 15 não tira poder.
+- Com 5 contra 5, o menor p (0,0079) passa em famílias de 3 e 4 (limiares de 0,0167 e 0,0125).
+
+*Efeito sobre a comparação.*
+- **A e B:** neutros. As métricas são as mesmas dos dois lados, e a família de 3 no A tem o mesmo limiar para os dois sentidos.
+- **C, eficiência por CPU:** tende a favorecer o TimescaleDB, pelo que a calibração mostrou (~0,3 contra ~1,9 núcleo por milhão de métricas/s).
+- **C, volume gravado por métrica:** tende a favorecer o InfluxDB (22 a 29 GiB por carga, contra 86 a 89 GiB).
+- **C, conjunto:** as duas medidas de eficiência entram juntas, e nenhuma é escolhida pelo resultado.
+- **C, CPU por métrica com o gerador limitando:** o TimescaleDB trabalha abaixo da capacidade. A CPU por métrica pode ficar menor ou maior do que ficaria sem o limite. Isso fica declarado.
+- **Consultas:** a família de 15 é conservadora e vale para os dois sentidos.
+
 ---
 
 ## ADR-068 — Carga mista: busca sob ingestão temporal
@@ -1848,6 +1908,166 @@ No piloto (ADR-066), o PostgreSQL avisou "checkpoints are occurring too frequent
 
 **Estado.** Aceita em 12/11/2026, com aprovação do Léo.
 
+**Complemento do item 6 (19/11/2026): definições da análise.** Aprovado pelo Léo em 19/11/2026, antes de qualquer cálculo de deriva.
+
+*Contexto.* O item 6 lista as séries e pede a inclinação por hora e a primeira hora contra a última. Não define:
+- como cada valor por minuto é formado;
+- com que estimador se calcula a inclinação;
+- como cada hora é resumida;
+- qual estatística representa um lote de consultas;
+- como o critério da ADR-004, item 3, é lido nas longas.
+
+As escolhas mudam os números da deriva, então são fixadas antes da análise. Até a aprovação só foram vistos os acompanhamentos da coleta: CPU, atrasos da *outbox*, algumas medianas de consultas do TimescaleDB e, no repouso antes do controle com `fio`, a CPU, a memória e a escrita por hora do InfluxDB longo.
+
+*Decisão.* Implementada em `harness/analise/longa.py`. Antes da aprovação, só o `resumir` do InfluxDB longo rodou; nenhuma inclinação foi calculada.
+1. **Minutos:** contados desde o início da medição, 720 por execução.
+   - **Vazões do B:** contagem de operações no minuto, dividida pela duração dele.
+   - **Latência fim a fim:** p50 e p99 das mensagens consumidas no minuto.
+   - **Profundidade:** mensagens enfileiradas menos consumidas desde o início do aquecimento, no fim de cada minuto. Na *outbox*, inclui a tabela de saída e a fila do RabbitMQ.
+2. **Métricas dos coletores:** valem pela última amostra de cada minuto. As taxas saem da diferença entre as últimas amostras de dois minutos seguidos, dividida pelo tempo entre elas.
+3. **Deriva:**
+   - **Inclinação por hora:** a principal é a de Theil-Sen, a mediana das inclinações entre todos os pares de minutos. A de mínimos quadrados vai na mesma tabela, como referência.
+   - **Primeira hora contra a última:** mediana dos 60 valores por minuto de cada uma, e a razão entre as duas.
+4. **Tabela por hora:** mediana, mínimo e máximo dos valores por minuto em cada uma das 12 horas (ADR-070, item 5).
+5. **Consultas do C:**
+   - **Valor de cada lote:** a média por tipo, como nas curtas (ADR-061).
+   - **Deriva:** calculada só sobre os 24 lotes periódicos, com Theil-Sen e mínimos quadrados contra a hora do lote, mais o primeiro lote contra o último.
+   - **À parte:** o lote logo depois do fim da ingestão e a bateria final. A bateria final é comparada com a mediana das 20 médias das curtas da mesma arquitetura.
+6. **Atribuição ao disco (ADR-004, item 3):**
+   - **Execução de controle:** o `fio` passa pelas mesmas séries e pela mesma tabela de deriva das execuções (MiB/s gravados e ms por escrita).
+   - **Para atribuir uma queda ao disco:** ela precisa coincidir com uma escrita sustentada perto do piso do padrão, e o controle precisa degradar na mesma tabela.
+   - **Fora disso:** a queda é do banco.
+   - **Registro:** cada atribuição fica escrita com os minutos e os valores.
+7. **Execução abortada da B consolidada:** pode ser resumida pelo mesmo código, só para a comparação descritiva da ADR-033. Ela aparece nas tabelas com o estado `abortada` e não é usada como resultado.
+
+*Justificativa.*
+- **Theil-Sen e medianas:** descrevem a tendência sem que um pico isolado a defina. Com mínimos quadrados, poucos minutos extremos mudariam o sinal da inclinação. Os picos continuam visíveis no máximo por hora, nas séries e na inclinação de referência.
+- **Média por lote:** mantém a estatística das curtas, e as duas consultas ficam comparáveis.
+- **Controle pela mesma tabela:** a condição "o controle também degrada" passa a ser lida com as mesmas definições da execução, sem um limiar escolhido depois.
+
+*Efeito sobre a comparação.*
+- **Estimadores robustos:** na inclinação e na primeira hora contra a última, favorecem a arquitetura com picos isolados. Pelo acompanhamento da coleta, essa é a *outbox*, cujos atrasos coincidem com o PostgreSQL no limite de 12 GiB. A mínimos quadrados e o máximo por hora ficam ao lado para mostrar o que a mediana não mostra.
+- **Média de 5 consultas por lote:** uma consulta lenta pesa nos dois sistemas da mesma forma.
+- **Atribuição ao banco por padrão:** desfavorece a arquitetura que grava mais no SSD, como já declara a ADR-004.
+
+---
+
+## ADR-070 — Valores extremos na análise
+
+**Contexto.** A Etapa 4.1 do plano pede tratar outliers com critério declarado. As execuções curtas e a carga mista têm 5 repetições por configuração, comparadas pelo Mann-Whitney exato com correção de Holm (ADR-067, item 7; ADR-068, item 6). A longa duração tem uma execução por arquitetura e é descritiva (ADR-069, item 6). As regras de validade já existentes não dependem do valor medido:
+- `abortada`: interrupção ou ambiente inválido, inclusive o ambiente contaminado por falha externa (ADR-033 e complemento de 18/11/2026). A execução é repetida.
+- `falha` e `oom`: mantidas e reportadas, nunca substituídas (ADR-033, item 1).
+- Taxa não sustentada na mista: reportada como resultado da arquitetura (ADR-068, item 3).
+
+**Decisão.**
+1. Nenhuma execução válida sai da análise por ter valor extremo. Entram todas cujo último estado é `ok`.
+2. Só ficam fora dos testes as execuções que as regras acima já tratam: a `abortada`, substituída pela repetição; a `falha` e a `oom`, contadas e reportadas como resultado da arquitetura; a taxa não sustentada da mista, reportada como tal.
+3. Dentro de cada execução, nenhuma operação é descartada além do aquecimento. Percentis e vazão usam todas as operações da medição, de `medicao_inicio_ms` a `medicao_fim_ms`.
+4. Na longa duração, as séries por minuto são reportadas sem suavização nem remoção de pontos.
+5. A dispersão fica visível: as tabelas trazem mediana, mínimo e máximo das repetições, e as figuras mostram cada repetição como um ponto.
+
+**Justificativa.**
+- **O teste já é robusto:** o Mann-Whitney usa postos. Um valor extremo conta como a maior (ou a menor) posição, qualquer que seja o seu tamanho, e não arrasta o resultado como arrastaria uma média.
+- **Remover decide o teste:** com 5 repetições, tirar uma deixa 4 contra 5, cujo menor p bilateral é 0,016, e 4 contra 4, cujo menor p é 0,029. Os dois ficam acima do limiar de Holm para 4 comparações (0,0125), e o segundo também para 2 (0,025). Remover um valor extremo seria escolher quais comparações podem ser significativas.
+- **Regras usuais não servem com 5 pontos:** a regra de 1,5 vez o intervalo interquartil e o escore z dependem de quartis e desvios estimados com 5 valores, que mudam muito com um único valor. Escolher a regra depois de ver os dados é um grau de liberdade do pesquisador.
+- **Exclusão só por evidência externa:** o complemento da ADR-033 já cobre a falha da máquina, por registros do sistema, sem olhar o resultado.
+
+**Efeito sobre a comparação.** Neutro por desenho: a regra vale igual para todas as arquiteturas e não depende do resultado. Na prática, desfavorece a arquitetura que oscila mais, qualquer que seja, porque a oscilação fica nos dados, alarga a dispersão e pode impedir a significância. Pelo que se viu na coleta, isso inclui a consolidada saturada no Eixo B, que oscila com o autovacuum (ADR-067, item 7), e a *outbox* na longa duração, com picos de até 3,6 s no enfileiramento depois que o PostgreSQL atinge o limite de memória do container (ADR-055). É essa instabilidade que o experimento quer medir.
+
+**Estado.** Aceita em 19/11/2026, com aprovação do Léo.
+
+---
+
+## ADR-071 — Indicadores de custo e complexidade (QS5)
+
+**Contexto.** A QS5 da proposta pede a diferença de complexidade operacional e de custo entre as arquiteturas, por indicadores objetivos: pico de memória, uso de CPU, tamanho e tempo de construção de índices; número de serviços, imagens, linhas de configuração de infraestrutura e dependências; tempo de provisionamento a frio; e estimativa mensal de infraestrutura equivalente em nuvem. A proposta declara esses indicadores como substitutos imperfeitos (validade de construto). Nenhuma ADR define como cada um é contado. Memória e CPU já saem das análises das execuções. O resto depende de regras de contagem que mudam os números, por isso as regras são fixadas antes de contar.
+
+O que já existe nos brutos:
+- **Preparo:** `resultados/brutos/preparos/` registra início e fim de cada preparo, e o do Eixo A traz a duração e o tamanho de cada índice (`carga.json`). É uma medida por arquitetura, feita fora das janelas, sem repouso.
+- **Subida:** cada execução registra o fim do repouso, quando a arquitetura começa a subir, e o início do aquecimento. Todos os geradores esperam os sistemas aceitarem a carga antes de começar.
+- **Cache:** a restauração dos volumes (ADR-029) copia os dados sem esvaziar o cache de páginas do host, e a subida acontece com parte dos dados já em memória. Nenhuma medida "a frio", com o cache vazio, foi coletada.
+- **Memória:** o orçamento é o mesmo entre as arquiteturas de cada eixo (ADR-003 e ADR-055). A poliglota o divide entre mais contêineres.
+
+**Decisão.**
+1. **Escopo:** contam só os serviços sob teste de cada arquitetura (`servicos_sob_teste` do `arquitetura.toml`). O gerador e os coletores ficam fora. O serviço de busca, que existe dos dois lados no Eixo A e na mista, entra nos dois.
+2. **Complexidade, por arquitetura:**
+   - **Serviços:** número de serviços sob teste.
+   - **Imagens:** número de imagens distintas e, entre elas, quantas são construídas pelo projeto (com Dockerfile próprio).
+   - **Linhas de configuração:** linhas não vazias e sem comentário dos blocos dos serviços sob teste no `compose.yaml`, dos arquivos de configuração montados (`rabbitmq.conf`) e dos Dockerfiles das imagens próprias. Ficam fora as linhas que só existem por controle do experimento (`extends`, `cpuset` e `memswap_limit`), o esquema SQL e o código de carga.
+   - **Dependências:** pacotes Python que a aplicação importa para falar com a arquitetura (diretos) e o fechamento deles no `uv.lock` (diretos mais transitivos). No Eixo C, as duas arquiteturas usam o mesmo binário do TSBS, e a contagem não se aplica.
+3. **Provisionamento:**
+   - **Preparo:** do volume vazio aos dados carregados e indexados, pelo `preparo.json` cujo volume foi usado nas execuções, com a duração e o tamanho de cada índice no Eixo A. É uma medida única e descritiva. Na mista, o preparo é uma cópia do Eixo A e não entra.
+   - **Subida:** do `compose up` até o gerador encontrar os sistemas prontos, em todas as execuções curtas, com mediana, mínimo e máximo por arquitetura. A medida é chamada "subida com dados restaurados", não "a frio", e a diferença fica escrita no artigo.
+   - **Sem coleta nova:** o escopo fica congelado a partir de 25/11.
+4. **Custo em nuvem:**
+   - **Máquinas:** cada serviço sob teste vira uma máquina virtual sob demanda, a menor das famílias de uso geral e de memória da geração atual com memória igual ou maior que o `mem_limit` do contêiner.
+   - **Preços:** AWS EC2, Linux, região `us-east-1`, 730 h por mês, consultados numa única data e registrados com a fonte.
+   - **Disco:** gp3 pelo tamanho dos volumes de dados. No Eixo A e na mista, o tamanho é o do preparo; no B e no C, o do fim da execução longa. A ingênua, que não tem longa, fica sem disco comparável e é marcada assim.
+   - **Referência:** ao lado, o custo de uma única máquina com o orçamento inteiro do eixo, igual entre as arquiteturas por construção. A diferença entre os dois mostra quanto do custo vem da divisão em várias máquinas.
+   - **Serviços gerenciados** (RDS, OpenSearch Service, Amazon MQ, Qdrant Cloud, InfluxDB Cloud) ficam fora. Os modelos de preço não são comparáveis entre si, e a escolha entre eles seria um grau de liberdade a mais.
+5. **Implementação:** um script em `harness/analise/` faz as contagens a partir dos arquivos versionados e dos brutos e grava uma tabela por eixo. Os preços entram num arquivo de dados com a data da consulta.
+6. **Detalhes fixados na implementação (19/11/2026, antes de qualquer contagem):**
+   - **`extends`:** os blocos são contados depois de resolver a herança. As linhas herdadas do modelo `postgres` (imagem, memória, `shm_size` e senha) contam, como contariam se estivessem escritas no bloco. Os modelos `comum` e `sistema-sob-teste` (reinício, rotação de logs e `cpuset`) são controle do experimento e não contam. Sem isso, os serviços do PostgreSQL pareceriam ter menos configuração do que têm.
+   - **Família das instâncias:** m8a e r8a, AMD EPYC de 5ª geração (Zen 5), a mesma microarquitetura do Ryzen 7 9700X da medição. Entram os tamanhos de `medium` a `2xlarge`.
+   - **Fonte dos preços:** a tabela pública de preços sob demanda que a própria página de preços do EC2 carrega, baixada depois da Fase 3 e guardada com a data. Sites agregadores servem só de conferência.
+   - **Disco no B e no C:** o tamanho dos dados informado pelos coletores na última amostra da execução longa. No PostgreSQL, são as tabelas mais os índices; no TimescaleDB, o total da hipertabela; no RabbitMQ e no InfluxDB, o diretório de dados. No A e na mista, é o tamanho dos volumes medido no preparo.
+
+**Justificativa.**
+- **Contagens pelos arquivos versionados:** qualquer pessoa as refaz a partir do repositório, sem julgamento caso a caso.
+- **Fora as linhas de controle do experimento:** um sistema em produção não teria `cpuset` nem `memswap_limit`. Contá-las inflaria a configuração em proporção ao número de serviços.
+- **Fechamento das dependências:** o número de pacotes diretos sozinho engana, porque um cliente pode trazer dezenas de pacotes transitivos que também precisam ser mantidos e atualizados.
+- **Subida das execuções:** tem 20 ou mais medidas por arquitetura, todas sob o protocolo. Uma medida a frio nova exigiria uma coleta fora do escopo congelado.
+- **Uma máquina por serviço:** é a forma comum de implantar sistemas distintos e mantém o orçamento de cada contêiner. A referência de máquina única separa o efeito da divisão do efeito do orçamento, que é igual por construção.
+
+**Efeito sobre a comparação.**
+- **Contagens:** favorecem a consolidada por construção, porque ela tem menos serviços, imagens e clientes. É a diferença que a QS5 quer medir, e os indicadores são declarados como substitutos imperfeitos. Excluir as linhas de controle favorece levemente a poliglota, que teria mais delas.
+- **Imagens próprias:** a consolidada também paga por imagem própria (`tcc-postgres`, com TimescaleDB e pgvector), e a *outbox* paga pelo relay.
+- **Subida com cache quente:** favorece os sistemas que leem dados do disco ao subir (Qdrant, OpenSearch e InfluxDB), ou seja, a poliglota. Com o cache vazio, a subida deles tenderia a ser mais lenta. O PostgreSQL sobe sem ler as tabelas.
+- **Preparo de medida única:** não sustenta comparação inferencial; é reportado como descritivo.
+- **Uma máquina por serviço:** o arredondamento para os tamanhos de instância pode favorecer qualquer lado. Corrigido em 19/11/2026, ao montar a tabela de instâncias, antes de qualquer cálculo: a proposta dizia que favorecia a consolidada. As memórias das instâncias dobram a cada tamanho (4, 8, 16 e 32 GiB). O PostgreSQL de 19 ou 20 GiB da consolidada sobe para 32 GiB, e as peças menores da poliglota (10, 9, 8, 7, 2 e 1 GiB) cabem em instâncias de 16, 8 e 4 GiB. Com o orçamento de 20 GiB, que não é um tamanho comum de instância (ADR-055), a divisão tende a favorecer a poliglota. A referência de máquina única mostra o tamanho desse efeito.
+- **Sem serviços gerenciados:** omite o custo operacional que eles reduzem, como cópias de segurança e atualizações. Isso pesa igual nos dois lados, mas a poliglota teria mais serviços a contratar.
+
+**Estado.** Aceita em 19/11/2026, com aprovação do Léo, antes de qualquer contagem.
+
+**Complemento (20/11/2026): pares `-c` na contagem de linhas e disco sem o WAL.** Aprovado pelo Léo em 20/11/2026, depois da primeira contagem e do primeiro cálculo de custo.
+
+- **Contexto:**
+  - **Pares `-c`:** o PostgreSQL recebe cada parâmetro no `command` do Compose como dois itens de lista, `- -c` e o valor, e a regra do item 2 conta os dois como linhas. O InfluxDB e o RabbitMQ escrevem cada ajuste numa linha só (variável de ambiente ou linha do `rabbitmq.conf`). Os pares são 5 no A consolidado e nas três arquiteturas do B, 12 na mista consolidada e 22 no TimescaleDB. A assimetria foi achada depois da primeira contagem.
+  - **Disco sem o WAL:** pelo item 6, o disco do B e do C vem dos coletores. No PostgreSQL e no TimescaleDB, eles medem tabelas e índices, sem o WAL e sem os catálogos. No RabbitMQ e no InfluxDB, medem o diretório de dados inteiro com `du`, que inclui o WAL do InfluxDB. O tamanho do `pg_wal` em disco não foi coletado. No A e na mista, o disco é o tamanho dos volumes no preparo e inclui tudo nos dois lados.
+- **Decisão:**
+  1. A contagem do item 2, com cada `-c` e o valor como duas linhas, continua sendo a métrica principal, como foi registrada antes da contagem.
+  2. Ao lado dela, a tabela traz uma variante de sensibilidade com cada par `-c` e o valor contados como uma linha (`linhas_total_pares_juntos`, em `custo-complexidade.csv`). O artigo reporta as duas e diz que a variante foi definida depois da primeira contagem.
+  3. O disco fica como foi calculado. A exclusão do WAL é declarada abaixo e no artigo, com o limite superior do efeito pelo `max_wal_size`.
+- **Justificativa:**
+  - **Principal sem mudança:** trocar a métrica principal depois de ver os números, num sentido que favorece o lado do PostgreSQL, seria um grau de liberdade usado a favor da hipótese. A variante mostra o tamanho do efeito sem substituir o que foi registrado.
+  - **Disco sem recálculo:** o `pg_wal` não foi medido. Estimá-lo agora exigiria escolher um valor depois de ver o resultado, e o limite superior mostra que o efeito é pequeno diante do custo das máquinas.
+- **Efeito sobre a comparação:**
+  - **Contagem principal:** desfavorece o lado PostgreSQL, que paga duas linhas por parâmetro. Com os pares juntos, as linhas caem de 67 para 62 no A consolidado, de 42, 54 e 79 para 37, 49 e 74 no B, de 75 para 53 no TimescaleDB e de 81 para 69 na mista consolidada. Os lados sem PostgreSQL ficam iguais. A ordem entre as arquiteturas não muda em nenhum eixo.
+  - **Variante:** se fosse lida como principal, favoreceria o lado PostgreSQL; por isso fica como sensibilidade.
+  - **Disco no B:** as três arquiteturas medem o PostgreSQL do mesmo modo. A única diferença é o diretório do RabbitMQ (0,06 GiB na *outbox*), e o efeito é de centavos.
+  - **Disco no C:** favorece o TimescaleDB. O WAL fica limitado, de forma aproximada, pelo `max_wal_size` de 32 GB (ADR-063), o que somaria até US$ 2,56 por mês, cerca de 1% do total de US$ 233,99. Com esse limite, a diferença de US$ 0,35 a favor do InfluxDB chegaria a até ~US$ 2,90. Nenhuma conclusão da QS5 depende dessa diferença.
+- **Estado:** aprovado em 20/11/2026.
+
+**Complemento (20/11/2026): pico de memória.** Aprovado pelo Léo em 20/11/2026, antes de calcular o indicador.
+
+- **Contexto:**
+  - A proposta lista o pico de memória entre os indicadores da QS5. O contexto desta ADR diz que ele "já sai das análises das execuções", mas nenhuma análise o calcula para a QS5. A da mista grava o maior `memory.current` de cada contêiner na janela de medição, como diagnóstico da ADR-068.
+  - O coletor do host (ADR-021) grava a cada amostra, por contêiner, o `memory.peak` do cgroup v2 e, do `memory.stat`, a memória anônima (`anon`), o cache de arquivos (`file`) e a memória compartilhada (`shmem`). No cgroup v2, a `shmem` faz parte do `file`, e não da `anon`.
+  - A escolha do contador muda o resultado, porque o cgroup conta o cache de arquivos no limite do contêiner (ADR-003).
+- **Decisão:**
+  1. **Principal:** o `memory.peak` de cada serviço sob teste, pelo maior valor das amostras da execução, somado por arquitetura. O contador guarda o máximo desde a criação do contêiner e cobre a subida, o aquecimento e a medição. A soma dos picos é um limite superior do pico conjunto, porque eles podem acontecer em momentos diferentes.
+  2. **Variante descritiva:** o maior valor, nas mesmas amostras, de `anon` mais `shmem` de cada serviço, somado por arquitetura. Com o swap desligado (ADR-016), é a memória que o kernel não consegue liberar.
+  3. **Execuções:** as curtas e as da mista que entram nas análises delas (na mista, só as válidas), com mediana, mínimo e máximo por configuração (ADR-070, item 5). A tabela da QS5 mostra, por arquitetura, a menor e a maior mediana entre as configurações. As longas ficam fora, porque têm uma execução por arquitetura.
+  4. **Implementação:** etapa `memoria` do `harness/analise/custo.py`, com `custo-memoria-execucoes.csv`, `custo-memoria-configuracoes.csv` e a tabela `custo-qs5-memoria.tex`.
+- **Justificativa:**
+  - **`memory.peak` como principal:** é o contador que o kernel mantém, sem escolha de quem analisa, igual para todos os sistemas. É também o número que um operador vê ao dimensionar a máquina.
+  - **Variante:** mostra quanto do pico é cache, que o kernel pode liberar, e quanto é memória presa.
+- **Efeito sobre a comparação:**
+  - **Principal:** inclui o cache de arquivos, que o kernel enche até perto do limite do contêiner quando há leitura ou escrita em disco. Isso tende a aproximar as arquiteturas do mesmo orçamento e a comprimir as diferenças. Não favorece nenhum lado por desenho.
+  - **Soma dos picos:** infla mais as arquiteturas com mais serviços, cujos picos não precisam coincidir. Favorece levemente a consolidada.
+  - **Variante:** favorece a poliglota. O que os sistemas leem por mapeamento de arquivos, como os índices do OpenSearch e os arquivos TSM do InfluxDB, conta como cache e fica de fora. Já o `shared_buffers` do PostgreSQL conta como `shmem` e entra. Por isso a variante fica como descritiva.
+- **Estado:** aprovado em 20/11/2026. Calculado no mesmo dia, nas 255 execuções (5 por configuração). A aproximação do limite prevista no efeito do principal não se confirmou em todos os casos: a ingênua fica entre 0,7 e 2,1 GiB, e o InfluxDB, entre 4,3 e 4,6 GiB. Só o TimescaleDB fica perto do limite, com 19,0 a 19,2 GiB. O texto do efeito fica como foi escrito antes do cálculo.
+
 ---
 
 ## Registro de alterações
@@ -1897,3 +2117,12 @@ No piloto (ADR-066), o PostgreSQL avisou "checkpoints are occurring too frequent
 | 12/11/2026 | ADR-068 (carga mista: busca sob ingestão temporal) e ADR-069 (longa duração dos Eixos B e C, 12 h), propostas; revisões propostas das ADR-004 (item 2), ADR-021 (item 4) e ADR-060 (item 4) |
 | 12/11/2026 | ADR-068 e ADR-069 aceitas, com as revisões das ADR-004 (item 2), ADR-021 (item 4) e ADR-060 (item 4) |
 | 15/11/2026 | ADR-021, item 4: complemento aprovado; o coletor cria a extensão `pgstattuple` nas execuções longas do Eixo B, que nenhum esquema criava |
+| 18/11/2026 | ADR-033: complemento aprovado; execução concluída com o ambiente contaminado por falha externa (GPU NVIDIA) é tratada como `abortada` e repetida, com vigia do diário do kernel durante as janelas |
+| 19/11/2026 | ADR-070 (valores extremos na análise) aceita: nenhuma execução válida sai por valor extremo, nenhuma operação é cortada além do aquecimento, e as séries da longa não são suavizadas |
+| 19/11/2026 | ADR-067, complemento do item 7, aprovado: métricas testadas e famílias de Holm das execuções curtas (A com 3 por nível, C com vazão e eficiência, consultas do C numa família de 15 tipos) |
+| 19/11/2026 | ADR-069, complemento do item 6, proposto: definições da análise da longa (séries por minuto, Theil-Sen como inclinação principal, média por lote de consultas, controle com `fio` na mesma tabela de deriva) |
+| 19/11/2026 | ADR-069, complemento do item 6, aprovado: Theil-Sen como inclinação principal, com mínimos quadrados e máximo por hora como referência; atribuição ao disco só com o controle degradando na mesma tabela |
+| 19/11/2026 | ADR-071 (indicadores de custo e complexidade da QS5), proposta: contagens pelos arquivos versionados, subida com dados restaurados no lugar do provisionamento a frio, uma máquina AWS por serviço com a máquina única como referência |
+| 19/11/2026 | ADR-071 aceita |
+| 20/11/2026 | ADR-071: complemento aprovado; contagem de linhas mantida como principal, com variante de sensibilidade que conta cada par `-c` e o valor como uma linha; disco do PostgreSQL e do TimescaleDB sem o WAL declarado, com limite superior de US$ 2,56 por mês no Eixo C |
+| 20/11/2026 | ADR-071: complemento do pico de memória aprovado, antes do cálculo; `memory.peak` do cgroup somado por arquitetura como principal e `anon` mais `shmem` como variante descritiva, nas curtas e na mista |
