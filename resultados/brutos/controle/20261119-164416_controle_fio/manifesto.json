@@ -1,0 +1,256 @@
+{
+  "id": "20261119-164416_controle_fio",
+  "tipo": "controle do SSD com fio (ADR-004, item 2; ADR-069, item 5)",
+  "taxa_mib_s": 24.3,
+  "duracao_s": 43200,
+  "repouso_s": 1200,
+  "controles": [
+    {
+      "controle": "swap desligado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhuma área ativa"
+    },
+    {
+      "controle": "timers parados",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "10 parados"
+    },
+    {
+      "controle": "P510 encontrado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "controlador nvme0"
+    },
+    {
+      "controle": "APST desligado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nvme0: pm_qos_latency_tolerance_us = 0"
+    },
+    {
+      "controle": "energia em performance",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "16 processadores em performance, boost ligado"
+    },
+    {
+      "controle": "suspensão e desligamento bloqueados",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "trava tcc-coleta ativa"
+    },
+    {
+      "controle": "nenhum container rodando",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "nenhum coletor órfão",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "nenhum navegador aberto",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "espaço livre de pelo menos 100 GiB",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "569 GiB livres"
+    },
+    {
+      "controle": "sudo sem senha para a coleta",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "fstrim e nvme smart-log liberados"
+    },
+    {
+      "controle": "sem programas pesados abertos",
+      "ok": false,
+      "bloqueante": false,
+      "detalhe": "abertos: claude, code"
+    }
+  ],
+  "repositorio": {
+    "commit": "07c4a10bacd92e829aef5ef24c8b47c08cc5b54f",
+    "alteracoes_locais": true
+  },
+  "host": {
+    "kernel": "7.0.0-42-generic",
+    "docker": "29.9.2"
+  },
+  "inicio": "2026-11-19T16:44:16-0300",
+  "disco_abertura": {
+    "ocupado_bytes": 321586896896,
+    "livre_bytes": 610682613760
+  },
+  "smart_abertura": {
+    "temperature": "38 °C (311 K, 100 °F)",
+    "percentage_used": "2%",
+    "Data Units Written": "34497995 (17.66 TB)",
+    "power_on_hours": "339",
+    "unsafe_shutdowns": "1",
+    "media_errors": "0"
+  },
+  "comando": [
+    "taskset",
+    "-c",
+    "0-5,8-13",
+    "fio",
+    "--name=controle",
+    "--filename=/var/tmp/fio-controle",
+    "--size=64g",
+    "--rw=randwrite",
+    "--bs=8k",
+    "--ioengine=io_uring",
+    "--iodepth=32",
+    "--numjobs=4",
+    "--direct=1",
+    "--rate=6220k",
+    "--time_based",
+    "--runtime=43200",
+    "--group_reporting",
+    "--write_bw_log=/home/leojaime/tcc/tcc-postgresql/resultados/brutos/controle/20261119-164416_controle_fio/fio",
+    "--write_lat_log=/home/leojaime/tcc/tcc-postgresql/resultados/brutos/controle/20261119-164416_controle_fio/fio",
+    "--log_avg_msec=1000",
+    "--output=/home/leojaime/tcc/tcc-postgresql/resultados/brutos/controle/20261119-164416_controle_fio/fio.txt"
+  ],
+  "fstrim": "/: 2,6 GiB (2762285056 bytes) descartado",
+  "fio_inicio_ms": 1795118662652,
+  "fio_fim_ms": 1795161863095,
+  "codigo_fio": 0,
+  "fstrim_final": "/: 65,1 GiB (69909159936 bytes) descartado",
+  "estado": "ok",
+  "fim": "2026-11-20T05:04:36-0300",
+  "disco_encerramento": {
+    "ocupado_bytes": 321741213696,
+    "livre_bytes": 610528296960
+  },
+  "smart_encerramento": {
+    "temperature": "51 °C (324 K, 123 °F)",
+    "percentage_used": "2%",
+    "Data Units Written": "36718736 (18.80 TB)",
+    "power_on_hours": "351",
+    "unsafe_shutdowns": "1",
+    "media_errors": "0"
+  },
+  "arquivos": [
+    {
+      "nome": "ferramenta/coletor-host.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "nome": "ferramenta/orquestrador.log",
+      "bytes": 185,
+      "sha256": "97bf1f9252be0f87297ab27e1171fad69ed7bcbb72ba929793971c871be5d3eb"
+    },
+    {
+      "nome": "fio.txt",
+      "bytes": 2086,
+      "sha256": "a560aee010587fe185eff6a0b6db1be640a34d02dd01da87341b634f2251a1fb"
+    },
+    {
+      "nome": "fio_bw.1.log",
+      "bytes": 1025693,
+      "sha256": "857eac435e795cccb2c293ab670f48d12cc1d816f5dcba7467fd699682b24441"
+    },
+    {
+      "nome": "fio_bw.2.log",
+      "bytes": 1025693,
+      "sha256": "bab4ad89a8ca82a9ccfc1d587c50a75291b722aca4f55bd50af6a25d56d01ff9"
+    },
+    {
+      "nome": "fio_bw.3.log",
+      "bytes": 1025693,
+      "sha256": "f36ddc9d8e4e3f9991d3fe0301906098f16e8777bddce5e87e2fdf0c20051873"
+    },
+    {
+      "nome": "fio_bw.4.log",
+      "bytes": 1025694,
+      "sha256": "56267b7d9e372b635398a4dde3062a4ac366a47ee240b8f3b79f7cc3cb591200"
+    },
+    {
+      "nome": "fio_clat.1.log",
+      "bytes": 1069008,
+      "sha256": "7130fcb520d81162bf39b6f5088c253ca6fe83553dd9d00111bbd75dc2db1e4f"
+    },
+    {
+      "nome": "fio_clat.2.log",
+      "bytes": 1069004,
+      "sha256": "5f1609c1fe8bc12f5950eff4ccc5a425f6e8e7ac7ccbdc33dba385d3a22037d5"
+    },
+    {
+      "nome": "fio_clat.3.log",
+      "bytes": 1068980,
+      "sha256": "94106f93c190f527ecccfb3a5a0f5a1c6360a20c9006256b5ee9a0409f2f44f1"
+    },
+    {
+      "nome": "fio_clat.4.log",
+      "bytes": 1068948,
+      "sha256": "7cc39043ade094bcf5ba5b349e67b95be17255ed6df75c8a429db64db1d4e662"
+    },
+    {
+      "nome": "fio_lat.1.log",
+      "bytes": 1069012,
+      "sha256": "e373bd97fbf6ed7ddd081e7ff1a5261ab5028b8c0aeaf51679837c22f7d86fe8"
+    },
+    {
+      "nome": "fio_lat.2.log",
+      "bytes": 1069018,
+      "sha256": "7fefd8bb8ca916e774a09707cadc9a199977217081a2a522bafce9ddbf9afdb1"
+    },
+    {
+      "nome": "fio_lat.3.log",
+      "bytes": 1068994,
+      "sha256": "276a8966b2f12d6981bd5d3d4046e9c82545c5943f39232e990907a5264f0b93"
+    },
+    {
+      "nome": "fio_lat.4.log",
+      "bytes": 1068963,
+      "sha256": "4ddbe5d028b0225e06f809c95ee03e793ed878912c7d68c4df0e7e5814c7171d"
+    },
+    {
+      "nome": "fio_slat.1.log",
+      "bytes": 1025836,
+      "sha256": "65a42a1b1175c7e0f5fb0ed2d24eba281474a38837f5af5653da21aec4035d9f"
+    },
+    {
+      "nome": "fio_slat.2.log",
+      "bytes": 1025821,
+      "sha256": "2dddc18096941dec7cb36348d7611bc9e2e1ab5b9c302e5eda6669b1ff4e3225"
+    },
+    {
+      "nome": "fio_slat.3.log",
+      "bytes": 1025899,
+      "sha256": "39f3c8c93baca50d132a67ad3a4761f027198762b60d4662facd0ddedfcdd619"
+    },
+    {
+      "nome": "fio_slat.4.log",
+      "bytes": 1026009,
+      "sha256": "6d4c81f2f7ea769475e8b1ec7507be9d5def92bc9e40afda6a753371f08e9934"
+    },
+    {
+      "nome": "metricas-host.csv",
+      "bytes": 132556985,
+      "sha256": "90109da3823fd3b17e439f6cd3552d64d017e3c57280ba75262a020ea06e95f8"
+    },
+    {
+      "nome": "smart-abertura.txt",
+      "bytes": 806,
+      "sha256": "f4e0e1c134cb3627fe698c9ff1ea1f0e97dae1e96efb66a5d629e7f1c14fb853"
+    },
+    {
+      "nome": "smart-encerramento.txt",
+      "bytes": 806,
+      "sha256": "3b69d0d72c17915574a9acc5bd75ba347c4c86ce02cb1f3b074d561a222b7e9b"
+    }
+  ]
+}

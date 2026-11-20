@@ -1,0 +1,48 @@
+{
+ "ResultFormatVersion": "0.1",
+ "RunnerConfig": {
+  "DBName": "benchmark",
+  "Limit": 0,
+  "LimitRPS": 0,
+  "MemProfile": "",
+  "HDRLatenciesFile": "",
+  "Workers": 1,
+  "PrintResponses": false,
+  "Debug": 0,
+  "FileName": "",
+  "BurnIn": 0,
+  "PrintInterval": 0,
+  "PrewarmQueries": false,
+  "ResultsFile": "/saida/ferramenta/lotes/03/lastpoint.json"
+ },
+ "StartTime": 1795078450000,
+ "EndTime": 1795078452000,
+ "DurationMillis": 2265,
+ "Totals": {
+  "burnIn": 0,
+  "limit": 0,
+  "overallQuantiles": {
+   "Influx_last_row_per_host": {
+    "q0": 0,
+    "q100": 463.519,
+    "q50": 459.599,
+    "q95": 463.519,
+    "q99": 463.519,
+    "q999": 463.519
+   },
+   "all_queries": {
+    "q0": 0,
+    "q100": 463.519,
+    "q50": 459.599,
+    "q95": 463.519,
+    "q99": 463.519,
+    "q999": 463.519
+   }
+  },
+  "overallQueryRates": {
+   "Influx_last_row_per_host": 2.2072530850222347,
+   "all_queries": 2.2072530850222347
+  },
+  "prewarmQueries": false
+ }
+}

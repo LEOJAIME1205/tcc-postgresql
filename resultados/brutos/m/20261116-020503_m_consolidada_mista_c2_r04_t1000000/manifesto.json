@@ -1,0 +1,279 @@
+{
+  "versao_formato": 1,
+  "id": "20261116-020503_m_consolidada_mista_c2_r04_t1000000",
+  "janela": "20261115-1319",
+  "eixo": "m",
+  "arquitetura": "consolidada",
+  "cenario": "mista",
+  "concorrencia": 2,
+  "repeticao": 4,
+  "ordem_na_janela": 26,
+  "semente": 1773743724,
+  "coleta_interna": true,
+  "espera": null,
+  "taxa": 1000000,
+  "duracao_planejada_s": {
+    "aquecimento": 300,
+    "medicao": 300
+  },
+  "repositorio": {
+    "commit": "07c4a10bacd92e829aef5ef24c8b47c08cc5b54f",
+    "alteracoes_locais": false
+  },
+  "host": {
+    "kernel": "7.0.0-42-generic",
+    "docker": "29.9.2"
+  },
+  "inicio": "2026-11-16T02:05:03-0300",
+  "estado": "ok",
+  "motivo_falha": null,
+  "tempos_ms": {
+    "repouso_inicio": 1794805518852,
+    "aquecimento_inicio": 1794806735855,
+    "medicao_inicio": 1794807035855,
+    "medicao_fim": 1794807335855
+  },
+  "controles": {
+    "conferidos": [
+      {
+        "controle": "swap desligado",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nenhuma área ativa"
+      },
+      {
+        "controle": "timers parados",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "10 parados"
+      },
+      {
+        "controle": "P510 encontrado",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "controlador nvme0"
+      },
+      {
+        "controle": "APST desligado",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nvme0: pm_qos_latency_tolerance_us = 0"
+      },
+      {
+        "controle": "energia em performance",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "16 processadores em performance, boost ligado"
+      },
+      {
+        "controle": "suspensão e desligamento bloqueados",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "trava tcc-coleta ativa"
+      },
+      {
+        "controle": "nenhum container rodando",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nenhum"
+      },
+      {
+        "controle": "nenhum coletor órfão",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nenhum"
+      },
+      {
+        "controle": "nenhum navegador aberto",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "nenhum"
+      },
+      {
+        "controle": "espaço livre de pelo menos 50 GiB",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "680 GiB livres"
+      },
+      {
+        "controle": "sudo sem senha para a coleta",
+        "ok": true,
+        "bloqueante": true,
+        "detalhe": "fstrim e nvme smart-log liberados"
+      },
+      {
+        "controle": "sem programas pesados abertos",
+        "ok": false,
+        "bloqueante": false,
+        "detalhe": "abertos: claude, code"
+      }
+    ],
+    "volumes_restaurados": true,
+    "fstrim": "/: 4,4 GiB (4763750400 bytes) descartado",
+    "repouso_s": 1200
+  },
+  "imagens": [
+    {
+      "servico": "postgres",
+      "imagem": "tcc-postgres:18.6-ts2.31.0-pgv0.8.7",
+      "id": "sha256:3c71fe3d3acb92bc6b4c2a1dfce722e9eff10c352252a6450051cd04880067ec",
+      "digests": [
+        "tcc-postgres@sha256:3c71fe3d3acb92bc6b4c2a1dfce722e9eff10c352252a6450051cd04880067ec"
+      ]
+    },
+    {
+      "servico": "busca",
+      "imagem": "tcc-busca:1",
+      "id": "sha256:82bbd087272bb16a875b8922a21a9d929763c5a58e9098a99e98f43f2e6c7dc4",
+      "digests": [
+        "tcc-busca@sha256:82bbd087272bb16a875b8922a21a9d929763c5a58e9098a99e98f43f2e6c7dc4"
+      ]
+    }
+  ],
+  "recursos": [
+    {
+      "servico": "postgres",
+      "cpuset": "0-5,8-13",
+      "memoria_bytes": 20401094656
+    },
+    {
+      "servico": "busca",
+      "cpuset": "0-5,8-13",
+      "memoria_bytes": 1073741824
+    }
+  ],
+  "gerador": {
+    "ferramenta": "tcc-gerador-mista",
+    "versao": "1 (busca: tcc-gerador-busca 1 (aiohttp 3.14.5, Python 3.14.4); ingestão: tcc-gerador-temporal 2 (TSBS 8323e59c74027b108f4ad5ec5d3e498b0101a02e com pr255.patch (ADR-059), Python 3.14.4))",
+    "parametros": {
+      "concorrencia": 2,
+      "processos": 2,
+      "semente": 1773743724,
+      "aquecimento_s": 300,
+      "medicao_s": 300,
+      "consultas": 3452,
+      "tempo_limite_s": 60.0,
+      "servico": "http://busca:8000",
+      "primeiras_consultas": [
+        "test1986",
+        "test1123",
+        "test1942",
+        "test2296",
+        "test818"
+      ],
+      "taxa_metricas_s": 1000000
+    }
+  },
+  "disco": {
+    "ocupado_bytes": 229645119488,
+    "livre_bytes": 702624391168
+  },
+  "fim": "2026-11-16T02:35:38-0300",
+  "arquivos": [
+    {
+      "nome": "ferramenta/busca.log",
+      "bytes": 833,
+      "sha256": "f26b66b3696f8454bf3f23c9ee76e24dbf26a50f0927f1859896f7be44a9d5fc"
+    },
+    {
+      "nome": "ferramenta/coletor-host.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "nome": "ferramenta/coletor-postgres-benchmark.log",
+      "bytes": 21,
+      "sha256": "d23915b3725ebe77763b51154dd41ffdba86b7cb5b1517db2e423f1319b10428"
+    },
+    {
+      "nome": "ferramenta/coletor-postgres-busca.log",
+      "bytes": 21,
+      "sha256": "d23915b3725ebe77763b51154dd41ffdba86b7cb5b1517db2e423f1319b10428"
+    },
+    {
+      "nome": "ferramenta/compose.log",
+      "bytes": 1528,
+      "sha256": "676bf991698a2d76d0e9693a0f17030305fd94d80c11efe9212f17ddae30a018"
+    },
+    {
+      "nome": "ferramenta/ingestao.log",
+      "bytes": 142,
+      "sha256": "9a585319e29a10148e2dcfba3e7db9274b6c79e3f944918bbd3104d465a73e32"
+    },
+    {
+      "nome": "ferramenta/orquestrador.log",
+      "bytes": 740,
+      "sha256": "dfa0c07414a5a60874421bc4a30464f1f7c8b4f87c30c386155c8ac22b1c6b38"
+    },
+    {
+      "nome": "ferramenta/postgres.log",
+      "bytes": 1260,
+      "sha256": "dfde9550e762a895cb96aed08ab9d0d3359057d65f68659a7ecbbc9c9fd3e32e"
+    },
+    {
+      "nome": "ferramenta/tsbs-fonte.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "nome": "ferramenta/tsbs-ingestao.json",
+      "bytes": 589,
+      "sha256": "a54eb4fd1c53fa0ede7899c777b14e5aaa4776e9a0b8239728b26dfce72ccfd9"
+    },
+    {
+      "nome": "ferramenta/tsbs-ingestao.txt",
+      "bytes": 47190,
+      "sha256": "b3de396c45c27926338767c02d872d8e5ce9ae227fabbc0a9ec60c63d13a51ef"
+    },
+    {
+      "nome": "gerador.json",
+      "bytes": 1690,
+      "sha256": "cf56a2bab51de67c4c60ea998e1c4669a39d455364d3488d7c2d0d5cabc87dce"
+    },
+    {
+      "nome": "ingestao.json",
+      "bytes": 510,
+      "sha256": "6fa7456cbfe2b538f0b5c1fad3f49e11c6529c5f8ab36fffa3507a043e61082a"
+    },
+    {
+      "nome": "instantaneos/docker-inspect.json",
+      "bytes": 17234,
+      "sha256": "8588e2ae7e68425c3113336bc12d93cb91f06d92e16247226f86f340c50c40ed"
+    },
+    {
+      "nome": "instantaneos/pg_stat_statements-postgres-benchmark.csv",
+      "bytes": 721584,
+      "sha256": "d80df9a3f5692158689291940c96fb38e507d00f70cd991be56da88b45348432"
+    },
+    {
+      "nome": "instantaneos/pg_stat_statements-postgres-busca.csv",
+      "bytes": 721299,
+      "sha256": "6a4b1c1f13d989742a5ac6607af5a5988966f57c6c232a4f63a5dae980e07d6e"
+    },
+    {
+      "nome": "metricas-host.csv",
+      "bytes": 3343670,
+      "sha256": "47133dc74e84e9c464eebf4ed217b44e97ec6361fbaa27365a3b278367799baf"
+    },
+    {
+      "nome": "metricas-ingestao.csv",
+      "bytes": 146205,
+      "sha256": "2f1dc16accbed3c77859726de964576da569e91462161ca2e536f307369801a3"
+    },
+    {
+      "nome": "metricas-postgres-benchmark.csv",
+      "bytes": 1141316,
+      "sha256": "f12d9f944ddaeab06f39233285e212e029ae80d1ea374036fe9e614b2b303dc9"
+    },
+    {
+      "nome": "metricas-postgres-busca.csv",
+      "bytes": 44323,
+      "sha256": "a5bc441b12773bc71b58d96d3aa9f99162dc1c64e447bd861985bc72406cea4e"
+    },
+    {
+      "nome": "operacoes.csv",
+      "bytes": 87324,
+      "sha256": "88e840fbe95259278a87cd1fa1d846c818f468b15acaa575e4e8323fbc90850f"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 142.04 queries/sec):
+Influx 5 cpu metric(s), random    1 hosts, random 12h0m0s by 1m:
+min:     5.14ms, med:     5.38ms, mean:     7.06ms, max:   11.07ms, stddev:     2.32ms, sum:   0.0sec, count: 5
+all queries                                                    :
+min:     5.14ms, med:     5.38ms, mean:     7.06ms, max:   11.07ms, stddev:     2.32ms, sum:   0.0sec, count: 5
+wall clock time: 0.036380sec
+Saving results json file to /saida/ferramenta/lotes/12/single-groupby-5-1-12.json

@@ -1,0 +1,48 @@
+{
+ "ResultFormatVersion": "0.1",
+ "RunnerConfig": {
+  "DBName": "benchmark",
+  "Limit": 0,
+  "LimitRPS": 0,
+  "MemProfile": "",
+  "HDRLatenciesFile": "",
+  "Workers": 1,
+  "PrintResponses": false,
+  "Debug": 0,
+  "FileName": "",
+  "BurnIn": 0,
+  "PrintInterval": 0,
+  "PrewarmQueries": false,
+  "ResultsFile": "/saida/ferramenta/lotes/14/cpu-max-all-1.json"
+ },
+ "StartTime": 1794859446000,
+ "EndTime": 1794859447000,
+ "DurationMillis": 1048,
+ "Totals": {
+  "burnIn": 0,
+  "limit": 0,
+  "overallQuantiles": {
+   "TimescaleDB_max_of_all_CPU_metrics_random_1_hosts_random_8h0m0s_by_1h": {
+    "q0": 0,
+    "q100": 270.383,
+    "q50": 207.023,
+    "q95": 270.383,
+    "q99": 270.383,
+    "q999": 270.383
+   },
+   "all_queries": {
+    "q0": 0,
+    "q100": 270.383,
+    "q50": 207.023,
+    "q95": 270.383,
+    "q99": 270.383,
+    "q999": 270.383
+   }
+  },
+  "overallQueryRates": {
+   "TimescaleDB_max_of_all_CPU_metrics_random_1_hosts_random_8h0m0s_by_1h": 4.772871766647136,
+   "all_queries": 4.772871766647136
+  },
+  "prewarmQueries": false
+ }
+}

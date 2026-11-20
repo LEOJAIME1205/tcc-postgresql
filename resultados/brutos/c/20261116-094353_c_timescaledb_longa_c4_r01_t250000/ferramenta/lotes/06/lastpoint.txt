@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 46.25 queries/sec):
+TimescaleDB last row per host:
+min:    16.81ms, med:    19.08ms, mean:    21.61ms, max:   32.90ms, stddev:     5.90ms, sum:   0.1sec, count: 5
+all queries                  :
+min:    16.81ms, med:    19.08ms, mean:    21.61ms, max:   32.90ms, stddev:     5.90ms, sum:   0.1sec, count: 5
+wall clock time: 0.110872sec
+Saving results json file to /saida/ferramenta/lotes/06/lastpoint.json

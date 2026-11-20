@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 0.55 queries/sec):
+TimescaleDB max of all CPU metrics, random    8 hosts, random 8h0m0s by 1h:
+min:  1340.93ms, med:  1880.38ms, mean:  1811.32ms, max: 2136.06ms, stddev:   314.73ms, sum:   9.1sec, count: 5
+all queries                                                               :
+min:  1340.93ms, med:  1880.38ms, mean:  1811.32ms, max: 2136.06ms, stddev:   314.73ms, sum:   9.1sec, count: 5
+wall clock time: 9.068645sec
+Saving results json file to /saida/ferramenta/lotes/23/cpu-max-all-8.json

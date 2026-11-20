@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 0.18 queries/sec):
+TimescaleDB mean of 5 metrics, all hosts, random 12h0m0s by 1h:
+min:  3084.54ms, med:  6054.14ms, mean:  5570.68ms, max: 6515.71ms, stddev:  1256.04ms, sum:  27.9sec, count: 5
+all queries                                                   :
+min:  3084.54ms, med:  6054.14ms, mean:  5570.68ms, max: 6515.71ms, stddev:  1256.04ms, sum:  27.9sec, count: 5
+wall clock time: 27.868034sec
+Saving results json file to /saida/ferramenta/lotes/17/double-groupby-5.json

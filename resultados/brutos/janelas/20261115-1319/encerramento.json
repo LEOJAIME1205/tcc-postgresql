@@ -1,0 +1,354 @@
+{
+  "versao_formato": 1,
+  "janela": "20261115-1319",
+  "plano": "mista",
+  "semente": 20261125,
+  "repouso_s": 1200,
+  "ordem": [
+    "m_poliglota_mista_c2_r01_t500000",
+    "m_poliglota_mista_c2_r01_t250000",
+    "m_poliglota_mista_c2_r01_t1000000",
+    "m_consolidada_mista_c2_r01_t250000",
+    "m_poliglota_mista_c2_r01",
+    "m_consolidada_mista_c2_r01_t1000000",
+    "m_consolidada_mista_c2_r01_t500000",
+    "m_consolidada_mista_c2_r01",
+    "m_poliglota_mista_c2_r02",
+    "m_consolidada_mista_c2_r02_t250000",
+    "m_poliglota_mista_c2_r02_t500000",
+    "m_poliglota_mista_c2_r02_t1000000",
+    "m_consolidada_mista_c2_r02",
+    "m_consolidada_mista_c2_r02_t1000000",
+    "m_poliglota_mista_c2_r02_t250000",
+    "m_consolidada_mista_c2_r02_t500000",
+    "m_poliglota_mista_c2_r03_t250000",
+    "m_consolidada_mista_c2_r03_t250000",
+    "m_consolidada_mista_c2_r03_t1000000",
+    "m_poliglota_mista_c2_r03_t1000000",
+    "m_consolidada_mista_c2_r03_t500000",
+    "m_poliglota_mista_c2_r03",
+    "m_poliglota_mista_c2_r03_t500000",
+    "m_consolidada_mista_c2_r03",
+    "m_poliglota_mista_c2_r04_t250000",
+    "m_consolidada_mista_c2_r04_t1000000",
+    "m_poliglota_mista_c2_r04_t500000",
+    "m_poliglota_mista_c2_r04_t1000000",
+    "m_consolidada_mista_c2_r04_t250000",
+    "m_consolidada_mista_c2_r04",
+    "m_poliglota_mista_c2_r04",
+    "m_consolidada_mista_c2_r04_t500000",
+    "m_poliglota_mista_c2_r05_t1000000",
+    "m_consolidada_mista_c2_r05_t250000",
+    "m_consolidada_mista_c2_r05",
+    "m_poliglota_mista_c2_r05",
+    "m_poliglota_mista_c2_r05_t250000",
+    "m_poliglota_mista_c2_r05_t500000",
+    "m_consolidada_mista_c2_r05_t500000",
+    "m_consolidada_mista_c2_r05_t1000000"
+  ],
+  "motivo": "concluída",
+  "sessoes": [
+    {
+      "inicio": "2026-11-15T13:19:39-0300",
+      "fim": "2026-11-16T09:43:53-0300",
+      "motivo": "concluída"
+    }
+  ],
+  "execucoes": [
+    {
+      "ordem": 1,
+      "id": "20261115-131939_m_poliglota_mista_c2_r01_t500000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 2,
+      "id": "20261115-135030_m_poliglota_mista_c2_r01_t250000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 3,
+      "id": "20261115-142105_m_poliglota_mista_c2_r01_t1000000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 4,
+      "id": "20261115-145140_m_consolidada_mista_c2_r01_t250000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 5,
+      "id": "20261115-152213_m_poliglota_mista_c2_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 6,
+      "id": "20261115-155237_m_consolidada_mista_c2_r01_t1000000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 7,
+      "id": "20261115-162323_m_consolidada_mista_c2_r01_t500000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 8,
+      "id": "20261115-165413_m_consolidada_mista_c2_r01",
+      "estado": "ok"
+    },
+    {
+      "ordem": 9,
+      "id": "20261115-172450_m_poliglota_mista_c2_r02",
+      "estado": "ok"
+    },
+    {
+      "ordem": 10,
+      "id": "20261115-175511_m_consolidada_mista_c2_r02_t250000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 11,
+      "id": "20261115-182546_m_poliglota_mista_c2_r02_t500000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 12,
+      "id": "20261115-185620_m_poliglota_mista_c2_r02_t1000000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 13,
+      "id": "20261115-192654_m_consolidada_mista_c2_r02",
+      "estado": "ok"
+    },
+    {
+      "ordem": 14,
+      "id": "20261115-195727_m_consolidada_mista_c2_r02_t1000000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 15,
+      "id": "20261115-202801_m_poliglota_mista_c2_r02_t250000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 16,
+      "id": "20261115-205835_m_consolidada_mista_c2_r02_t500000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 17,
+      "id": "20261115-212925_m_poliglota_mista_c2_r03_t250000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 18,
+      "id": "20261115-215959_m_consolidada_mista_c2_r03_t250000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 19,
+      "id": "20261115-223049_m_consolidada_mista_c2_r03_t1000000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 20,
+      "id": "20261115-230135_m_poliglota_mista_c2_r03_t1000000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 21,
+      "id": "20261115-233209_m_consolidada_mista_c2_r03_t500000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 22,
+      "id": "20261116-000300_m_poliglota_mista_c2_r03",
+      "estado": "ok"
+    },
+    {
+      "ordem": 23,
+      "id": "20261116-003321_m_poliglota_mista_c2_r03_t500000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 24,
+      "id": "20261116-010353_m_consolidada_mista_c2_r03",
+      "estado": "ok"
+    },
+    {
+      "ordem": 25,
+      "id": "20261116-013430_m_poliglota_mista_c2_r04_t250000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 26,
+      "id": "20261116-020503_m_consolidada_mista_c2_r04_t1000000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 27,
+      "id": "20261116-023538_m_poliglota_mista_c2_r04_t500000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 28,
+      "id": "20261116-030612_m_poliglota_mista_c2_r04_t1000000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 29,
+      "id": "20261116-033644_m_consolidada_mista_c2_r04_t250000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 30,
+      "id": "20261116-040734_m_consolidada_mista_c2_r04",
+      "estado": "ok"
+    },
+    {
+      "ordem": 31,
+      "id": "20261116-043808_m_poliglota_mista_c2_r04",
+      "estado": "ok"
+    },
+    {
+      "ordem": 32,
+      "id": "20261116-050829_m_consolidada_mista_c2_r04_t500000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 33,
+      "id": "20261116-053903_m_poliglota_mista_c2_r05_t1000000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 34,
+      "id": "20261116-060936_m_consolidada_mista_c2_r05_t250000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 35,
+      "id": "20261116-064026_m_consolidada_mista_c2_r05",
+      "estado": "ok"
+    },
+    {
+      "ordem": 36,
+      "id": "20261116-071101_m_poliglota_mista_c2_r05",
+      "estado": "ok"
+    },
+    {
+      "ordem": 37,
+      "id": "20261116-074122_m_poliglota_mista_c2_r05_t250000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 38,
+      "id": "20261116-081154_m_poliglota_mista_c2_r05_t500000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 39,
+      "id": "20261116-084228_m_consolidada_mista_c2_r05_t500000",
+      "estado": "ok"
+    },
+    {
+      "ordem": 40,
+      "id": "20261116-091303_m_consolidada_mista_c2_r05_t1000000",
+      "estado": "ok"
+    }
+  ],
+  "momento": "2026-11-16T09:43:53-0300",
+  "controles": [
+    {
+      "controle": "swap desligado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhuma área ativa"
+    },
+    {
+      "controle": "timers parados",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "10 parados"
+    },
+    {
+      "controle": "P510 encontrado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "controlador nvme0"
+    },
+    {
+      "controle": "APST desligado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nvme0: pm_qos_latency_tolerance_us = 0"
+    },
+    {
+      "controle": "energia em performance",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "16 processadores em performance, boost ligado"
+    },
+    {
+      "controle": "suspensão e desligamento bloqueados",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "trava tcc-coleta ativa"
+    },
+    {
+      "controle": "nenhum container rodando",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "nenhum coletor órfão",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "nenhum navegador aberto",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "espaço livre de pelo menos 50 GiB",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "654 GiB livres"
+    },
+    {
+      "controle": "sudo sem senha para a coleta",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "fstrim e nvme smart-log liberados"
+    },
+    {
+      "controle": "sem programas pesados abertos",
+      "ok": false,
+      "bloqueante": false,
+      "detalhe": "abertos: claude, code"
+    }
+  ],
+  "disco": {
+    "ocupado_bytes": 229881745408,
+    "livre_bytes": 702387765248
+  },
+  "smart": {
+    "temperature": "51 °C (324 K, 123 °F)",
+    "percentage_used": "1%",
+    "Data Units Written": "27384431 (14.02 TB)",
+    "power_on_hours": "260",
+    "unsafe_shutdowns": "0",
+    "media_errors": "0"
+  },
+  "host": {
+    "kernel": "7.0.0-42-generic",
+    "docker": "29.9.2"
+  },
+  "repositorio": {
+    "commit": "07c4a10bacd92e829aef5ef24c8b47c08cc5b54f",
+    "alteracoes_locais": false
+  }
+}

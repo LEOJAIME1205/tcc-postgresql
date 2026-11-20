@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 0.08 queries/sec):
+Influx CPU over threshold, all hosts:
+min: 12279.81ms, med: 12592.64ms, mean: 12608.67ms, max: 12885.50ms, stddev:   197.92ms, sum:  63.0sec, count: 5
+all queries                         :
+min: 12279.81ms, med: 12592.64ms, mean: 12608.67ms, max: 12885.50ms, stddev:   197.92ms, sum:  63.0sec, count: 5
+wall clock time: 63.058878sec
+Saving results json file to /saida/ferramenta/lotes/02/high-cpu-all.json

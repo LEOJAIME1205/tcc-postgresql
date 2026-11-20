@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 1.29 queries/sec):
+Influx mean of 1 metrics, all hosts, random 12h0m0s by 1h:
+min:   744.26ms, med:   765.09ms, mean:   773.03ms, max:  799.52ms, stddev:    22.05ms, sum:   3.9sec, count: 5
+all queries                                              :
+min:   744.26ms, med:   765.09ms, mean:   773.03ms, max:  799.52ms, stddev:    22.05ms, sum:   3.9sec, count: 5
+wall clock time: 3.876293sec
+Saving results json file to /saida/ferramenta/lotes/18/double-groupby-1.json

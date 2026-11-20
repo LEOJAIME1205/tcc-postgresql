@@ -1,0 +1,44 @@
+# Carga mista (ADR-068): a busca do Eixo A com 2 clientes sob a ingestão do Eixo C em taxa fixa.
+# 8 configurações (2 arquiteturas; sem escrita e 250 mil, 500 mil e 1 milhão de métricas/s) em
+# 5 blocos completos, 40 execuções, ~21 h. Sem a chave taxas, a configuração de base.
+nome = "mista"
+semente = 20261125
+espaco_livre_min_gib = 50
+
+[[configuracao]]
+eixo = "m"
+arquitetura = "consolidada"
+cenario = "mista"
+concorrencias = [2]
+repeticoes = 5
+aquecimento_s = 300
+medicao_s = 300
+
+[[configuracao]]
+eixo = "m"
+arquitetura = "consolidada"
+cenario = "mista"
+concorrencias = [2]
+taxas = [250000, 500000, 1000000]
+repeticoes = 5
+aquecimento_s = 300
+medicao_s = 300
+
+[[configuracao]]
+eixo = "m"
+arquitetura = "poliglota"
+cenario = "mista"
+concorrencias = [2]
+repeticoes = 5
+aquecimento_s = 300
+medicao_s = 300
+
+[[configuracao]]
+eixo = "m"
+arquitetura = "poliglota"
+cenario = "mista"
+concorrencias = [2]
+taxas = [250000, 500000, 1000000]
+repeticoes = 5
+aquecimento_s = 300
+medicao_s = 300

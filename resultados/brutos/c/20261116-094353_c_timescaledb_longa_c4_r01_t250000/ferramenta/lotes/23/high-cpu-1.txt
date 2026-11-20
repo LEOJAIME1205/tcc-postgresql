@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 3.22 queries/sec):
+TimescaleDB CPU over threshold, 1 host(s):
+min:    30.23ms, med:   415.98ms, mean:   310.95ms, max:  429.01ms, stddev:   153.58ms, sum:   1.6sec, count: 5
+all queries                              :
+min:    30.23ms, med:   415.98ms, mean:   310.95ms, max:  429.01ms, stddev:   153.58ms, sum:   1.6sec, count: 5
+wall clock time: 1.562484sec
+Saving results json file to /saida/ferramenta/lotes/23/high-cpu-1.json

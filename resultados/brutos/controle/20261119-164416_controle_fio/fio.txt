@@ -1,0 +1,35 @@
+controle: (g=0): rw=randwrite, bs=(R) 8192B-8192B, (W) 8192B-8192B, (T) 8192B-8192B, ioengine=io_uring, iodepth=32
+...
+fio-3.41
+Starting 4 processes
+controle: Laying out IO file (1 file / 65536MiB)
+
+controle: (groupid=0, jobs=4): err= 0: pid=1197724: Fri Nov 20 05:04:23 2026
+  write: IOPS=3109, BW=24.3MiB/s (25.5MB/s)(1025GiB/43200001msec); 0 zone resets
+    slat (nsec): min=840, max=47745k, avg=3244.22, stdev=40808.23
+    clat (nsec): min=120, max=49113k, avg=12789.99, stdev=97024.15
+     lat (usec): min=5, max=49116, avg=16.03, stdev=105.40
+    clat percentiles (usec):
+     |  1.00th=[    6],  5.00th=[    6], 10.00th=[    6], 20.00th=[    9],
+     | 30.00th=[   10], 40.00th=[   11], 50.00th=[   11], 60.00th=[   11],
+     | 70.00th=[   11], 80.00th=[   11], 90.00th=[   13], 95.00th=[   14],
+     | 99.00th=[   17], 99.50th=[   21], 99.90th=[ 1254], 99.95th=[ 1713],
+     | 99.99th=[ 2114]
+   bw (  KiB/s): min=24304, max=25456, per=100.00%, avg=24882.34, stdev= 4.27, samples=172800
+   iops        : min= 2964, max= 3260, avg=3110.20, stdev= 0.87, samples=345600
+  lat (nsec)   : 250=0.01%, 500=0.01%, 750=0.01%, 1000=0.01%
+  lat (usec)   : 2=0.01%, 4=0.01%, 10=35.67%, 20=63.80%, 50=0.16%
+  lat (usec)   : 100=0.10%, 250=0.07%, 500=0.01%, 750=0.01%, 1000=0.02%
+  lat (msec)   : 2=0.12%, 4=0.02%, 10=0.01%, 20=0.01%, 50=0.01%
+  cpu          : usr=0.17%, sys=0.56%, ctx=268499448, majf=0, minf=5138
+  IO depths    : 1=99.9%, 2=0.1%, 4=0.1%, 8=0.1%, 16=0.1%, 32=0.1%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued rwts: total=0,134352000,0,0 short=0,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=32
+
+Run status group 0 (all jobs):
+  WRITE: bw=24.3MiB/s (25.5MB/s), 24.3MiB/s-24.3MiB/s (25.5MB/s-25.5MB/s), io=1025GiB (1101GB), run=43200001-43200001msec
+
+Disk stats (read/write):
+  nvme0n1: ios=509/135930746, sectors=13536/2220661112, merge=244/7253555, ticks=62/5904646, in_queue=5916388, util=3.89%

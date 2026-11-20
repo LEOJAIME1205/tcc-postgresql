@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 0.05 queries/sec):
+Influx max cpu over last 5 min-intervals (random end):
+min:  7277.06ms, med:  9943.04ms, mean: 21737.40ms, max: 43466.75ms, stddev: 15818.46ms, sum: 108.7sec, count: 5
+all queries                                          :
+min:  7277.06ms, med:  9943.04ms, mean: 21737.40ms, max: 43466.75ms, stddev: 15818.46ms, sum: 108.7sec, count: 5
+wall clock time: 108.703893sec
+Saving results json file to /saida/ferramenta/lotes/15/groupby-orderby-limit.json

@@ -1,0 +1,326 @@
+{
+  "janela": "20261115-1319",
+  "atualizado": "2026-11-16T09:43:53-0300",
+  "execucoes": [
+    {
+      "ordem": 1,
+      "execucao": "m_poliglota_mista_c2_r01_t500000",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-131939_m_poliglota_mista_c2_r01_t500000"
+      ]
+    },
+    {
+      "ordem": 2,
+      "execucao": "m_poliglota_mista_c2_r01_t250000",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-135030_m_poliglota_mista_c2_r01_t250000"
+      ]
+    },
+    {
+      "ordem": 3,
+      "execucao": "m_poliglota_mista_c2_r01_t1000000",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-142105_m_poliglota_mista_c2_r01_t1000000"
+      ]
+    },
+    {
+      "ordem": 4,
+      "execucao": "m_consolidada_mista_c2_r01_t250000",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-145140_m_consolidada_mista_c2_r01_t250000"
+      ]
+    },
+    {
+      "ordem": 5,
+      "execucao": "m_poliglota_mista_c2_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-152213_m_poliglota_mista_c2_r01"
+      ]
+    },
+    {
+      "ordem": 6,
+      "execucao": "m_consolidada_mista_c2_r01_t1000000",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-155237_m_consolidada_mista_c2_r01_t1000000"
+      ]
+    },
+    {
+      "ordem": 7,
+      "execucao": "m_consolidada_mista_c2_r01_t500000",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-162323_m_consolidada_mista_c2_r01_t500000"
+      ]
+    },
+    {
+      "ordem": 8,
+      "execucao": "m_consolidada_mista_c2_r01",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-165413_m_consolidada_mista_c2_r01"
+      ]
+    },
+    {
+      "ordem": 9,
+      "execucao": "m_poliglota_mista_c2_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-172450_m_poliglota_mista_c2_r02"
+      ]
+    },
+    {
+      "ordem": 10,
+      "execucao": "m_consolidada_mista_c2_r02_t250000",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-175511_m_consolidada_mista_c2_r02_t250000"
+      ]
+    },
+    {
+      "ordem": 11,
+      "execucao": "m_poliglota_mista_c2_r02_t500000",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-182546_m_poliglota_mista_c2_r02_t500000"
+      ]
+    },
+    {
+      "ordem": 12,
+      "execucao": "m_poliglota_mista_c2_r02_t1000000",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-185620_m_poliglota_mista_c2_r02_t1000000"
+      ]
+    },
+    {
+      "ordem": 13,
+      "execucao": "m_consolidada_mista_c2_r02",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-192654_m_consolidada_mista_c2_r02"
+      ]
+    },
+    {
+      "ordem": 14,
+      "execucao": "m_consolidada_mista_c2_r02_t1000000",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-195727_m_consolidada_mista_c2_r02_t1000000"
+      ]
+    },
+    {
+      "ordem": 15,
+      "execucao": "m_poliglota_mista_c2_r02_t250000",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-202801_m_poliglota_mista_c2_r02_t250000"
+      ]
+    },
+    {
+      "ordem": 16,
+      "execucao": "m_consolidada_mista_c2_r02_t500000",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-205835_m_consolidada_mista_c2_r02_t500000"
+      ]
+    },
+    {
+      "ordem": 17,
+      "execucao": "m_poliglota_mista_c2_r03_t250000",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-212925_m_poliglota_mista_c2_r03_t250000"
+      ]
+    },
+    {
+      "ordem": 18,
+      "execucao": "m_consolidada_mista_c2_r03_t250000",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-215959_m_consolidada_mista_c2_r03_t250000"
+      ]
+    },
+    {
+      "ordem": 19,
+      "execucao": "m_consolidada_mista_c2_r03_t1000000",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-223049_m_consolidada_mista_c2_r03_t1000000"
+      ]
+    },
+    {
+      "ordem": 20,
+      "execucao": "m_poliglota_mista_c2_r03_t1000000",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-230135_m_poliglota_mista_c2_r03_t1000000"
+      ]
+    },
+    {
+      "ordem": 21,
+      "execucao": "m_consolidada_mista_c2_r03_t500000",
+      "estado": "ok",
+      "tentativas": [
+        "20261115-233209_m_consolidada_mista_c2_r03_t500000"
+      ]
+    },
+    {
+      "ordem": 22,
+      "execucao": "m_poliglota_mista_c2_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-000300_m_poliglota_mista_c2_r03"
+      ]
+    },
+    {
+      "ordem": 23,
+      "execucao": "m_poliglota_mista_c2_r03_t500000",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-003321_m_poliglota_mista_c2_r03_t500000"
+      ]
+    },
+    {
+      "ordem": 24,
+      "execucao": "m_consolidada_mista_c2_r03",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-010353_m_consolidada_mista_c2_r03"
+      ]
+    },
+    {
+      "ordem": 25,
+      "execucao": "m_poliglota_mista_c2_r04_t250000",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-013430_m_poliglota_mista_c2_r04_t250000"
+      ]
+    },
+    {
+      "ordem": 26,
+      "execucao": "m_consolidada_mista_c2_r04_t1000000",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-020503_m_consolidada_mista_c2_r04_t1000000"
+      ]
+    },
+    {
+      "ordem": 27,
+      "execucao": "m_poliglota_mista_c2_r04_t500000",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-023538_m_poliglota_mista_c2_r04_t500000"
+      ]
+    },
+    {
+      "ordem": 28,
+      "execucao": "m_poliglota_mista_c2_r04_t1000000",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-030612_m_poliglota_mista_c2_r04_t1000000"
+      ]
+    },
+    {
+      "ordem": 29,
+      "execucao": "m_consolidada_mista_c2_r04_t250000",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-033644_m_consolidada_mista_c2_r04_t250000"
+      ]
+    },
+    {
+      "ordem": 30,
+      "execucao": "m_consolidada_mista_c2_r04",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-040734_m_consolidada_mista_c2_r04"
+      ]
+    },
+    {
+      "ordem": 31,
+      "execucao": "m_poliglota_mista_c2_r04",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-043808_m_poliglota_mista_c2_r04"
+      ]
+    },
+    {
+      "ordem": 32,
+      "execucao": "m_consolidada_mista_c2_r04_t500000",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-050829_m_consolidada_mista_c2_r04_t500000"
+      ]
+    },
+    {
+      "ordem": 33,
+      "execucao": "m_poliglota_mista_c2_r05_t1000000",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-053903_m_poliglota_mista_c2_r05_t1000000"
+      ]
+    },
+    {
+      "ordem": 34,
+      "execucao": "m_consolidada_mista_c2_r05_t250000",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-060936_m_consolidada_mista_c2_r05_t250000"
+      ]
+    },
+    {
+      "ordem": 35,
+      "execucao": "m_consolidada_mista_c2_r05",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-064026_m_consolidada_mista_c2_r05"
+      ]
+    },
+    {
+      "ordem": 36,
+      "execucao": "m_poliglota_mista_c2_r05",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-071101_m_poliglota_mista_c2_r05"
+      ]
+    },
+    {
+      "ordem": 37,
+      "execucao": "m_poliglota_mista_c2_r05_t250000",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-074122_m_poliglota_mista_c2_r05_t250000"
+      ]
+    },
+    {
+      "ordem": 38,
+      "execucao": "m_poliglota_mista_c2_r05_t500000",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-081154_m_poliglota_mista_c2_r05_t500000"
+      ]
+    },
+    {
+      "ordem": 39,
+      "execucao": "m_consolidada_mista_c2_r05_t500000",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-084228_m_consolidada_mista_c2_r05_t500000"
+      ]
+    },
+    {
+      "ordem": 40,
+      "execucao": "m_consolidada_mista_c2_r05_t1000000",
+      "estado": "ok",
+      "tentativas": [
+        "20261116-091303_m_consolidada_mista_c2_r05_t1000000"
+      ]
+    }
+  ]
+}

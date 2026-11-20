@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 1.96 queries/sec):
+Influx last row per host:
+min:   492.66ms, med:   517.29ms, mean:   509.16ms, max:  521.07ms, stddev:    12.28ms, sum:   2.5sec, count: 5
+all queries             :
+min:   492.66ms, med:   517.29ms, mean:   509.16ms, max:  521.07ms, stddev:    12.28ms, sum:   2.5sec, count: 5
+wall clock time: 2.555011sec
+Saving results json file to /saida/ferramenta/lotes/04/lastpoint.json

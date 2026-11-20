@@ -1,0 +1,48 @@
+{
+ "ResultFormatVersion": "0.1",
+ "RunnerConfig": {
+  "DBName": "benchmark",
+  "Limit": 0,
+  "LimitRPS": 0,
+  "MemProfile": "",
+  "HDRLatenciesFile": "",
+  "Workers": 1,
+  "PrintResponses": false,
+  "Debug": 0,
+  "FileName": "",
+  "BurnIn": 0,
+  "PrintInterval": 0,
+  "PrewarmQueries": false,
+  "ResultsFile": "/saida/ferramenta/consultas/aquecimento-groupby-orderby-limit.json"
+ },
+ "StartTime": 1795117357000,
+ "EndTime": 1795117367000,
+ "DurationMillis": 9541,
+ "Totals": {
+  "burnIn": 0,
+  "limit": 0,
+  "overallQuantiles": {
+   "Influx_max_cpu_over_last_5_min_intervals_random_end_": {
+    "q0": 0,
+    "q100": 4552.959,
+    "q50": 1378.239,
+    "q95": 4552.959,
+    "q99": 4552.959,
+    "q999": 4552.959
+   },
+   "all_queries": {
+    "q0": 0,
+    "q100": 4552.959,
+    "q50": 1378.239,
+    "q95": 4552.959,
+    "q99": 4552.959,
+    "q999": 4552.959
+   }
+  },
+  "overallQueryRates": {
+   "Influx_max_cpu_over_last_5_min_intervals_random_end_": 0.5240643094625205,
+   "all_queries": 0.5240643094625205
+  },
+  "prewarmQueries": false
+ }
+}

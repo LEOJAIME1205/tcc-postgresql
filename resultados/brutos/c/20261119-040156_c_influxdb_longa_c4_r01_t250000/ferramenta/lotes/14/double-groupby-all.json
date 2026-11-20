@@ -1,0 +1,48 @@
+{
+ "ResultFormatVersion": "0.1",
+ "RunnerConfig": {
+  "DBName": "benchmark",
+  "Limit": 0,
+  "LimitRPS": 0,
+  "MemProfile": "",
+  "HDRLatenciesFile": "",
+  "Workers": 1,
+  "PrintResponses": false,
+  "Debug": 0,
+  "FileName": "",
+  "BurnIn": 0,
+  "PrintInterval": 0,
+  "PrewarmQueries": false,
+  "ResultsFile": "/saida/ferramenta/lotes/14/double-groupby-all.json"
+ },
+ "StartTime": 1795098153000,
+ "EndTime": 1795098187000,
+ "DurationMillis": 33465,
+ "Totals": {
+  "burnIn": 0,
+  "limit": 0,
+  "overallQuantiles": {
+   "Influx_mean_of_10_metrics_all_hosts_random_12h0m0s_by_1h": {
+    "q0": 0,
+    "q100": 6790.911,
+    "q50": 6683.391,
+    "q95": 6790.911,
+    "q99": 6790.911,
+    "q999": 6790.911
+   },
+   "all_queries": {
+    "q0": 0,
+    "q100": 6790.911,
+    "q50": 6683.391,
+    "q95": 6790.911,
+    "q99": 6790.911,
+    "q999": 6790.911
+   }
+  },
+  "overallQueryRates": {
+   "Influx_mean_of_10_metrics_all_hosts_random_12h0m0s_by_1h": 0.1494105600662969,
+   "all_queries": 0.1494105600662969
+  },
+  "prewarmQueries": false
+ }
+}

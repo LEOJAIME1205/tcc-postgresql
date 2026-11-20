@@ -1,0 +1,48 @@
+{
+ "ResultFormatVersion": "0.1",
+ "RunnerConfig": {
+  "DBName": "benchmark",
+  "Limit": 0,
+  "LimitRPS": 0,
+  "MemProfile": "",
+  "HDRLatenciesFile": "",
+  "Workers": 1,
+  "PrintResponses": false,
+  "Debug": 0,
+  "FileName": "",
+  "BurnIn": 0,
+  "PrintInterval": 0,
+  "PrewarmQueries": false,
+  "ResultsFile": "/saida/ferramenta/lotes/12/single-groupby-1-1-12.json"
+ },
+ "StartTime": 1794855843000,
+ "EndTime": 1794855845000,
+ "DurationMillis": 2016,
+ "Totals": {
+  "burnIn": 0,
+  "limit": 0,
+  "overallQuantiles": {
+   "TimescaleDB_1_cpu_metric_s_random_1_hosts_random_12h0m0s_by_1m": {
+    "q0": 0,
+    "q100": 429.455,
+    "q50": 423.871,
+    "q95": 429.455,
+    "q99": 429.455,
+    "q999": 429.455
+   },
+   "all_queries": {
+    "q0": 0,
+    "q100": 429.455,
+    "q50": 423.871,
+    "q95": 429.455,
+    "q99": 429.455,
+    "q999": 429.455
+   }
+  },
+  "overallQueryRates": {
+   "TimescaleDB_1_cpu_metric_s_random_1_hosts_random_12h0m0s_by_1m": 2.4796594108846794,
+   "all_queries": 2.4796594108846794
+  },
+  "prewarmQueries": false
+ }
+}

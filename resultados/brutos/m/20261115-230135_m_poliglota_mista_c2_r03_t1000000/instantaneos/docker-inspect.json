@@ -1,0 +1,1004 @@
+{
+  "containers": [
+    {
+      "Id": "5ca0ed1deb6d600decb4dc4d746af79971689f5dd0d1fb76e2d00a7175b2c03f",
+      "Created": "2026-11-16T02:21:42.937001452Z",
+      "Path": "./entrypoint.sh",
+      "Args": [],
+      "State": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 270350,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-11-16T02:21:43.095907568Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "Image": "sha256:b7b0444c4c351c970b98e90a6f89c2ee4287c65b44e52b4cb503fa5b2aa927ad",
+      "ResolvConfPath": "/var/lib/docker/containers/5ca0ed1deb6d600decb4dc4d746af79971689f5dd0d1fb76e2d00a7175b2c03f/resolv.conf",
+      "HostnamePath": "/var/lib/docker/containers/5ca0ed1deb6d600decb4dc4d746af79971689f5dd0d1fb76e2d00a7175b2c03f/hostname",
+      "HostsPath": "/var/lib/docker/containers/5ca0ed1deb6d600decb4dc4d746af79971689f5dd0d1fb76e2d00a7175b2c03f/hosts",
+      "LogPath": "/var/lib/docker/containers/5ca0ed1deb6d600decb4dc4d746af79971689f5dd0d1fb76e2d00a7175b2c03f/5ca0ed1deb6d600decb4dc4d746af79971689f5dd0d1fb76e2d00a7175b2c03f-json.log",
+      "Name": "/tcc-m-poliglota-qdrant-1",
+      "RestartCount": 0,
+      "Driver": "overlayfs",
+      "Platform": "linux",
+      "MountLabel": "",
+      "ProcessLabel": "",
+      "AppArmorProfile": "docker-default",
+      "ExecIDs": null,
+      "HostConfig": {
+        "Binds": [
+          "/home/leojaime/tcc-dados/m/poliglota/qdrant/atual:/qdrant/storage:rw"
+        ],
+        "ContainerIDFile": "",
+        "LogConfig": {
+          "Type": "json-file",
+          "Config": {
+            "max-file": "5",
+            "max-size": "100m"
+          }
+        },
+        "NetworkMode": "tcc-m-poliglota_default",
+        "PortBindings": {},
+        "RestartPolicy": {
+          "Name": "no",
+          "MaximumRetryCount": 0
+        },
+        "AutoRemove": false,
+        "VolumeDriver": "",
+        "VolumesFrom": null,
+        "ConsoleSize": [
+          0,
+          0
+        ],
+        "CapAdd": null,
+        "CapDrop": null,
+        "CgroupnsMode": "private",
+        "Dns": null,
+        "DnsOptions": null,
+        "DnsSearch": null,
+        "ExtraHosts": [],
+        "GroupAdd": null,
+        "IpcMode": "private",
+        "Cgroup": "",
+        "Links": null,
+        "OomScoreAdj": 0,
+        "PidMode": "",
+        "Privileged": false,
+        "PublishAllPorts": false,
+        "ReadonlyRootfs": false,
+        "SecurityOpt": null,
+        "UTSMode": "",
+        "UsernsMode": "",
+        "ShmSize": 67108864,
+        "Runtime": "runc",
+        "Isolation": "",
+        "CpuShares": 0,
+        "Memory": 8589934592,
+        "NanoCpus": 0,
+        "CgroupParent": "",
+        "BlkioWeight": 0,
+        "BlkioWeightDevice": null,
+        "BlkioDeviceReadBps": null,
+        "BlkioDeviceWriteBps": null,
+        "BlkioDeviceReadIOps": null,
+        "BlkioDeviceWriteIOps": null,
+        "CpuPeriod": 0,
+        "CpuQuota": 0,
+        "CpuRealtimePeriod": 0,
+        "CpuRealtimeRuntime": 0,
+        "CpusetCpus": "0-5,8-13",
+        "CpusetMems": "",
+        "Devices": null,
+        "DeviceCgroupRules": null,
+        "DeviceRequests": null,
+        "MemoryReservation": 0,
+        "MemorySwap": 8589934592,
+        "MemorySwappiness": null,
+        "OomKillDisable": null,
+        "PidsLimit": null,
+        "Ulimits": null,
+        "CpuCount": 0,
+        "CpuPercent": 0,
+        "IOMaximumIOps": 0,
+        "IOMaximumBandwidth": 0,
+        "MaskedPaths": [
+          "/proc/acpi",
+          "/proc/asound",
+          "/proc/interrupts",
+          "/proc/kcore",
+          "/proc/keys",
+          "/proc/latency_stats",
+          "/proc/sched_debug",
+          "/proc/scsi",
+          "/proc/timer_list",
+          "/proc/timer_stats",
+          "/sys/devices/virtual/powercap",
+          "/sys/firmware"
+        ],
+        "ReadonlyPaths": [
+          "/proc/bus",
+          "/proc/fs",
+          "/proc/irq",
+          "/proc/sys",
+          "/proc/sysrq-trigger"
+        ]
+      },
+      "Storage": {
+        "RootFS": {
+          "Snapshot": {
+            "Name": "overlayfs"
+          }
+        }
+      },
+      "Mounts": [
+        {
+          "Type": "bind",
+          "Source": "/home/leojaime/tcc-dados/m/poliglota/qdrant/atual",
+          "Destination": "/qdrant/storage",
+          "Mode": "rw",
+          "RW": true,
+          "Propagation": "rprivate"
+        }
+      ],
+      "Config": {
+        "Hostname": "5ca0ed1deb6d",
+        "Domainname": "",
+        "User": "0:0",
+        "AttachStdin": false,
+        "AttachStdout": true,
+        "AttachStderr": true,
+        "ExposedPorts": {
+          "6333/tcp": {},
+          "6334/tcp": {}
+        },
+        "Tty": false,
+        "OpenStdin": false,
+        "StdinOnce": false,
+        "Env": [
+          "QDRANT__TELEMETRY_DISABLED=true",
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "DIR=",
+          "TZ=Etc/UTC",
+          "RUN_MODE=production"
+        ],
+        "Cmd": [
+          "./entrypoint.sh"
+        ],
+        "Image": "qdrant/qdrant:v1.19.2@sha256:b7b0444c4c351c970b98e90a6f89c2ee4287c65b44e52b4cb503fa5b2aa927ad",
+        "Volumes": null,
+        "WorkingDir": "/qdrant",
+        "Entrypoint": null,
+        "Labels": {
+          "com.docker.compose.config-hash": "602283ed34c700d7d3d319720c243b0080608410edda74e577dc0c1170a88c6b",
+          "com.docker.compose.container-number": "1",
+          "com.docker.compose.depends_on": "",
+          "com.docker.compose.image": "sha256:0e8273b9130ca3b0dd9dcfaa8f55342066711f8aaeb2aa072e53344c42ecf57f",
+          "com.docker.compose.oneoff": "False",
+          "com.docker.compose.project": "tcc-m-poliglota",
+          "com.docker.compose.project.config_files": "/home/leojaime/tcc/tcc-postgresql/eixo-m-mista/poliglota/compose.yaml",
+          "com.docker.compose.project.working_dir": "/home/leojaime/tcc/tcc-postgresql/eixo-m-mista/poliglota",
+          "com.docker.compose.service": "qdrant",
+          "com.docker.compose.version": "5.6.1",
+          "org.opencontainers.image.description": "Official Qdrant image",
+          "org.opencontainers.image.documentation": "https://qdrant.com/docs",
+          "org.opencontainers.image.source": "https://github.com/qdrant/qdrant",
+          "org.opencontainers.image.title": "Qdrant",
+          "org.opencontainers.image.url": "https://qdrant.com/",
+          "org.opencontainers.image.vendor": "Qdrant",
+          "org.opencontainers.image.version": "v1.19.2"
+        },
+        "StopTimeout": 120
+      },
+      "NetworkSettings": {
+        "SandboxID": "7f0d421f53fc1976855737272184f416d9ef0c0b04409f5e07389bb0525e64b4",
+        "SandboxKey": "/var/run/docker/netns/7f0d421f53fc",
+        "Ports": {
+          "6333/tcp": null,
+          "6334/tcp": null
+        },
+        "Networks": {
+          "tcc-m-poliglota_default": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": [
+              "tcc-m-poliglota-qdrant-1",
+              "qdrant"
+            ],
+            "DriverOpts": null,
+            "GwPriority": 0,
+            "NetworkID": "c64c3de3abb3bee01f1f413d32c239acba051828a591b399ab48bc7fc19a9db8",
+            "EndpointID": "805ccca4fcb6d0307eee5d07d44abf4ba728f0f2b7395caa0a3be44cab27af89",
+            "Gateway": "172.18.0.1",
+            "IPAddress": "172.18.0.4",
+            "MacAddress": "1a:c1:d0:40:f3:f0",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "DNSNames": [
+              "tcc-m-poliglota-qdrant-1",
+              "qdrant",
+              "5ca0ed1deb6d"
+            ]
+          }
+        }
+      },
+      "ImageManifestDescriptor": {
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "digest": "sha256:0e8273b9130ca3b0dd9dcfaa8f55342066711f8aaeb2aa072e53344c42ecf57f",
+        "size": 2935,
+        "platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        }
+      }
+    },
+    {
+      "Id": "280942b7a613552c1bc8b47d7e6cbd03f603fd6a6d93622c6578b7c70b17e675",
+      "Created": "2026-11-16T02:21:42.936236793Z",
+      "Path": "/opt/venv/bin/uvicorn",
+      "Args": [
+        "servico:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--workers",
+        "6",
+        "--loop",
+        "uvloop",
+        "--http",
+        "httptools",
+        "--no-access-log"
+      ],
+      "State": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 270195,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-11-16T02:21:42.976456348Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "Image": "sha256:82bbd087272bb16a875b8922a21a9d929763c5a58e9098a99e98f43f2e6c7dc4",
+      "ResolvConfPath": "/var/lib/docker/containers/280942b7a613552c1bc8b47d7e6cbd03f603fd6a6d93622c6578b7c70b17e675/resolv.conf",
+      "HostnamePath": "/var/lib/docker/containers/280942b7a613552c1bc8b47d7e6cbd03f603fd6a6d93622c6578b7c70b17e675/hostname",
+      "HostsPath": "/var/lib/docker/containers/280942b7a613552c1bc8b47d7e6cbd03f603fd6a6d93622c6578b7c70b17e675/hosts",
+      "LogPath": "/var/lib/docker/containers/280942b7a613552c1bc8b47d7e6cbd03f603fd6a6d93622c6578b7c70b17e675/280942b7a613552c1bc8b47d7e6cbd03f603fd6a6d93622c6578b7c70b17e675-json.log",
+      "Name": "/tcc-m-poliglota-busca-1",
+      "RestartCount": 0,
+      "Driver": "overlayfs",
+      "Platform": "linux",
+      "MountLabel": "",
+      "ProcessLabel": "",
+      "AppArmorProfile": "docker-default",
+      "ExecIDs": null,
+      "HostConfig": {
+        "Binds": null,
+        "ContainerIDFile": "",
+        "LogConfig": {
+          "Type": "json-file",
+          "Config": {
+            "max-file": "5",
+            "max-size": "100m"
+          }
+        },
+        "NetworkMode": "tcc-m-poliglota_default",
+        "PortBindings": {},
+        "RestartPolicy": {
+          "Name": "no",
+          "MaximumRetryCount": 0
+        },
+        "AutoRemove": false,
+        "VolumeDriver": "",
+        "VolumesFrom": null,
+        "ConsoleSize": [
+          0,
+          0
+        ],
+        "CapAdd": null,
+        "CapDrop": null,
+        "CgroupnsMode": "private",
+        "Dns": null,
+        "DnsOptions": null,
+        "DnsSearch": null,
+        "ExtraHosts": [],
+        "GroupAdd": null,
+        "IpcMode": "private",
+        "Cgroup": "",
+        "Links": null,
+        "OomScoreAdj": 0,
+        "PidMode": "",
+        "Privileged": false,
+        "PublishAllPorts": false,
+        "ReadonlyRootfs": false,
+        "SecurityOpt": null,
+        "UTSMode": "",
+        "UsernsMode": "",
+        "ShmSize": 67108864,
+        "Runtime": "runc",
+        "Isolation": "",
+        "CpuShares": 0,
+        "Memory": 1073741824,
+        "NanoCpus": 0,
+        "CgroupParent": "",
+        "BlkioWeight": 0,
+        "BlkioWeightDevice": null,
+        "BlkioDeviceReadBps": null,
+        "BlkioDeviceWriteBps": null,
+        "BlkioDeviceReadIOps": null,
+        "BlkioDeviceWriteIOps": null,
+        "CpuPeriod": 0,
+        "CpuQuota": 0,
+        "CpuRealtimePeriod": 0,
+        "CpuRealtimeRuntime": 0,
+        "CpusetCpus": "0-5,8-13",
+        "CpusetMems": "",
+        "Devices": null,
+        "DeviceCgroupRules": null,
+        "DeviceRequests": null,
+        "MemoryReservation": 0,
+        "MemorySwap": 1073741824,
+        "MemorySwappiness": null,
+        "OomKillDisable": null,
+        "PidsLimit": null,
+        "Ulimits": null,
+        "CpuCount": 0,
+        "CpuPercent": 0,
+        "IOMaximumIOps": 0,
+        "IOMaximumBandwidth": 0,
+        "MaskedPaths": [
+          "/proc/acpi",
+          "/proc/asound",
+          "/proc/interrupts",
+          "/proc/kcore",
+          "/proc/keys",
+          "/proc/latency_stats",
+          "/proc/sched_debug",
+          "/proc/scsi",
+          "/proc/timer_list",
+          "/proc/timer_stats",
+          "/sys/devices/virtual/powercap",
+          "/sys/firmware"
+        ],
+        "ReadonlyPaths": [
+          "/proc/bus",
+          "/proc/fs",
+          "/proc/irq",
+          "/proc/sys",
+          "/proc/sysrq-trigger"
+        ]
+      },
+      "Storage": {
+        "RootFS": {
+          "Snapshot": {
+            "Name": "overlayfs"
+          }
+        }
+      },
+      "Mounts": [],
+      "Config": {
+        "Hostname": "280942b7a613",
+        "Domainname": "",
+        "User": "1000:1000",
+        "AttachStdin": false,
+        "AttachStdout": true,
+        "AttachStderr": true,
+        "ExposedPorts": {
+          "8000/tcp": {}
+        },
+        "Tty": false,
+        "OpenStdin": false,
+        "StdinOnce": false,
+        "Env": [
+          "TCC_MOTOR=poliglota",
+          "TCC_CONEXOES=11",
+          "TCC_EF_BUSCA=120",
+          "OPENSEARCH_HOST=opensearch",
+          "QDRANT_HOST=qdrant",
+          "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "PYTHON_VERSION=3.14.4",
+          "PYTHON_SHA256=d923c51303e38e249136fc1bdf3568d56ecb03214efdef48516176d3d7faaef8",
+          "UV_PROJECT_ENVIRONMENT=/opt/venv",
+          "UV_PYTHON_DOWNLOADS=never",
+          "UV_COMPILE_BYTECODE=1",
+          "UV_LINK_MODE=copy"
+        ],
+        "Cmd": [
+          "/opt/venv/bin/uvicorn",
+          "servico:app",
+          "--host",
+          "0.0.0.0",
+          "--port",
+          "8000",
+          "--workers",
+          "6",
+          "--loop",
+          "uvloop",
+          "--http",
+          "httptools",
+          "--no-access-log"
+        ],
+        "Image": "tcc-busca:1",
+        "Volumes": null,
+        "WorkingDir": "/app",
+        "Entrypoint": null,
+        "Labels": {
+          "com.docker.compose.config-hash": "31e6228eeddb9625826a009d66f6100229cb2e2796184da5a1ed0ae522d14e63",
+          "com.docker.compose.container-number": "1",
+          "com.docker.compose.depends_on": "",
+          "com.docker.compose.image": "sha256:1d25086486a384f915c13249d501389c8ac4d9f92ca2a0ef40a4e2c025354ad0",
+          "com.docker.compose.oneoff": "False",
+          "com.docker.compose.project": "tcc-m-poliglota",
+          "com.docker.compose.project.config_files": "/home/leojaime/tcc/tcc-postgresql/eixo-m-mista/poliglota/compose.yaml",
+          "com.docker.compose.project.working_dir": "/home/leojaime/tcc/tcc-postgresql/eixo-m-mista/poliglota",
+          "com.docker.compose.service": "busca",
+          "com.docker.compose.version": "5.6.1"
+        }
+      },
+      "NetworkSettings": {
+        "SandboxID": "e6b3cb35ef881e582c1ee7f1c86e184ab82e67ad50e5174abd0c0c8e134bf0ce",
+        "SandboxKey": "/var/run/docker/netns/e6b3cb35ef88",
+        "Ports": {
+          "8000/tcp": null
+        },
+        "Networks": {
+          "tcc-m-poliglota_default": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": [
+              "tcc-m-poliglota-busca-1",
+              "busca"
+            ],
+            "DriverOpts": null,
+            "GwPriority": 0,
+            "NetworkID": "c64c3de3abb3bee01f1f413d32c239acba051828a591b399ab48bc7fc19a9db8",
+            "EndpointID": "c9d013d0e5f9bf5041a3c0f588fe554ee3ee9f22bfaa8d5f7771fe98df654781",
+            "Gateway": "172.18.0.1",
+            "IPAddress": "172.18.0.2",
+            "MacAddress": "56:92:c7:9e:be:30",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "DNSNames": [
+              "tcc-m-poliglota-busca-1",
+              "busca",
+              "280942b7a613"
+            ]
+          }
+        }
+      },
+      "ImageManifestDescriptor": {
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "digest": "sha256:1d25086486a384f915c13249d501389c8ac4d9f92ca2a0ef40a4e2c025354ad0",
+        "size": 2195,
+        "platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        }
+      }
+    },
+    {
+      "Id": "81c33809c55bfc0cc168702e81ede78d92bbb7810ed26babac326a0705eddd59",
+      "Created": "2026-11-16T02:21:42.936100034Z",
+      "Path": "/entrypoint.sh",
+      "Args": [
+        "influxd"
+      ],
+      "State": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 270490,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-11-16T02:21:43.158035552Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "Image": "sha256:33fa5b045658ddd676f3f9a72c1f40eb92ad1582539a691cd36e578ce0a6f751",
+      "ResolvConfPath": "/var/lib/docker/containers/81c33809c55bfc0cc168702e81ede78d92bbb7810ed26babac326a0705eddd59/resolv.conf",
+      "HostnamePath": "/var/lib/docker/containers/81c33809c55bfc0cc168702e81ede78d92bbb7810ed26babac326a0705eddd59/hostname",
+      "HostsPath": "/var/lib/docker/containers/81c33809c55bfc0cc168702e81ede78d92bbb7810ed26babac326a0705eddd59/hosts",
+      "LogPath": "/var/lib/docker/containers/81c33809c55bfc0cc168702e81ede78d92bbb7810ed26babac326a0705eddd59/81c33809c55bfc0cc168702e81ede78d92bbb7810ed26babac326a0705eddd59-json.log",
+      "Name": "/tcc-m-poliglota-influxdb-1",
+      "RestartCount": 0,
+      "Driver": "overlayfs",
+      "Platform": "linux",
+      "MountLabel": "",
+      "ProcessLabel": "",
+      "AppArmorProfile": "docker-default",
+      "ExecIDs": null,
+      "HostConfig": {
+        "Binds": [
+          "/home/leojaime/tcc-dados/m/poliglota/influxdb/atual:/var/lib/influxdb:rw"
+        ],
+        "ContainerIDFile": "",
+        "LogConfig": {
+          "Type": "json-file",
+          "Config": {
+            "max-file": "5",
+            "max-size": "100m"
+          }
+        },
+        "NetworkMode": "tcc-m-poliglota_default",
+        "PortBindings": {},
+        "RestartPolicy": {
+          "Name": "no",
+          "MaximumRetryCount": 0
+        },
+        "AutoRemove": false,
+        "VolumeDriver": "",
+        "VolumesFrom": null,
+        "ConsoleSize": [
+          0,
+          0
+        ],
+        "CapAdd": null,
+        "CapDrop": null,
+        "CgroupnsMode": "private",
+        "Dns": null,
+        "DnsOptions": null,
+        "DnsSearch": null,
+        "ExtraHosts": [],
+        "GroupAdd": null,
+        "IpcMode": "private",
+        "Cgroup": "",
+        "Links": null,
+        "OomScoreAdj": 0,
+        "PidMode": "",
+        "Privileged": false,
+        "PublishAllPorts": false,
+        "ReadonlyRootfs": false,
+        "SecurityOpt": null,
+        "UTSMode": "",
+        "UsernsMode": "",
+        "ShmSize": 67108864,
+        "Runtime": "runc",
+        "Isolation": "",
+        "CpuShares": 0,
+        "Memory": 2147483648,
+        "NanoCpus": 0,
+        "CgroupParent": "",
+        "BlkioWeight": 0,
+        "BlkioWeightDevice": null,
+        "BlkioDeviceReadBps": null,
+        "BlkioDeviceWriteBps": null,
+        "BlkioDeviceReadIOps": null,
+        "BlkioDeviceWriteIOps": null,
+        "CpuPeriod": 0,
+        "CpuQuota": 0,
+        "CpuRealtimePeriod": 0,
+        "CpuRealtimeRuntime": 0,
+        "CpusetCpus": "0-5,8-13",
+        "CpusetMems": "",
+        "Devices": null,
+        "DeviceCgroupRules": null,
+        "DeviceRequests": null,
+        "MemoryReservation": 0,
+        "MemorySwap": 2147483648,
+        "MemorySwappiness": null,
+        "OomKillDisable": null,
+        "PidsLimit": null,
+        "Ulimits": null,
+        "CpuCount": 0,
+        "CpuPercent": 0,
+        "IOMaximumIOps": 0,
+        "IOMaximumBandwidth": 0,
+        "MaskedPaths": [
+          "/proc/acpi",
+          "/proc/asound",
+          "/proc/interrupts",
+          "/proc/kcore",
+          "/proc/keys",
+          "/proc/latency_stats",
+          "/proc/sched_debug",
+          "/proc/scsi",
+          "/proc/timer_list",
+          "/proc/timer_stats",
+          "/sys/devices/virtual/powercap",
+          "/sys/firmware"
+        ],
+        "ReadonlyPaths": [
+          "/proc/bus",
+          "/proc/fs",
+          "/proc/irq",
+          "/proc/sys",
+          "/proc/sysrq-trigger"
+        ]
+      },
+      "Storage": {
+        "RootFS": {
+          "Snapshot": {
+            "Name": "overlayfs"
+          }
+        }
+      },
+      "Mounts": [
+        {
+          "Type": "bind",
+          "Source": "/home/leojaime/tcc-dados/m/poliglota/influxdb/atual",
+          "Destination": "/var/lib/influxdb",
+          "Mode": "rw",
+          "RW": true,
+          "Propagation": "rprivate"
+        }
+      ],
+      "Config": {
+        "Hostname": "81c33809c55b",
+        "Domainname": "",
+        "User": "1000:1000",
+        "AttachStdin": false,
+        "AttachStdout": true,
+        "AttachStderr": true,
+        "ExposedPorts": {
+          "8086/tcp": {}
+        },
+        "Tty": false,
+        "OpenStdin": false,
+        "StdinOnce": false,
+        "Env": [
+          "INFLUXDB_DATA_INDEX_VERSION=tsi1",
+          "INFLUXDB_REPORTING_DISABLED=true",
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "INFLUXDB_VERSION=1.13.1",
+          "INFLUXDB_PR=-1",
+          "INFLUXDB_PV=1.13.1-1"
+        ],
+        "Cmd": [
+          "influxd"
+        ],
+        "Image": "influxdb:1.13.1@sha256:33fa5b045658ddd676f3f9a72c1f40eb92ad1582539a691cd36e578ce0a6f751",
+        "Volumes": {
+          "/var/lib/influxdb": {}
+        },
+        "WorkingDir": "",
+        "Entrypoint": [
+          "/entrypoint.sh"
+        ],
+        "Labels": {
+          "com.docker.compose.config-hash": "927f11e39e675b180362889f10114050a13064da2761f6cc44b7734160064b9f",
+          "com.docker.compose.container-number": "1",
+          "com.docker.compose.depends_on": "",
+          "com.docker.compose.image": "sha256:222540c8fbe2bf6e30fc38fb22e97b7b6eaa67007e70b17895daf238df4ee1b5",
+          "com.docker.compose.oneoff": "False",
+          "com.docker.compose.project": "tcc-m-poliglota",
+          "com.docker.compose.project.config_files": "/home/leojaime/tcc/tcc-postgresql/eixo-m-mista/poliglota/compose.yaml",
+          "com.docker.compose.project.working_dir": "/home/leojaime/tcc/tcc-postgresql/eixo-m-mista/poliglota",
+          "com.docker.compose.service": "influxdb",
+          "com.docker.compose.version": "5.6.1"
+        },
+        "StopTimeout": 120
+      },
+      "NetworkSettings": {
+        "SandboxID": "76fdcf606b5468d24503c142286ec546a06856848cb7a615c2bfc20c38530841",
+        "SandboxKey": "/var/run/docker/netns/76fdcf606b54",
+        "Ports": {
+          "8086/tcp": null
+        },
+        "Networks": {
+          "tcc-m-poliglota_default": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": [
+              "tcc-m-poliglota-influxdb-1",
+              "influxdb"
+            ],
+            "DriverOpts": null,
+            "GwPriority": 0,
+            "NetworkID": "c64c3de3abb3bee01f1f413d32c239acba051828a591b399ab48bc7fc19a9db8",
+            "EndpointID": "25c7343d9bd5556829021a574f9b64dc37d9d5f7e8b522c092f3ad685dbe091a",
+            "Gateway": "172.18.0.1",
+            "IPAddress": "172.18.0.5",
+            "MacAddress": "da:ee:44:b2:cc:dd",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "DNSNames": [
+              "tcc-m-poliglota-influxdb-1",
+              "influxdb",
+              "81c33809c55b"
+            ]
+          }
+        }
+      },
+      "ImageManifestDescriptor": {
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "digest": "sha256:222540c8fbe2bf6e30fc38fb22e97b7b6eaa67007e70b17895daf238df4ee1b5",
+        "size": 2314,
+        "annotations": {
+          "com.docker.official-images.bashbrew.arch": "amd64",
+          "org.opencontainers.image.base.digest": "sha256:a1c89a59d56245724cc8afbac1150c88385c2e7f7fd705ac988b1579ca421064",
+          "org.opencontainers.image.base.name": "buildpack-deps:bookworm-curl",
+          "org.opencontainers.image.created": "2026-10-28T02:28:06Z",
+          "org.opencontainers.image.revision": "03c5f22dfec78fa00ef48dce091f081890bf5d26",
+          "org.opencontainers.image.source": "https://github.com/influxdata/influxdata-docker.git#03c5f22dfec78fa00ef48dce091f081890bf5d26:influxdb/1.13",
+          "org.opencontainers.image.url": "https://hub.docker.com/_/influxdb",
+          "org.opencontainers.image.version": "1.13"
+        },
+        "platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        }
+      }
+    },
+    {
+      "Id": "06319a6dd59d646d221a3575c4af2a3cbecb3cc3942de4f1691acdd8da148d69",
+      "Created": "2026-11-16T02:21:42.935214646Z",
+      "Path": "./opensearch-docker-entrypoint.sh",
+      "Args": [
+        "opensearch"
+      ],
+      "State": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 270282,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-11-16T02:21:43.037237019Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "Image": "sha256:fafe3fc3587088674669235575aa166228c48bdb940294a8cdbbc1da75236a40",
+      "ResolvConfPath": "/var/lib/docker/containers/06319a6dd59d646d221a3575c4af2a3cbecb3cc3942de4f1691acdd8da148d69/resolv.conf",
+      "HostnamePath": "/var/lib/docker/containers/06319a6dd59d646d221a3575c4af2a3cbecb3cc3942de4f1691acdd8da148d69/hostname",
+      "HostsPath": "/var/lib/docker/containers/06319a6dd59d646d221a3575c4af2a3cbecb3cc3942de4f1691acdd8da148d69/hosts",
+      "LogPath": "/var/lib/docker/containers/06319a6dd59d646d221a3575c4af2a3cbecb3cc3942de4f1691acdd8da148d69/06319a6dd59d646d221a3575c4af2a3cbecb3cc3942de4f1691acdd8da148d69-json.log",
+      "Name": "/tcc-m-poliglota-opensearch-1",
+      "RestartCount": 0,
+      "Driver": "overlayfs",
+      "Platform": "linux",
+      "MountLabel": "",
+      "ProcessLabel": "",
+      "AppArmorProfile": "docker-default",
+      "ExecIDs": null,
+      "HostConfig": {
+        "Binds": [
+          "/home/leojaime/tcc-dados/m/poliglota/opensearch/atual:/usr/share/opensearch/data:rw"
+        ],
+        "ContainerIDFile": "",
+        "LogConfig": {
+          "Type": "json-file",
+          "Config": {
+            "max-file": "5",
+            "max-size": "100m"
+          }
+        },
+        "NetworkMode": "tcc-m-poliglota_default",
+        "PortBindings": {},
+        "RestartPolicy": {
+          "Name": "no",
+          "MaximumRetryCount": 0
+        },
+        "AutoRemove": false,
+        "VolumeDriver": "",
+        "VolumesFrom": null,
+        "ConsoleSize": [
+          0,
+          0
+        ],
+        "CapAdd": null,
+        "CapDrop": null,
+        "CgroupnsMode": "private",
+        "Dns": null,
+        "DnsOptions": null,
+        "DnsSearch": null,
+        "ExtraHosts": [],
+        "GroupAdd": null,
+        "IpcMode": "private",
+        "Cgroup": "",
+        "Links": null,
+        "OomScoreAdj": 0,
+        "PidMode": "",
+        "Privileged": false,
+        "PublishAllPorts": false,
+        "ReadonlyRootfs": false,
+        "SecurityOpt": null,
+        "UTSMode": "",
+        "UsernsMode": "",
+        "ShmSize": 67108864,
+        "Runtime": "runc",
+        "Isolation": "",
+        "CpuShares": 0,
+        "Memory": 9663676416,
+        "NanoCpus": 0,
+        "CgroupParent": "",
+        "BlkioWeight": 0,
+        "BlkioWeightDevice": null,
+        "BlkioDeviceReadBps": null,
+        "BlkioDeviceWriteBps": null,
+        "BlkioDeviceReadIOps": null,
+        "BlkioDeviceWriteIOps": null,
+        "CpuPeriod": 0,
+        "CpuQuota": 0,
+        "CpuRealtimePeriod": 0,
+        "CpuRealtimeRuntime": 0,
+        "CpusetCpus": "0-5,8-13",
+        "CpusetMems": "",
+        "Devices": null,
+        "DeviceCgroupRules": null,
+        "DeviceRequests": null,
+        "MemoryReservation": 0,
+        "MemorySwap": 9663676416,
+        "MemorySwappiness": null,
+        "OomKillDisable": null,
+        "PidsLimit": null,
+        "Ulimits": [
+          {
+            "Name": "memlock",
+            "Hard": -1,
+            "Soft": -1
+          },
+          {
+            "Name": "nofile",
+            "Hard": 65536,
+            "Soft": 65536
+          }
+        ],
+        "CpuCount": 0,
+        "CpuPercent": 0,
+        "IOMaximumIOps": 0,
+        "IOMaximumBandwidth": 0,
+        "MaskedPaths": [
+          "/proc/acpi",
+          "/proc/asound",
+          "/proc/interrupts",
+          "/proc/kcore",
+          "/proc/keys",
+          "/proc/latency_stats",
+          "/proc/sched_debug",
+          "/proc/scsi",
+          "/proc/timer_list",
+          "/proc/timer_stats",
+          "/sys/devices/virtual/powercap",
+          "/sys/firmware"
+        ],
+        "ReadonlyPaths": [
+          "/proc/bus",
+          "/proc/fs",
+          "/proc/irq",
+          "/proc/sys",
+          "/proc/sysrq-trigger"
+        ]
+      },
+      "Storage": {
+        "RootFS": {
+          "Snapshot": {
+            "Name": "overlayfs"
+          }
+        }
+      },
+      "Mounts": [
+        {
+          "Type": "bind",
+          "Source": "/home/leojaime/tcc-dados/m/poliglota/opensearch/atual",
+          "Destination": "/usr/share/opensearch/data",
+          "Mode": "rw",
+          "RW": true,
+          "Propagation": "rprivate"
+        }
+      ],
+      "Config": {
+        "Hostname": "06319a6dd59d",
+        "Domainname": "",
+        "User": "1000",
+        "AttachStdin": false,
+        "AttachStdout": true,
+        "AttachStderr": true,
+        "ExposedPorts": {
+          "9200/tcp": {},
+          "9300/tcp": {},
+          "9600/tcp": {},
+          "9650/tcp": {}
+        },
+        "Tty": false,
+        "OpenStdin": false,
+        "StdinOnce": false,
+        "Env": [
+          "bootstrap.memory_lock=true",
+          "OPENSEARCH_JAVA_OPTS=-Xms4608m -Xmx4608m",
+          "DISABLE_INSTALL_DEMO_CONFIG=true",
+          "DISABLE_SECURITY_PLUGIN=true",
+          "discovery.type=single-node",
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/share/opensearch/jdk/bin:/usr/share/opensearch/bin",
+          "JAVA_HOME=/usr/share/opensearch/jdk",
+          "LD_LIBRARY_PATH=/usr/share/opensearch/plugins/opensearch-knn/lib"
+        ],
+        "Cmd": [
+          "opensearch"
+        ],
+        "Image": "opensearchproject/opensearch:3.8.0@sha256:fafe3fc3587088674669235575aa166228c48bdb940294a8cdbbc1da75236a40",
+        "Volumes": null,
+        "WorkingDir": "/usr/share/opensearch",
+        "Entrypoint": [
+          "./opensearch-docker-entrypoint.sh"
+        ],
+        "Labels": {
+          "DOCKERFILE": "https://github.com/opensearch-project/opensearch-build/blob/main/docker/release/dockerfiles/opensearch.al2.dockerfile",
+          "com.docker.compose.config-hash": "8c15efd10bad2c15a9b1c8191d3a61801b7b3c0d56974778ca2414bce7cea8a3",
+          "com.docker.compose.container-number": "1",
+          "com.docker.compose.depends_on": "",
+          "com.docker.compose.image": "sha256:68a688de28fb9bb66601552650b91a52a9fd5e7eac5481dd2b225ecb66fd09b0",
+          "com.docker.compose.oneoff": "False",
+          "com.docker.compose.project": "tcc-m-poliglota",
+          "com.docker.compose.project.config_files": "/home/leojaime/tcc/tcc-postgresql/eixo-m-mista/poliglota/compose.yaml",
+          "com.docker.compose.project.working_dir": "/home/leojaime/tcc/tcc-postgresql/eixo-m-mista/poliglota",
+          "com.docker.compose.service": "opensearch",
+          "com.docker.compose.version": "5.6.1",
+          "org.label-schema.build-date": "2026-09-15T19:35:13Z",
+          "org.label-schema.description": "12115",
+          "org.label-schema.license": "Apache-2.0",
+          "org.label-schema.name": "opensearch",
+          "org.label-schema.schema-version": "1.0",
+          "org.label-schema.url": "https://opensearch.org",
+          "org.label-schema.vcs-url": "https://github.com/opensearch-project/OpenSearch",
+          "org.label-schema.vendor": "OpenSearch",
+          "org.label-schema.version": "3.8.0"
+        },
+        "StopTimeout": 120
+      },
+      "NetworkSettings": {
+        "SandboxID": "c9b4708b49cefbff7992179b1a4d259b4a809bfa06f701be1b34ee1baae49c62",
+        "SandboxKey": "/var/run/docker/netns/c9b4708b49ce",
+        "Ports": {
+          "9200/tcp": null,
+          "9300/tcp": null,
+          "9600/tcp": null,
+          "9650/tcp": null
+        },
+        "Networks": {
+          "tcc-m-poliglota_default": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": [
+              "tcc-m-poliglota-opensearch-1",
+              "opensearch"
+            ],
+            "DriverOpts": null,
+            "GwPriority": 0,
+            "NetworkID": "c64c3de3abb3bee01f1f413d32c239acba051828a591b399ab48bc7fc19a9db8",
+            "EndpointID": "afdd618609bcd72a4c9cc277089066a449193409650ec384f581ea7822a96da0",
+            "Gateway": "172.18.0.1",
+            "IPAddress": "172.18.0.3",
+            "MacAddress": "86:6e:88:7c:63:ee",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "DNSNames": [
+              "tcc-m-poliglota-opensearch-1",
+              "opensearch",
+              "06319a6dd59d"
+            ]
+          }
+        }
+      },
+      "ImageManifestDescriptor": {
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "digest": "sha256:68a688de28fb9bb66601552650b91a52a9fd5e7eac5481dd2b225ecb66fd09b0",
+        "size": 1622,
+        "platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        }
+      }
+    }
+  ]
+}

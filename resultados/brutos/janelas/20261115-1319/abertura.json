@@ -1,0 +1,144 @@
+{
+  "versao_formato": 1,
+  "janela": "20261115-1319",
+  "plano": "mista",
+  "semente": 20261125,
+  "repouso_s": 1200,
+  "ordem": [
+    "m_poliglota_mista_c2_r01_t500000",
+    "m_poliglota_mista_c2_r01_t250000",
+    "m_poliglota_mista_c2_r01_t1000000",
+    "m_consolidada_mista_c2_r01_t250000",
+    "m_poliglota_mista_c2_r01",
+    "m_consolidada_mista_c2_r01_t1000000",
+    "m_consolidada_mista_c2_r01_t500000",
+    "m_consolidada_mista_c2_r01",
+    "m_poliglota_mista_c2_r02",
+    "m_consolidada_mista_c2_r02_t250000",
+    "m_poliglota_mista_c2_r02_t500000",
+    "m_poliglota_mista_c2_r02_t1000000",
+    "m_consolidada_mista_c2_r02",
+    "m_consolidada_mista_c2_r02_t1000000",
+    "m_poliglota_mista_c2_r02_t250000",
+    "m_consolidada_mista_c2_r02_t500000",
+    "m_poliglota_mista_c2_r03_t250000",
+    "m_consolidada_mista_c2_r03_t250000",
+    "m_consolidada_mista_c2_r03_t1000000",
+    "m_poliglota_mista_c2_r03_t1000000",
+    "m_consolidada_mista_c2_r03_t500000",
+    "m_poliglota_mista_c2_r03",
+    "m_poliglota_mista_c2_r03_t500000",
+    "m_consolidada_mista_c2_r03",
+    "m_poliglota_mista_c2_r04_t250000",
+    "m_consolidada_mista_c2_r04_t1000000",
+    "m_poliglota_mista_c2_r04_t500000",
+    "m_poliglota_mista_c2_r04_t1000000",
+    "m_consolidada_mista_c2_r04_t250000",
+    "m_consolidada_mista_c2_r04",
+    "m_poliglota_mista_c2_r04",
+    "m_consolidada_mista_c2_r04_t500000",
+    "m_poliglota_mista_c2_r05_t1000000",
+    "m_consolidada_mista_c2_r05_t250000",
+    "m_consolidada_mista_c2_r05",
+    "m_poliglota_mista_c2_r05",
+    "m_poliglota_mista_c2_r05_t250000",
+    "m_poliglota_mista_c2_r05_t500000",
+    "m_consolidada_mista_c2_r05_t500000",
+    "m_consolidada_mista_c2_r05_t1000000"
+  ],
+  "momento": "2026-11-15T13:19:39-0300",
+  "controles": [
+    {
+      "controle": "swap desligado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhuma área ativa"
+    },
+    {
+      "controle": "timers parados",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "10 parados"
+    },
+    {
+      "controle": "P510 encontrado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "controlador nvme0"
+    },
+    {
+      "controle": "APST desligado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nvme0: pm_qos_latency_tolerance_us = 0"
+    },
+    {
+      "controle": "energia em performance",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "16 processadores em performance, boost ligado"
+    },
+    {
+      "controle": "suspensão e desligamento bloqueados",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "trava tcc-coleta ativa"
+    },
+    {
+      "controle": "nenhum container rodando",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "nenhum coletor órfão",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "nenhum navegador aberto",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "espaço livre de pelo menos 50 GiB",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "680 GiB livres"
+    },
+    {
+      "controle": "sudo sem senha para a coleta",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "fstrim e nvme smart-log liberados"
+    },
+    {
+      "controle": "sem programas pesados abertos",
+      "ok": false,
+      "bloqueante": false,
+      "detalhe": "abertos: claude, code"
+    }
+  ],
+  "disco": {
+    "ocupado_bytes": 201975107584,
+    "livre_bytes": 730294403072
+  },
+  "smart": {
+    "temperature": "38 °C (311 K, 100 °F)",
+    "percentage_used": "1%",
+    "Data Units Written": "25395059 (13.00 TB)",
+    "power_on_hours": "240",
+    "unsafe_shutdowns": "0",
+    "media_errors": "0"
+  },
+  "host": {
+    "kernel": "7.0.0-42-generic",
+    "docker": "29.9.2"
+  },
+  "repositorio": {
+    "commit": "07c4a10bacd92e829aef5ef24c8b47c08cc5b54f",
+    "alteracoes_locais": false
+  }
+}

@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 469.60 queries/sec):
+Influx max of all CPU metrics, random    8 hosts, random 8h0m0s by 1h:
+min:     2.03ms, med:     2.05ms, mean:     2.09ms, max:    2.25ms, stddev:     0.08ms, sum:   0.0sec, count: 5
+all queries                                                          :
+min:     2.03ms, med:     2.05ms, mean:     2.09ms, max:    2.25ms, stddev:     0.08ms, sum:   0.0sec, count: 5
+wall clock time: 0.010993sec
+Saving results json file to /saida/ferramenta/lotes/20/cpu-max-all-8.json

@@ -1,0 +1,18 @@
+{
+  "ferramenta": "tcc-gerador-temporal",
+  "versao": "2 (TSBS 8323e59c74027b108f4ad5ec5d3e498b0101a02e com pr255.patch (ADR-059), Python 3.14.4)",
+  "arquitetura": "timescaledb",
+  "taxa_metricas_s": 250000,
+  "trabalhadores": 4,
+  "lote": 10000,
+  "inicio_ms": 1794777328292,
+  "fim_ms": 1794777944092,
+  "metricas": 153937510.0,
+  "linhas": 15393751.0,
+  "pontos_enviados": 15393751,
+  "pontos_devidos": 15393751,
+  "maior_atraso_s": 0.004,
+  "fonte_esgotada": false,
+  "estourou": false,
+  "erro": null
+}

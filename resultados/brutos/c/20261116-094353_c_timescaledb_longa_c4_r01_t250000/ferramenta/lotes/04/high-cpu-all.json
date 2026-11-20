@@ -1,0 +1,48 @@
+{
+ "ResultFormatVersion": "0.1",
+ "RunnerConfig": {
+  "DBName": "benchmark",
+  "Limit": 0,
+  "LimitRPS": 0,
+  "MemProfile": "",
+  "HDRLatenciesFile": "",
+  "Workers": 1,
+  "PrintResponses": false,
+  "Debug": 0,
+  "FileName": "",
+  "BurnIn": 0,
+  "PrintInterval": 0,
+  "PrewarmQueries": false,
+  "ResultsFile": "/saida/ferramenta/lotes/04/high-cpu-all.json"
+ },
+ "StartTime": 1794841507000,
+ "EndTime": 1794841511000,
+ "DurationMillis": 3795,
+ "Totals": {
+  "burnIn": 0,
+  "limit": 0,
+  "overallQuantiles": {
+   "TimescaleDB_CPU_over_threshold_all_hosts": {
+    "q0": 0,
+    "q100": 1457.599,
+    "q50": 649.375,
+    "q95": 1457.599,
+    "q99": 1457.599,
+    "q999": 1457.599
+   },
+   "all_queries": {
+    "q0": 0,
+    "q100": 1457.599,
+    "q50": 649.375,
+    "q95": 1457.599,
+    "q99": 1457.599,
+    "q999": 1457.599
+   }
+  },
+  "overallQueryRates": {
+   "TimescaleDB_CPU_over_threshold_all_hosts": 1.3175418594860522,
+   "all_queries": 1.3175418594860522
+  },
+  "prewarmQueries": false
+ }
+}

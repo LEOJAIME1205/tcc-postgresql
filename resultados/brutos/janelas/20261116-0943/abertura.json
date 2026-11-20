@@ -1,0 +1,108 @@
+{
+  "versao_formato": 1,
+  "janela": "20261116-0943",
+  "plano": "longa",
+  "semente": 20261126,
+  "repouso_s": 1200,
+  "ordem": [
+    "c_timescaledb_longa_c4_r01_t250000",
+    "b_consolidada_longa_c32_r01_t2800",
+    "b_outbox_longa_c32_r01_t2800",
+    "c_influxdb_longa_c4_r01_t250000"
+  ],
+  "momento": "2026-11-16T09:43:53-0300",
+  "controles": [
+    {
+      "controle": "swap desligado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhuma área ativa"
+    },
+    {
+      "controle": "timers parados",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "10 parados"
+    },
+    {
+      "controle": "P510 encontrado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "controlador nvme0"
+    },
+    {
+      "controle": "APST desligado",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nvme0: pm_qos_latency_tolerance_us = 0"
+    },
+    {
+      "controle": "energia em performance",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "16 processadores em performance, boost ligado"
+    },
+    {
+      "controle": "suspensão e desligamento bloqueados",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "trava tcc-coleta ativa"
+    },
+    {
+      "controle": "nenhum container rodando",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "nenhum coletor órfão",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "nenhum navegador aberto",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "nenhum"
+    },
+    {
+      "controle": "espaço livre de pelo menos 300 GiB",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "654 GiB livres"
+    },
+    {
+      "controle": "sudo sem senha para a coleta",
+      "ok": true,
+      "bloqueante": true,
+      "detalhe": "fstrim e nvme smart-log liberados"
+    },
+    {
+      "controle": "sem programas pesados abertos",
+      "ok": false,
+      "bloqueante": false,
+      "detalhe": "abertos: claude, code"
+    }
+  ],
+  "disco": {
+    "ocupado_bytes": 229881769984,
+    "livre_bytes": 702387740672
+  },
+  "smart": {
+    "temperature": "51 °C (324 K, 123 °F)",
+    "percentage_used": "1%",
+    "Data Units Written": "27384432 (14.02 TB)",
+    "power_on_hours": "260",
+    "unsafe_shutdowns": "0",
+    "media_errors": "0"
+  },
+  "host": {
+    "kernel": "7.0.0-42-generic",
+    "docker": "29.9.2"
+  },
+  "repositorio": {
+    "commit": "07c4a10bacd92e829aef5ef24c8b47c08cc5b54f",
+    "alteracoes_locais": false
+  }
+}

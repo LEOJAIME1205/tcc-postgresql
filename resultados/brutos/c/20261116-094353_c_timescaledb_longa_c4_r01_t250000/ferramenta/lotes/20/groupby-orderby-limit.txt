@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 25.77 queries/sec):
+TimescaleDB max cpu over last 5 min-intervals (random end):
+min:    20.27ms, med:    43.26ms, mean:    38.79ms, max:   55.09ms, stddev:    11.93ms, sum:   0.2sec, count: 5
+all queries                                               :
+min:    20.27ms, med:    43.26ms, mean:    38.79ms, max:   55.09ms, stddev:    11.93ms, sum:   0.2sec, count: 5
+wall clock time: 0.197740sec
+Saving results json file to /saida/ferramenta/lotes/20/groupby-orderby-limit.json

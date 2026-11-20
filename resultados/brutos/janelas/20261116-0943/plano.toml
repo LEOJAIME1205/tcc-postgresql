@@ -1,0 +1,47 @@
+# Longa duração (ADR-069): uma execução por arquitetura, 12 h de medição, em ordem sorteada,
+# ~53 h. Fila em taxa fixa de 2.800 mensagens/s com 32 produtores e 32 consumidores; ingestão
+# temporal em taxa fixa de 250 mil métricas/s com 4 trabalhadores e dados gerados na hora. O
+# espaço mínimo cobre o TimescaleDB sem compressão no fim da ingestão (~205 GB e até 32 GB de WAL).
+nome = "longa"
+semente = 20261126
+espaco_livre_min_gib = 300
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "consolidada"
+cenario = "longa"
+concorrencias = [32]
+taxas = [2800]
+repeticoes = 1
+aquecimento_s = 120
+medicao_s = 43200
+
+[[configuracao]]
+eixo = "b"
+arquitetura = "outbox"
+cenario = "longa"
+concorrencias = [32]
+taxas = [2800]
+repeticoes = 1
+aquecimento_s = 120
+medicao_s = 43200
+
+[[configuracao]]
+eixo = "c"
+arquitetura = "timescaledb"
+cenario = "longa"
+concorrencias = [4]
+taxas = [250000]
+repeticoes = 1
+aquecimento_s = 10
+medicao_s = 43200
+
+[[configuracao]]
+eixo = "c"
+arquitetura = "influxdb"
+cenario = "longa"
+concorrencias = [4]
+taxas = [250000]
+repeticoes = 1
+aquecimento_s = 10
+medicao_s = 43200

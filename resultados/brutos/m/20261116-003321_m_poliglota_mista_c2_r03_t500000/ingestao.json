@@ -1,0 +1,18 @@
+{
+  "ferramenta": "tcc-gerador-temporal",
+  "versao": "2 (TSBS 8323e59c74027b108f4ad5ec5d3e498b0101a02e com pr255.patch (ADR-059), Python 3.14.4)",
+  "arquitetura": "influxdb",
+  "taxa_metricas_s": 500000,
+  "trabalhadores": 4,
+  "lote": 10000,
+  "inicio_ms": 1794801216711,
+  "fim_ms": 1794801832778,
+  "metricas": 307992790.0,
+  "linhas": 30799279.0,
+  "pontos_enviados": 30799279,
+  "pontos_devidos": 30799279,
+  "maior_atraso_s": 0.015,
+  "fonte_esgotada": false,
+  "estourou": false,
+  "erro": null
+}

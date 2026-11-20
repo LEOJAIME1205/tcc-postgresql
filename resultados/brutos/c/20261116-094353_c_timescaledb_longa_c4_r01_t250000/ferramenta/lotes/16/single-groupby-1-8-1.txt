@@ -1,0 +1,7 @@
+Run complete after 5 queries with 1 workers (Overall query rate 4.05 queries/sec):
+TimescaleDB 1 cpu metric(s), random    8 hosts, random 1h0m0s by 1m:
+min:   197.30ms, med:   245.57ms, mean:   246.70ms, max:  284.64ms, stddev:    33.04ms, sum:   1.2sec, count: 5
+all queries                                                        :
+min:   197.30ms, med:   245.57ms, mean:   246.70ms, max:  284.64ms, stddev:    33.04ms, sum:   1.2sec, count: 5
+wall clock time: 1.241428sec
+Saving results json file to /saida/ferramenta/lotes/16/single-groupby-1-8-1.json

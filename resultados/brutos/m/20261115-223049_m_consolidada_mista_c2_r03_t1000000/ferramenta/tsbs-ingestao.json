@@ -1,0 +1,27 @@
+{
+ "ResultFormatVersion": "0.1",
+ "RunnerConfig": {
+  "db-name": "benchmark",
+  "batch-size": 10000,
+  "workers": 4,
+  "limit": 0,
+  "do-load": true,
+  "do-create-db": false,
+  "do-abort-on-exist": false,
+  "reporting-period": 1000000000,
+  "hash-workers": false,
+  "no-flow-control": false,
+  "channel-capacity": 0,
+  "insert-intervals": "",
+  "results-file": "/saida/ferramenta/tsbs-ingestao.json",
+  "file": "",
+  "seed": 0
+ },
+ "StartTime": 1794793876,
+ "EndTime": 1794794492,
+ "DurationMillis": 615924,
+ "Totals": {
+  "metricRate": 999934.1485361715,
+  "rowRate": 99993.41485361716
+ }
+}

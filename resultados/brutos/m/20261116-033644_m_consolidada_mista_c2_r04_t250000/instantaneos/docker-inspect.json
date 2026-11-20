@@ -1,0 +1,544 @@
+{
+  "containers": [
+    {
+      "Id": "e273f1292aa7e75336ce08f4aea8ec0f97cd59bf6b557d7b0bd18dac4a6fd2d1",
+      "Created": "2026-11-16T06:57:15.225278069Z",
+      "Path": "docker-entrypoint.sh",
+      "Args": [
+        "postgres",
+        "-c",
+        "shared_preload_libraries=timescaledb,pg_stat_statements",
+        "-c",
+        "timescaledb.telemetry_level=off",
+        "-c",
+        "shared_buffers=4864MB",
+        "-c",
+        "effective_cache_size=14592MB",
+        "-c",
+        "work_mem=4MB",
+        "-c",
+        "max_worker_processes=31",
+        "-c",
+        "timescaledb.max_background_workers=16",
+        "-c",
+        "max_locks_per_transaction=512",
+        "-c",
+        "max_wal_size=32GB",
+        "-c",
+        "min_wal_size=512MB",
+        "-c",
+        "autovacuum_max_workers=10",
+        "-c",
+        "autovacuum_naptime=10"
+      ],
+      "State": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 418867,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-11-16T06:57:15.25451986Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "Image": "sha256:3c71fe3d3acb92bc6b4c2a1dfce722e9eff10c352252a6450051cd04880067ec",
+      "ResolvConfPath": "/var/lib/docker/containers/e273f1292aa7e75336ce08f4aea8ec0f97cd59bf6b557d7b0bd18dac4a6fd2d1/resolv.conf",
+      "HostnamePath": "/var/lib/docker/containers/e273f1292aa7e75336ce08f4aea8ec0f97cd59bf6b557d7b0bd18dac4a6fd2d1/hostname",
+      "HostsPath": "/var/lib/docker/containers/e273f1292aa7e75336ce08f4aea8ec0f97cd59bf6b557d7b0bd18dac4a6fd2d1/hosts",
+      "LogPath": "/var/lib/docker/containers/e273f1292aa7e75336ce08f4aea8ec0f97cd59bf6b557d7b0bd18dac4a6fd2d1/e273f1292aa7e75336ce08f4aea8ec0f97cd59bf6b557d7b0bd18dac4a6fd2d1-json.log",
+      "Name": "/tcc-m-consolidada-postgres-1",
+      "RestartCount": 0,
+      "Driver": "overlayfs",
+      "Platform": "linux",
+      "MountLabel": "",
+      "ProcessLabel": "",
+      "AppArmorProfile": "docker-default",
+      "ExecIDs": null,
+      "HostConfig": {
+        "Binds": [
+          "/home/leojaime/tcc-dados/m/consolidada/postgres/atual:/var/lib/postgresql:rw"
+        ],
+        "ContainerIDFile": "",
+        "LogConfig": {
+          "Type": "json-file",
+          "Config": {
+            "max-file": "5",
+            "max-size": "100m"
+          }
+        },
+        "NetworkMode": "tcc-m-consolidada_default",
+        "PortBindings": {},
+        "RestartPolicy": {
+          "Name": "no",
+          "MaximumRetryCount": 0
+        },
+        "AutoRemove": false,
+        "VolumeDriver": "",
+        "VolumesFrom": null,
+        "ConsoleSize": [
+          0,
+          0
+        ],
+        "CapAdd": null,
+        "CapDrop": null,
+        "CgroupnsMode": "private",
+        "Dns": null,
+        "DnsOptions": null,
+        "DnsSearch": null,
+        "ExtraHosts": [],
+        "GroupAdd": null,
+        "IpcMode": "private",
+        "Cgroup": "",
+        "Links": null,
+        "OomScoreAdj": 0,
+        "PidMode": "",
+        "Privileged": false,
+        "PublishAllPorts": false,
+        "ReadonlyRootfs": false,
+        "SecurityOpt": null,
+        "UTSMode": "",
+        "UsernsMode": "",
+        "ShmSize": 9663676416,
+        "Runtime": "runc",
+        "Isolation": "",
+        "CpuShares": 0,
+        "Memory": 20401094656,
+        "NanoCpus": 0,
+        "CgroupParent": "",
+        "BlkioWeight": 0,
+        "BlkioWeightDevice": null,
+        "BlkioDeviceReadBps": null,
+        "BlkioDeviceWriteBps": null,
+        "BlkioDeviceReadIOps": null,
+        "BlkioDeviceWriteIOps": null,
+        "CpuPeriod": 0,
+        "CpuQuota": 0,
+        "CpuRealtimePeriod": 0,
+        "CpuRealtimeRuntime": 0,
+        "CpusetCpus": "0-5,8-13",
+        "CpusetMems": "",
+        "Devices": null,
+        "DeviceCgroupRules": null,
+        "DeviceRequests": null,
+        "MemoryReservation": 0,
+        "MemorySwap": 20401094656,
+        "MemorySwappiness": null,
+        "OomKillDisable": null,
+        "PidsLimit": null,
+        "Ulimits": null,
+        "CpuCount": 0,
+        "CpuPercent": 0,
+        "IOMaximumIOps": 0,
+        "IOMaximumBandwidth": 0,
+        "MaskedPaths": [
+          "/proc/acpi",
+          "/proc/asound",
+          "/proc/interrupts",
+          "/proc/kcore",
+          "/proc/keys",
+          "/proc/latency_stats",
+          "/proc/sched_debug",
+          "/proc/scsi",
+          "/proc/timer_list",
+          "/proc/timer_stats",
+          "/sys/devices/virtual/powercap",
+          "/sys/firmware"
+        ],
+        "ReadonlyPaths": [
+          "/proc/bus",
+          "/proc/fs",
+          "/proc/irq",
+          "/proc/sys",
+          "/proc/sysrq-trigger"
+        ]
+      },
+      "Storage": {
+        "RootFS": {
+          "Snapshot": {
+            "Name": "overlayfs"
+          }
+        }
+      },
+      "Mounts": [
+        {
+          "Type": "bind",
+          "Source": "/home/leojaime/tcc-dados/m/consolidada/postgres/atual",
+          "Destination": "/var/lib/postgresql",
+          "Mode": "rw",
+          "RW": true,
+          "Propagation": "rprivate"
+        }
+      ],
+      "Config": {
+        "Hostname": "e273f1292aa7",
+        "Domainname": "",
+        "User": "",
+        "AttachStdin": false,
+        "AttachStdout": true,
+        "AttachStderr": true,
+        "ExposedPorts": {
+          "5432/tcp": {}
+        },
+        "Tty": false,
+        "OpenStdin": false,
+        "StdinOnce": false,
+        "Env": [
+          "POSTGRES_PASSWORD=tcc",
+          "POSTGRES_DB=busca",
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/postgresql/18/bin",
+          "GOSU_VERSION=1.19",
+          "LANG=en_US.utf8",
+          "PG_MAJOR=18",
+          "PG_VERSION=18.6-1.pgdg13+2",
+          "PGDATA=/var/lib/postgresql/18/docker"
+        ],
+        "Cmd": [
+          "postgres",
+          "-c",
+          "shared_preload_libraries=timescaledb,pg_stat_statements",
+          "-c",
+          "timescaledb.telemetry_level=off",
+          "-c",
+          "shared_buffers=4864MB",
+          "-c",
+          "effective_cache_size=14592MB",
+          "-c",
+          "work_mem=4MB",
+          "-c",
+          "max_worker_processes=31",
+          "-c",
+          "timescaledb.max_background_workers=16",
+          "-c",
+          "max_locks_per_transaction=512",
+          "-c",
+          "max_wal_size=32GB",
+          "-c",
+          "min_wal_size=512MB",
+          "-c",
+          "autovacuum_max_workers=10",
+          "-c",
+          "autovacuum_naptime=10"
+        ],
+        "Image": "tcc-postgres:18.6-ts2.31.0-pgv0.8.7",
+        "Volumes": {
+          "/var/lib/postgresql": {}
+        },
+        "WorkingDir": "",
+        "Entrypoint": [
+          "docker-entrypoint.sh"
+        ],
+        "Labels": {
+          "com.docker.compose.config-hash": "bde870e1238a63c6753ecc76c473a0febceacb63ce3f4d0328c09d405b55031d",
+          "com.docker.compose.container-number": "1",
+          "com.docker.compose.depends_on": "",
+          "com.docker.compose.image": "sha256:d079565c71a8b25b2381a3466ea086dcfa1f01ca4228f10aa24e45b951b2b85e",
+          "com.docker.compose.oneoff": "False",
+          "com.docker.compose.project": "tcc-m-consolidada",
+          "com.docker.compose.project.config_files": "/home/leojaime/tcc/tcc-postgresql/eixo-m-mista/consolidada/compose.yaml",
+          "com.docker.compose.project.working_dir": "/home/leojaime/tcc/tcc-postgresql/eixo-m-mista/consolidada",
+          "com.docker.compose.service": "postgres",
+          "com.docker.compose.version": "5.6.1"
+        },
+        "StopSignal": "SIGINT",
+        "StopTimeout": 120
+      },
+      "NetworkSettings": {
+        "SandboxID": "30b885e5044484d3c6b4f8ae0ddd2b6bc55a1df71dff881f40c59b8792d12871",
+        "SandboxKey": "/var/run/docker/netns/30b885e50444",
+        "Ports": {
+          "5432/tcp": null
+        },
+        "Networks": {
+          "tcc-m-consolidada_default": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": [
+              "tcc-m-consolidada-postgres-1",
+              "postgres"
+            ],
+            "DriverOpts": null,
+            "GwPriority": 0,
+            "NetworkID": "e84bab3a7b7ce46724775113e7369938d4f4977661a3731d4369029a873dfd0d",
+            "EndpointID": "983e5978d85751c5e3d309b593ff302784d248e0818e5b5532c1910189556945",
+            "Gateway": "172.18.0.1",
+            "IPAddress": "172.18.0.2",
+            "MacAddress": "4e:e4:c8:31:89:d3",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "DNSNames": [
+              "tcc-m-consolidada-postgres-1",
+              "postgres",
+              "e273f1292aa7"
+            ]
+          }
+        }
+      },
+      "ImageManifestDescriptor": {
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "digest": "sha256:d079565c71a8b25b2381a3466ea086dcfa1f01ca4228f10aa24e45b951b2b85e",
+        "size": 3149,
+        "platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        }
+      }
+    },
+    {
+      "Id": "b1210826d4ad78db24269182c1fc46d396b4af59cb9669dec50c40ed2e9ea9c3",
+      "Created": "2026-11-16T06:57:15.224796546Z",
+      "Path": "/opt/venv/bin/uvicorn",
+      "Args": [
+        "servico:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--workers",
+        "6",
+        "--loop",
+        "uvloop",
+        "--http",
+        "httptools",
+        "--no-access-log"
+      ],
+      "State": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 418976,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-11-16T06:57:15.322502548Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "Image": "sha256:82bbd087272bb16a875b8922a21a9d929763c5a58e9098a99e98f43f2e6c7dc4",
+      "ResolvConfPath": "/var/lib/docker/containers/b1210826d4ad78db24269182c1fc46d396b4af59cb9669dec50c40ed2e9ea9c3/resolv.conf",
+      "HostnamePath": "/var/lib/docker/containers/b1210826d4ad78db24269182c1fc46d396b4af59cb9669dec50c40ed2e9ea9c3/hostname",
+      "HostsPath": "/var/lib/docker/containers/b1210826d4ad78db24269182c1fc46d396b4af59cb9669dec50c40ed2e9ea9c3/hosts",
+      "LogPath": "/var/lib/docker/containers/b1210826d4ad78db24269182c1fc46d396b4af59cb9669dec50c40ed2e9ea9c3/b1210826d4ad78db24269182c1fc46d396b4af59cb9669dec50c40ed2e9ea9c3-json.log",
+      "Name": "/tcc-m-consolidada-busca-1",
+      "RestartCount": 0,
+      "Driver": "overlayfs",
+      "Platform": "linux",
+      "MountLabel": "",
+      "ProcessLabel": "",
+      "AppArmorProfile": "docker-default",
+      "ExecIDs": null,
+      "HostConfig": {
+        "Binds": null,
+        "ContainerIDFile": "",
+        "LogConfig": {
+          "Type": "json-file",
+          "Config": {
+            "max-file": "5",
+            "max-size": "100m"
+          }
+        },
+        "NetworkMode": "tcc-m-consolidada_default",
+        "PortBindings": {},
+        "RestartPolicy": {
+          "Name": "no",
+          "MaximumRetryCount": 0
+        },
+        "AutoRemove": false,
+        "VolumeDriver": "",
+        "VolumesFrom": null,
+        "ConsoleSize": [
+          0,
+          0
+        ],
+        "CapAdd": null,
+        "CapDrop": null,
+        "CgroupnsMode": "private",
+        "Dns": null,
+        "DnsOptions": null,
+        "DnsSearch": null,
+        "ExtraHosts": [],
+        "GroupAdd": null,
+        "IpcMode": "private",
+        "Cgroup": "",
+        "Links": null,
+        "OomScoreAdj": 0,
+        "PidMode": "",
+        "Privileged": false,
+        "PublishAllPorts": false,
+        "ReadonlyRootfs": false,
+        "SecurityOpt": null,
+        "UTSMode": "",
+        "UsernsMode": "",
+        "ShmSize": 67108864,
+        "Runtime": "runc",
+        "Isolation": "",
+        "CpuShares": 0,
+        "Memory": 1073741824,
+        "NanoCpus": 0,
+        "CgroupParent": "",
+        "BlkioWeight": 0,
+        "BlkioWeightDevice": null,
+        "BlkioDeviceReadBps": null,
+        "BlkioDeviceWriteBps": null,
+        "BlkioDeviceReadIOps": null,
+        "BlkioDeviceWriteIOps": null,
+        "CpuPeriod": 0,
+        "CpuQuota": 0,
+        "CpuRealtimePeriod": 0,
+        "CpuRealtimeRuntime": 0,
+        "CpusetCpus": "0-5,8-13",
+        "CpusetMems": "",
+        "Devices": null,
+        "DeviceCgroupRules": null,
+        "DeviceRequests": null,
+        "MemoryReservation": 0,
+        "MemorySwap": 1073741824,
+        "MemorySwappiness": null,
+        "OomKillDisable": null,
+        "PidsLimit": null,
+        "Ulimits": null,
+        "CpuCount": 0,
+        "CpuPercent": 0,
+        "IOMaximumIOps": 0,
+        "IOMaximumBandwidth": 0,
+        "MaskedPaths": [
+          "/proc/acpi",
+          "/proc/asound",
+          "/proc/interrupts",
+          "/proc/kcore",
+          "/proc/keys",
+          "/proc/latency_stats",
+          "/proc/sched_debug",
+          "/proc/scsi",
+          "/proc/timer_list",
+          "/proc/timer_stats",
+          "/sys/devices/virtual/powercap",
+          "/sys/firmware"
+        ],
+        "ReadonlyPaths": [
+          "/proc/bus",
+          "/proc/fs",
+          "/proc/irq",
+          "/proc/sys",
+          "/proc/sysrq-trigger"
+        ]
+      },
+      "Storage": {
+        "RootFS": {
+          "Snapshot": {
+            "Name": "overlayfs"
+          }
+        }
+      },
+      "Mounts": [],
+      "Config": {
+        "Hostname": "b1210826d4ad",
+        "Domainname": "",
+        "User": "1000:1000",
+        "AttachStdin": false,
+        "AttachStdout": true,
+        "AttachStderr": true,
+        "ExposedPorts": {
+          "8000/tcp": {}
+        },
+        "Tty": false,
+        "OpenStdin": false,
+        "StdinOnce": false,
+        "Env": [
+          "TCC_MOTOR=consolidada",
+          "TCC_CONEXOES=11",
+          "TCC_EF_BUSCA=260",
+          "PGHOST=postgres",
+          "PGUSER=postgres",
+          "PGPASSWORD=tcc",
+          "PGDATABASE=busca",
+          "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "PYTHON_VERSION=3.14.4",
+          "PYTHON_SHA256=d923c51303e38e249136fc1bdf3568d56ecb03214efdef48516176d3d7faaef8",
+          "UV_PROJECT_ENVIRONMENT=/opt/venv",
+          "UV_PYTHON_DOWNLOADS=never",
+          "UV_COMPILE_BYTECODE=1",
+          "UV_LINK_MODE=copy"
+        ],
+        "Cmd": [
+          "/opt/venv/bin/uvicorn",
+          "servico:app",
+          "--host",
+          "0.0.0.0",
+          "--port",
+          "8000",
+          "--workers",
+          "6",
+          "--loop",
+          "uvloop",
+          "--http",
+          "httptools",
+          "--no-access-log"
+        ],
+        "Image": "tcc-busca:1",
+        "Volumes": null,
+        "WorkingDir": "/app",
+        "Entrypoint": null,
+        "Labels": {
+          "com.docker.compose.config-hash": "f41985e28ccd859ac3aa1f00d1bec5c03d2302b2e22f0b5d1649ff59664c5d30",
+          "com.docker.compose.container-number": "1",
+          "com.docker.compose.depends_on": "",
+          "com.docker.compose.image": "sha256:1d25086486a384f915c13249d501389c8ac4d9f92ca2a0ef40a4e2c025354ad0",
+          "com.docker.compose.oneoff": "False",
+          "com.docker.compose.project": "tcc-m-consolidada",
+          "com.docker.compose.project.config_files": "/home/leojaime/tcc/tcc-postgresql/eixo-m-mista/consolidada/compose.yaml",
+          "com.docker.compose.project.working_dir": "/home/leojaime/tcc/tcc-postgresql/eixo-m-mista/consolidada",
+          "com.docker.compose.service": "busca",
+          "com.docker.compose.version": "5.6.1"
+        }
+      },
+      "NetworkSettings": {
+        "SandboxID": "02a61d29a45d5878a98039d1eacf57d4f523fd0b36c5c1aa5ec0868436311cde",
+        "SandboxKey": "/var/run/docker/netns/02a61d29a45d",
+        "Ports": {
+          "8000/tcp": null
+        },
+        "Networks": {
+          "tcc-m-consolidada_default": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": [
+              "tcc-m-consolidada-busca-1",
+              "busca"
+            ],
+            "DriverOpts": null,
+            "GwPriority": 0,
+            "NetworkID": "e84bab3a7b7ce46724775113e7369938d4f4977661a3731d4369029a873dfd0d",
+            "EndpointID": "8e66ce8bb0a88e78349bb68173e1ef557727fe1184459f131b815aeecc823966",
+            "Gateway": "172.18.0.1",
+            "IPAddress": "172.18.0.3",
+            "MacAddress": "46:66:00:57:6e:c7",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "DNSNames": [
+              "tcc-m-consolidada-busca-1",
+              "busca",
+              "b1210826d4ad"
+            ]
+          }
+        }
+      },
+      "ImageManifestDescriptor": {
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "digest": "sha256:1d25086486a384f915c13249d501389c8ac4d9f92ca2a0ef40a4e2c025354ad0",
+        "size": 2195,
+        "platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        }
+      }
+    }
+  ]
+}

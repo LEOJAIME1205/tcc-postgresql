@@ -1,0 +1,24 @@
+Smart Log for NVME device:nvme0 namespace-id:ffffffff
+critical_warning			: 0
+temperature				: 38 °C (311 K, 100 °F)
+available_spare				: 100%
+available_spare_threshold		: 5%
+percentage_used				: 1%
+endurance group critical warning summary: 0
+Data Units Read				: 3773252 (1.93 TB)
+Data Units Written			: 25395059 (13.00 TB)
+host_read_commands			: 56628641
+host_write_commands			: 558567912
+controller_busy_time			: 1313
+power_cycles				: 33
+power_on_hours				: 240
+unsafe_shutdowns			: 0
+media_errors				: 0
+num_err_log_entries			: 0
+Warning Temperature Time		: 0
+Critical Composite Temperature Time	: 0
+Temperature Sensor 1			: 38 °C (311 K, 100 °F)
+Thermal Management T1 Trans Count	: 0
+Thermal Management T2 Trans Count	: 0
+Thermal Management T1 Total Time	: 0
+Thermal Management T2 Total Time	: 0

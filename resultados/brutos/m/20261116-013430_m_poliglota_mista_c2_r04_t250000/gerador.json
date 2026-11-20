@@ -1,0 +1,56 @@
+{
+  "ferramenta": "tcc-gerador-mista",
+  "versao": "1 (busca: tcc-gerador-busca 1 (aiohttp 3.14.5, Python 3.14.4); ingestão: tcc-gerador-temporal 2 (TSBS 8323e59c74027b108f4ad5ec5d3e498b0101a02e com pr255.patch (ADR-059), Python 3.14.4))",
+  "aquecimento_inicio_ms": 1794804901559,
+  "medicao_inicio_ms": 1794805201559,
+  "medicao_fim_ms": 1794805501559,
+  "processo_fim_ms": 1794805501936,
+  "parametros": {
+    "concorrencia": 2,
+    "processos": 2,
+    "semente": 1773743724,
+    "aquecimento_s": 300,
+    "medicao_s": 300,
+    "consultas": 3452,
+    "tempo_limite_s": 60.0,
+    "servico": "http://busca:8000",
+    "primeiras_consultas": [
+      "test1986",
+      "test1123",
+      "test1942",
+      "test2296",
+      "test818"
+    ],
+    "taxa_metricas_s": 250000
+  },
+  "operacoes": 244642,
+  "erros": 0,
+  "erros_por_tipo": {},
+  "mista": {
+    "taxa_metricas_s": 250000,
+    "antecedencia_s": 10.0,
+    "sistema_ingestao": "influxdb",
+    "trabalhadores_ingestao": 4,
+    "taxa_na_medicao_metricas_s": 250000.0,
+    "taxa_sustentada": true,
+    "ingestao_cobriu_medicao": true,
+    "ingestao": {
+      "ferramenta": "tcc-gerador-temporal",
+      "versao": "2 (TSBS 8323e59c74027b108f4ad5ec5d3e498b0101a02e com pr255.patch (ADR-059), Python 3.14.4)",
+      "arquitetura": "influxdb",
+      "taxa_metricas_s": 250000,
+      "trabalhadores": 4,
+      "lote": 10000,
+      "inicio_ms": 1794804886002,
+      "fim_ms": 1794805502056,
+      "metricas": 153993960.0,
+      "linhas": 15399396.0,
+      "pontos_enviados": 15399396,
+      "pontos_devidos": 15399396,
+      "maior_atraso_s": 0.016,
+      "fonte_esgotada": false,
+      "estourou": false,
+      "erro": null
+    }
+  }
+}
