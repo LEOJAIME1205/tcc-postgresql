@@ -1,0 +1,12 @@
+{
+  "execucao": "20261118-031242_b_consolidada_longa_c32_r01_t2800",
+  "diretorio": "/home/leojaime/tcc/tcc-postgresql/resultados/brutos/b/20261118-031242_b_consolidada_longa_c32_r01_t2800",
+  "estado": "ok",
+  "eixo": "b",
+  "arquitetura": "consolidada",
+  "inicio_ms": 1794983720592,
+  "fim_ms": 1795026920592,
+  "taxa": 2800,
+  "medicao_planejada_s": 43200,
+  "lote_intervalo_s": null
+}

@@ -1,0 +1,23 @@
+% Gerado por harness/analise/custo.py tabela (ADR-071 e complemento de 20/11/2026);
+% não editar à mão.
+% Menor e maior mediana entre as configurações (níveis e taxas) de cada arquitetura, nas
+% curtas e na mista. Pico: memory.peak do cgroup somado entre os serviços sob teste
+% (principal). Anônima + compartilhada: anon + shmem do memory.stat (variante descritiva).
+\begin{tabular}{llrr}
+\hline
+Eixo & Arquitetura & Pico (GiB) & Anônima + compartilhada (GiB) \\
+\hline
+A & consolidada & 12,7--15,7 & 5,8--6,6 \\
+ & poliglota & 7,2--8,6 & 6,6--6,6 \\
+\hline
+B & consolidada & 1,3--17,2 & 0,3--4,4 \\
+ & ingênua & 0,7--2,1 & 0,3--0,7 \\
+ & \emph{outbox} & 1,5--12,7 & 0,4--3,5 \\
+\hline
+C & TimescaleDB & 19,0--19,2 & 7,2--7,2 \\
+ & InfluxDB & 4,3--4,6 & 3,6--3,9 \\
+\hline
+Mista & consolidada & 12,5--18,4 & 6,0--6,1 \\
+ & poliglota & 7,9--10,0 & 6,2--6,5 \\
+\hline
+\end{tabular}

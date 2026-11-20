@@ -1,0 +1,12 @@
+{
+  "execucao": "20261119-040156_c_influxdb_longa_c4_r01_t250000",
+  "diretorio": "/home/leojaime/tcc/tcc-postgresql/resultados/brutos/c/20261119-040156_c_influxdb_longa_c4_r01_t250000",
+  "estado": "ok",
+  "eixo": "c",
+  "arquitetura": "influxdb",
+  "inicio_ms": 1795072942721,
+  "fim_ms": 1795116132808,
+  "taxa": 250000,
+  "medicao_planejada_s": 43200,
+  "lote_intervalo_s": 1800
+}

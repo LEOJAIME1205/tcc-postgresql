@@ -1,0 +1,22 @@
+% Gerado por harness/analise/custo.py tabela (ADR-071 e complemento de 20/11/2026);
+% não editar à mão.
+% Valores em US$ por mês (730 h, us-east-1, preços de precos-nuvem.toml). Máquina única:
+% referência com o orçamento inteiro do eixo, sem o disco.
+\begin{tabular}{llrrrrr}
+\hline
+Eixo & Arquitetura & Instâncias & Máquinas & Disco & Total & Máquina única \\
+\hline
+A & consolidada & r8a.xlarge + m8a.medium & 277,68 & 1,11 & 278,78 & 233,25 \\
+ & poliglota & 2$\times$r8a.large + m8a.medium & 277,68 & 0,44 & 278,12 & 233,25 \\
+\hline
+B & consolidada & r8a.xlarge & 233,25 & 0,75 & 234,00 & 233,25 \\
+ & ingênua & r8a.large + r8a.medium & 174,94 & -- & -- & 233,25 \\
+ & \emph{outbox} & r8a.large + r8a.medium + m8a.medium & 219,36 & 0,75 & 220,12 & 233,25 \\
+\hline
+C & TimescaleDB & r8a.xlarge & 233,25 & 0,74 & 233,99 & 233,25 \\
+ & InfluxDB & r8a.xlarge & 233,25 & 0,39 & 233,64 & 233,25 \\
+\hline
+Mista & consolidada & r8a.xlarge + m8a.medium & 277,68 & 1,11 & 278,78 & 233,25 \\
+ & poliglota & r8a.large + r8a.medium + 2$\times$m8a.medium & 263,79 & 0,44 & 264,23 & 233,25 \\
+\hline
+\end{tabular}

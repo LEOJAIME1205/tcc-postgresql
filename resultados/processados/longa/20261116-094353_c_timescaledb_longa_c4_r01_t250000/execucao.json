@@ -1,0 +1,12 @@
+{
+  "execucao": "20261116-094353_c_timescaledb_longa_c4_r01_t250000",
+  "diretorio": "/home/leojaime/tcc/tcc-postgresql/resultados/brutos/c/20261116-094353_c_timescaledb_longa_c4_r01_t250000",
+  "estado": "ok",
+  "eixo": "c",
+  "arquitetura": "timescaledb",
+  "inicio_ms": 1794834253535,
+  "fim_ms": 1794877443749,
+  "taxa": 250000,
+  "medicao_planejada_s": 43200,
+  "lote_intervalo_s": 1800
+}

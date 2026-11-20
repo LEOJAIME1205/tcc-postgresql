@@ -1,0 +1,30 @@
+{
+ "janela": "20261116-0943",
+ "taxa_mib_s": 24.25256808810764,
+ "execucoes": [
+  {
+   "execucao": "20261116-094353_c_timescaledb_longa_c4_r01_t250000",
+   "bytes": 645305602048,
+   "segundos": 43190.214,
+   "mib_s": 14.24886153391715
+  },
+  {
+   "execucao": "20261118-031242_b_consolidada_longa_c32_r01_t2800",
+   "bytes": 581077823488,
+   "segundos": 43200.0,
+   "mib_s": 12.827754539207175
+  },
+  {
+   "execucao": "20261118-153727_b_outbox_longa_c32_r01_t2800",
+   "bytes": 1098604548096,
+   "segundos": 43200.0,
+   "mib_s": 24.25256808810764
+  },
+  {
+   "execucao": "20261119-040156_c_influxdb_longa_c4_r01_t250000",
+   "bytes": 337048924160,
+   "segundos": 43190.087,
+   "mib_s": 7.442330513104778
+  }
+ ]
+}

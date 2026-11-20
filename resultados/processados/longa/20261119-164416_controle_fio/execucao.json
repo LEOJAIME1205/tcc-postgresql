@@ -1,0 +1,10 @@
+{
+  "execucao": "20261119-164416_controle_fio",
+  "diretorio": "/home/leojaime/tcc/tcc-postgresql/resultados/brutos/controle/20261119-164416_controle_fio",
+  "estado": "ok",
+  "eixo": "controle",
+  "arquitetura": "fio",
+  "inicio_ms": 1795118662652,
+  "fim_ms": 1795161862652,
+  "taxa": 24.3
+}
