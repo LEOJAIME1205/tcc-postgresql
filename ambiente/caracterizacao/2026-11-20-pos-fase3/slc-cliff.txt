@@ -1,0 +1,33 @@
+slc-cliff: (g=0): rw=write, bs=(R) 1024KiB-1024KiB, (W) 1024KiB-1024KiB, (T) 1024KiB-1024KiB, ioengine=io_uring, iodepth=32
+fio-3.41
+Starting 1 process
+slc-cliff: Laying out IO file (1 file / 409600MiB)
+
+slc-cliff: (groupid=0, jobs=1): err= 0: pid=1721941: Fri Nov 20 13:10:02 2026
+  write: IOPS=1338, BW=1338MiB/s (1403MB/s)(400GiB/306056msec); 0 zone resets
+    slat (usec): min=17, max=427092, avg=25.06, stdev=667.71
+    clat (usec): min=789, max=925762, avg=23885.25, stdev=33213.37
+     lat (usec): min=812, max=925793, avg=23910.30, stdev=33221.11
+    clat percentiles (msec):
+     |  1.00th=[    4],  5.00th=[    4], 10.00th=[    4], 20.00th=[   14],
+     | 30.00th=[   15], 40.00th=[   16], 50.00th=[   16], 60.00th=[   17],
+     | 70.00th=[   19], 80.00th=[   26], 90.00th=[   51], 95.00th=[   63],
+     | 99.00th=[  122], 99.50th=[  249], 99.90th=[  456], 99.95th=[  477],
+     | 99.99th=[  634]
+   bw (  MiB/s): min=   67, max= 9146, per=100.00%, avg=1338.45, stdev=1221.69, samples=306
+   iops        : min=   42, max= 9250, avg=1338.40, stdev=1272.22, samples=612
+  lat (usec)   : 1000=0.01%
+  lat (msec)   : 2=0.03%, 4=11.06%, 10=0.84%, 20=65.28%, 50=12.48%
+  lat (msec)   : 100=9.05%, 250=0.76%, 500=0.47%, 750=0.02%, 1000=0.01%
+  cpu          : usr=1.07%, sys=2.27%, ctx=406847, majf=0, minf=12
+  IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.1%, 16=0.1%, 32=100.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.1%, 64=0.0%, >=64=0.0%
+     issued rwts: total=0,409600,0,0 short=0,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=32
+
+Run status group 0 (all jobs):
+  WRITE: bw=1338MiB/s (1403MB/s), 1338MiB/s-1338MiB/s (1403MB/s-1403MB/s), io=400GiB (429GB), run=306056-306056msec
+
+Disk stats (read/write):
+  nvme0n1: ios=0/3277440, sectors=0/838882888, merge=0/6879, ticks=0/76700776, in_queue=76701417, util=97.39%

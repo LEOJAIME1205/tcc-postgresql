@@ -246,6 +246,71 @@ Arquivos em `caracterizacao/2026-10-25-recuperacao/`:
 | `smart-antes.txt`, `smart-depois.txt` | Log SMART antes e depois do teste |
 | `df-antes.txt`, `df-depois.txt` | Ocupação do sistema de arquivos antes e depois |
 
+### Escrita sequencial depois da Fase 3 — execução de 20/11/2026
+
+Repetição do `slc-cliff` de 24/10 (ADR-004, complemento do item 5), com o
+sistema de arquivos **34,6% ocupado** (322 GB de 982 GB). Nas janelas da Fase 3,
+a ocupação foi de 16,0% a 24,7%. Como o cache diminui com a ocupação, o valor
+medido aqui é um **limite inferior** do cache durante a fase.
+
+Controles aplicados: abertura da janela do protocolo (swap desligado, timers
+parados, snaps suspensos, APST desligado), perfil `performance` pelo
+`powerprofilesctl launch`, `systemd-inhibit`, kernel 7.0.0-42 (o das medições),
+`sync` e `fstrim -v /` seguidos de 20 minutos de repouso. A temperatura inicial
+era 37 °C. Comando registrado em `caracterizacao/2026-11-20-pos-fase3/medir.sh`:
+
+```bash
+fio --name=slc-cliff --filename=/var/tmp/fio-slc-cliff --size=400g --rw=write --bs=1M \
+    --ioengine=io_uring --iodepth=32 --direct=1 \
+    --write_bw_log=slc-cliff --log_avg_msec=1000 --output=slc-cliff.txt
+```
+
+| Grandeza | 24/10 (3%) | 20/11 (34,6%) |
+|---|---|---|
+| Cache pelo critério de 25/10 (segundos acima de 8 GiB/s) | 62,4 GiB | 35,6 GiB |
+| Volume gravado nas rajadas de cache, com as frações de segundo | 62,4 GiB em 7 s | ~48 GiB em 11 s, em duas rajadas |
+| Vazão média entre o cache e o regime de ~2 GiB/s | 0,98 GiB/s | 0,65 GiB/s |
+| Menor média de 10 s | 0,63 GiB/s | 0,30 GiB/s |
+| Menor vazão de 1 s nesse trecho | 505 MiB/s | 67 MiB/s |
+| Início do regime de ~2 GiB/s | 204 s (256 GiB) | 161 s (146 GiB) |
+| Vazão média do teste inteiro | 1.470 MiB/s | 1.338 MiB/s |
+| Temperatura máxima | 68 °C | 67 °C |
+
+- **O cache chega em duas rajadas.** Ele grava 23 GiB a ~8,9 GiB/s até o 3º
+  segundo, fica ~4 segundos quase parado (70 a 220 MiB/s) e grava outros ~25 GiB
+  a ~8,9 GiB/s até o 11º segundo. Alternância parecida apareceu num dos ciclos de
+  25/10. Pelo critério de 25/10, só contam os segundos inteiros acima de 8 GiB/s
+  (35,6 GiB). Somando as frações das rajadas, o volume em velocidade de cache
+  chega a ~48 GiB.
+- **O piso caiu.** Entre o cache e o regime de ~2 GiB/s, a vazão ficou em
+  0,3–0,9 GiB/s, com segundos isolados de 67 MiB/s. Depois, o regime de ~2 GiB/s
+  veio mais cedo e com quedas para ~1 GiB/s em 17 de 145 segundos.
+- **Sem efeito térmico.** O SMART não registrou eventos térmicos.
+
+Leitura para as análises (ADR-004, complemento do item 5):
+
+- **Marcação de 60 GiB:** com o cache abaixo de 47 GiB pelo critério de 25/10,
+  não dá para afirmar que as execuções com 35 a 60 GiB gravados ficaram dentro
+  dele durante a Fase 3, nem que saíram. São as curtas de vazão do B
+  consolidado com 16 e 32 clientes (39 a 43 GiB), da *outbox* com 16 (47 a
+  48 GiB) e a mista consolidada a 1 milhão/s (47 a 48 GiB). A marcação não
+  muda; a lista fica declarada em `docs/leitura-dos-resultados.md`.
+- **Atribuição de quedas ao disco:** nenhuma muda. As longas gravaram de 7 a
+  24 MiB/s na mediana de cada hora, com picos de até 81 MiB/s num minuto. Isso
+  fica muito abaixo da menor média de 10 s do piso medido agora, de 0,3 GiB/s,
+  e o controle com `fio` não degradou.
+
+Arquivos em `caracterizacao/2026-11-20-pos-fase3/`:
+
+| Arquivo | Conteúdo |
+|---|---|
+| `medir.sh` | Roteiro completo, com o comando do fio |
+| `controles.txt`, `progresso.log` | Controles conferidos no início e etapas com horário |
+| `slc-cliff.txt`, `slc-cliff_bw.1.log` | Saída do fio e vazão por segundo |
+| `nvme-temp.csv` | Temperatura do P510 a cada segundo durante o teste |
+| `smart-antes.txt`, `smart-depois.txt` | Log SMART antes e depois |
+| `df-antes.txt`, `df-depois.txt` | Ocupação antes e depois |
+
 ## Monitoramento durante as execuções
 
 Amostrados continuamente e publicados junto com os resultados:

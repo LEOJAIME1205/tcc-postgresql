@@ -1,0 +1,7 @@
+kernel: 7.0.0-42-generic
+governador: performance 
+epp: performance 
+swap: 0 dispositivo(s) ativo(s)
+fstrim.timer: inactive
+apst (pm_qos_latency_tolerance_us): 0
+fio: fio-3.41
