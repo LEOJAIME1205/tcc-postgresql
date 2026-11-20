@@ -10,8 +10,9 @@ import unittest
 from typing import List
 
 from harness.analise.comum import Linha
-from harness.analise.longa import (deriva, deriva_dos_lotes, horas, info_da_execucao,
-                                   minimos_quadrados, operacoes_por_minuto, taxa, theil_sen,
+from harness.analise.longa import (SerieInterna, deriva, deriva_dos_lotes, horas,
+                                   info_da_execucao, minimos_quadrados, minutos_internos,
+                                   operacoes_por_minuto, serie_interna, taxa, theil_sen,
                                    ultimas_por_minuto, ultimo)
 
 INICIO_MS: int = 1_000_000
@@ -138,6 +139,52 @@ class TesteLotes(unittest.TestCase):
         self.assertAlmostEqual(d[0]["primeiro_lote_media_ms"], 12.0)
         self.assertAlmostEqual(d[0]["ultimo_lote_media_ms"], 18.0)
         self.assertAlmostEqual(d[0]["razao_ultimo_primeiro"], 1.5)
+
+
+class TesteInternas(unittest.TestCase):
+    def test_regras(self) -> None:
+        self.assertEqual(serie_interna("postgres", "pg_tuplas_mortas", "public.tarefas"),
+                         SerieInterna("tuplas_mortas_tarefas", "valor"))
+        self.assertEqual(serie_interna("timescaledb", "pg_autovacuum_total",
+                                       "_timescaledb_internal._hyper_1_2_chunk"),
+                         SerieInterna("autovacuum_chunks", "desde_inicio"))
+        self.assertIsNone(serie_interna("timescaledb", "pg_tuplas_mortas_pct",
+                                        "_timescaledb_internal._hyper_1_2_chunk"))
+        self.assertIsNone(serie_interna("timescaledb", "pg_tuplas_mortas",
+                                        "_timescaledb_catalog.chunk"))
+        self.assertIsNone(serie_interna("postgres", "pg_idade_xid", "template1"))
+        self.assertEqual(serie_interna("postgres", "pg_idade_xid", "fila"),
+                         SerieInterna("idade_xid", "valor"))
+        self.assertEqual(serie_interna("influxdb", "influx_series", "benchmark"),
+                         SerieInterna("series", "valor"))
+        self.assertIsNone(serie_interna("influxdb", "influx_series", "_internal"))
+        self.assertIsNone(serie_interna("rabbitmq", "rmq_publicadas_total", "tarefas"))
+
+    def test_valor_desde_inicio_taxa_e_soma(self) -> None:
+        def linha(arquivo: str, minuto: int, metrica: str, rotulo: str, valor: float) -> Linha:
+            return {"arquivo": arquivo, "minuto": str(minuto), "metrica": metrica,
+                    "rotulo": rotulo, "ts_ms": str(INICIO_MS + minuto * 60_000 + 59_000),
+                    "valor": repr(valor)}
+        chunk = "_timescaledb_internal._hyper_1_%d_chunk"
+        linhas: List[Linha] = [
+            linha("postgres", 0, "pg_tuplas_mortas", "public.tarefas", 10.0),
+            linha("postgres", 2, "pg_tuplas_mortas", "public.tarefas", 30.0),
+            linha("postgres", 0, "pg_autovacuum_total", "public.tarefas", 5.0),
+            linha("postgres", 1, "pg_autovacuum_total", "public.tarefas", 7.0),
+            linha("postgres", 0, "pg_wal_bytes_total", "", 0.0),
+            linha("postgres", 1, "pg_wal_bytes_total", "", 60.0 * 2**20),
+            linha("timescaledb", 0, "pg_autovacuum_total", chunk % 1, 1.0),
+            linha("timescaledb", 1, "pg_autovacuum_total", chunk % 1, 2.0),
+            linha("timescaledb", 1, "pg_autovacuum_total", chunk % 2, 4.0),
+            linha("postgres", 5, "pg_tuplas_mortas", "public.tarefas", 99.0),
+        ]
+        saida = minutos_internos(linhas, 3)
+        self.assertEqual(len(saida), 3)
+        self.assertEqual([m.get("tuplas_mortas_tarefas") for m in saida], [10.0, None, 30.0])
+        self.assertEqual([m.get("autovacuum_tarefas") for m in saida], [0.0, 2.0, None])
+        self.assertEqual([m.get("wal_mib_s") for m in saida], [None, 1.0, None])
+        # chunk novo no minuto 1 entra na soma: 1 + 0 no minuto 0, 2 + 4 no minuto 1
+        self.assertEqual([m.get("autovacuum_chunks") for m in saida], [0.0, 5.0, None])
 
 
 if __name__ == "__main__":

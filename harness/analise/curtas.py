@@ -44,7 +44,8 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, cast
 
 from harness.analise.calibracao import resumir as resumir_calibracao
 from harness.analise.comum import (PROCESSADOS, Linha, disco_bytes_por_s, execucoes_da_janela,
-                                   gravar_csv, ler_execucoes, ler_json, numero)
+                                   gravar_csv, ler_execucoes, ler_json, numero,
+                                   series_por_rotulo)
 from harness.analise.estatistica import ALFA, comparar, holm, menor_p_possivel
 
 JANELAS: Tuple[str, ...] = ("20261111-0350", "20261112-0004", "20261113-1656", "20261114-1321")
@@ -87,8 +88,17 @@ _GRUPOS: Tuple[Grupo, ...] = (
           (Metrica("vazao_por_s", True), Metrica("cpu_sut_s_por_milhao", False),
            Metrica("disco_mib_por_milhao", False)),
           ("vazao_antes_do_cache_por_s", "carga_s", "variacao_minutos_pct", "cpu_sut_nucleos",
-           "cpu_gerador_antes_do_cache_nucleos", "disco_gravado_gib")),
+           "cpu_gerador_antes_do_cache_nucleos", "disco_gravado_gib",
+           # Espaço e tempo depois da carga (complemento da ADR-062).
+           "espaco_gib", "bytes_por_metrica", "bytes_por_linha", "espaco_antes_compressao_gib",
+           "razao_compressao", "compressao_ou_compactacao_s", "carga_mais_compressao_s",
+           "analyze_s", "espaco_diretorio_gib", "bytes_por_metrica_diretorio")),
 )
+# Valores do resumo.json do C usados no espaço e no tempo depois da carga.
+RESUMO_ESPACO_C: Tuple[str, ...] = (
+    "carga_metricas", "carga_linhas", "compressao_s", "analyze_s", "espera_compactacao_s",
+    "espaco_antes_compressao_bytes", "espaco_depois_compressao_bytes", "tsm_bytes")
+GIB: float = 2.0**30
 GRUPOS: Dict[str, Grupo] = {g.nome: g for g in _GRUPOS}
 
 
@@ -118,6 +128,55 @@ def _carga_c(r: Dict[str, Any], diretorio: str, inicio_ms: int, fim_ms: int,
         elif metrica == "consulta_contagem" and esperadas is not None and float(valor["valor"]) != float(esperadas):
             print(f"aviso: {os.path.basename(diretorio)}: {rotulo} com {valor['valor']} consultas, "
                   f"esperadas {esperadas}", file=sys.stderr)
+    r.update(espaco_da_execucao(diretorio, r.get("carga_s")))
+
+
+def espaco_da_execucao(diretorio: str, carga_s: Optional[float]) -> Dict[str, float]:
+    """Espaço e tempo depois da carga de uma execução do C, pelo resumo.json e, no InfluxDB,
+    pela última amostra do diretório de dados (complemento da ADR-062)."""
+    resumo: Dict[str, float] = {}
+    for valor in cast(List[Dict[str, Any]], ler_json(os.path.join(diretorio, "resumo.json")).get("valores", [])):
+        if str(valor.get("metrica")) in RESUMO_ESPACO_C:
+            resumo[str(valor["metrica"])] = float(valor["valor"])
+    diretorio_influx: Optional[float] = None
+    caminho = os.path.join(diretorio, "metricas-influxdb.csv")
+    if os.path.exists(caminho):
+        series = series_por_rotulo(caminho, ("influx_dados_bytes",), 0, sys.maxsize)
+        diretorio_influx = sum(s[-1][1] for s in series.values() if s) if series else None
+    return espaco_c(resumo, carga_s, diretorio_influx)
+
+
+def espaco_c(resumo: Dict[str, float], carga_s: Optional[float],
+             diretorio_bytes: Optional[float]) -> Dict[str, float]:
+    """Espaço e tempo depois da carga (complemento da ADR-062).
+
+    O espaço principal é o formato nativo: a hipertabela comprimida no TimescaleDB e os
+    arquivos TSM no InfluxDB. O diretório inteiro do InfluxDB é a variante."""
+    r: Dict[str, float] = {}
+    dados = resumo.get("espaco_depois_compressao_bytes", resumo.get("tsm_bytes"))
+    metricas, linhas = resumo.get("carga_metricas"), resumo.get("carga_linhas")
+    if dados is not None:
+        r["espaco_gib"] = dados / GIB
+        if metricas:
+            r["bytes_por_metrica"] = dados / metricas
+        if linhas:
+            r["bytes_por_linha"] = dados / linhas
+        antes = resumo.get("espaco_antes_compressao_bytes")
+        if antes is not None and dados > 0:
+            r["espaco_antes_compressao_gib"] = antes / GIB
+            r["razao_compressao"] = antes / dados
+    depois_da_carga = resumo.get("compressao_s", resumo.get("espera_compactacao_s"))
+    if depois_da_carga is not None:
+        r["compressao_ou_compactacao_s"] = depois_da_carga
+        if carga_s is not None:
+            r["carga_mais_compressao_s"] = carga_s + depois_da_carga
+    if "analyze_s" in resumo:
+        r["analyze_s"] = resumo["analyze_s"]
+    if diretorio_bytes is not None:
+        r["espaco_diretorio_gib"] = diretorio_bytes / GIB
+        if metricas:
+            r["bytes_por_metrica_diretorio"] = diretorio_bytes / metricas
+    return r
 
 
 def resumir_execucao(diretorio: str) -> Optional[Dict[str, Any]]:

@@ -104,20 +104,25 @@ def estilo_global() -> None:
 def gravar(figura: Figure, nome: str, saida: str) -> None:
     os.makedirs(saida, exist_ok=True)
     for extensao in ("pdf", "png"):
+        # Sem data de criação no PDF: regerar as figuras com os mesmos dados dá o mesmo arquivo.
+        metadados = {"CreationDate": None} if extensao == "pdf" else {}
         figura.savefig(os.path.join(saida, f"{nome}.{extensao}"), bbox_inches="tight",
-                       pad_inches=0.03)
+                       pad_inches=0.03, metadata=metadados)
     plt.close(figura)
     print(f"{nome}: pdf e png em {os.path.relpath(saida, PROCESSADOS)}")
 
 
-def legenda(figura: Figure, arquiteturas: Sequence[str], titulo_vazado: Optional[str] = None) -> None:
-    """Legenda única no alto da figura, numa linha; o vazado ganha uma entrada própria."""
+def legenda(figura: Figure, arquiteturas: Sequence[str], titulo_vazado: Optional[str] = None,
+            extras: Sequence[Line2D] = ()) -> None:
+    """Legenda única no alto da figura, numa linha; o vazado e os extras (tipos de linha) ganham
+    entradas próprias."""
     alcas: List[Line2D] = [Line2D([], [], color=ESTILOS[a].cor, marker=ESTILOS[a].marcador,
                                   markersize=5, linewidth=1.5, label=ESTILOS[a].rotulo)
                            for a in arquiteturas]
     if titulo_vazado:
         alcas.append(Line2D([], [], color=APAGADA, marker="o", markersize=5, linewidth=0,
                             markerfacecolor=FUNDO, markeredgewidth=0.9, label=titulo_vazado))
+    alcas += list(extras)
     figura.legend(handles=alcas, loc="lower left", bbox_to_anchor=(0.0, 1.0), ncol=len(alcas),
                   handlelength=1.8, columnspacing=1.6, borderaxespad=0.2)
 
@@ -433,10 +438,19 @@ def pasta_longa(eixo: str, arquitetura: str) -> Optional[str]:
     return None
 
 
-def serie_minutos(pasta: str, coluna: str) -> Tuple[List[float], List[float]]:
+def serie_minutos(pasta: str, coluna: str, arquivo: str = "minutos.csv",
+                  somar: Sequence[str] = ()) -> Tuple[List[float], List[float]]:
+    """Horas e valores de uma coluna por minuto; com somar, a soma das colunas pedidas nos
+    minutos em que todas existem."""
     horas: List[float] = []
     valores: List[float] = []
-    for linha in ler_execucoes(os.path.join(pasta, "minutos.csv")):
+    for linha in ler_execucoes(os.path.join(pasta, arquivo)):
+        if somar:
+            partes = [numero(linha, c) for c in somar]
+            if all(p is not None for p in partes):
+                horas.append(int(linha["minuto"]) / 60)
+                valores.append(sum(cast(float, p) for p in partes))
+            continue
         v = numero(linha, coluna)
         if v is not None:
             horas.append(int(linha["minuto"]) / 60)
@@ -532,6 +546,81 @@ def figura_longa_ssd(saida: str) -> None:
     gravar(figura, "longa-ssd", saida)
 
 
+# Tabela de pedidos e tabela da fila de cada arquitetura do B (a outbox enfileira na de saída).
+TABELA_DA_FILA: Dict[str, str] = {"consolidada": "tarefas", "outbox": "saida"}
+
+
+def figura_longa_internas_b(saida: str) -> None:
+    """Tuplas mortas, tamanho, autovacuum e espaço livre das tabelas do B nas 12 h."""
+    arquiteturas = ("consolidada", "outbox")
+    pastas = {a: pasta_longa("b", a) for a in arquiteturas}
+    figura, grade = plt.subplots(2, 2, figsize=(LARGURA, 4.4), sharex=True)
+    eixos: List[Axes] = [ax for linha in grade for ax in linha]
+    paineis = (("tuplas_mortas_{t}", (), "(a) Tuplas mortas"),
+               ("", ("tabela_gib_{t}", "indices_gib_{t}"), "(b) Tabela e índices (GiB)"),
+               ("autovacuum_{t}", (), "(c) Autovacuums desde o início"),
+               ("espaco_livre_pct_{t}", (), "(d) Espaço livre, pgstattuple (%)"))
+    # A outbox vai por baixo e mais grossa: em pedidos e no autovacuum as duas quase coincidem.
+    espessuras = {"outbox": 1.8, "consolidada": 0.8}
+    for ax, (coluna, somar, titulo) in zip(eixos, paineis):
+        for a in ("outbox", "consolidada"):
+            pasta = pastas[a]
+            if pasta is None:
+                continue
+            for tabela, estilo in (("pedidos", "-"), (TABELA_DA_FILA[a], "--")):
+                x, y = serie_minutos(pasta, coluna.format(t=tabela), "internas-minutos.csv",
+                                     tuple(c.format(t=tabela) for c in somar))
+                ax.plot(x, y, color=ESTILOS[a].cor, linewidth=espessuras[a], linestyle=estilo)
+        ax.set_ylim(bottom=0)
+        ax.yaxis.set_major_formatter(FuncFormatter(formato_numero))
+        ax.set_title(titulo)
+        eixo_horas(ax, rotulo=ax in eixos[2:])
+    extras = [Line2D([], [], color=TINTA_2, linewidth=1.0, linestyle="-", label="pedidos"),
+              Line2D([], [], color=TINTA_2, linewidth=1.0, linestyle="--",
+                     label="fila (tarefas ou saída)")]
+    legenda(figura, arquiteturas, extras=extras)
+    figura.tight_layout(h_pad=0.8)
+    gravar(figura, "longa-internas-b", saida)
+
+
+def figura_longa_internas_c(saida: str) -> None:
+    """Espaço em disco, autovacuum dos chunks e compactações do C nas 12 h."""
+    ts, influx = pasta_longa("c", "timescaledb"), pasta_longa("c", "influxdb")
+    figura, eixos = plt.subplots(3, 1, figsize=(LARGURA, 4.6), sharex=True)
+    ax = eixos[0]
+    if ts is not None:
+        ax.plot(*serie_minutos(ts, "hipertabela_gib", "internas-minutos.csv"),
+                color=ESTILOS["timescaledb"].cor, linewidth=0.8)
+    if influx is not None:
+        ax.plot(*serie_minutos(influx, "tsm_gib", "internas-minutos.csv"),
+                color=ESTILOS["influxdb"].cor, linewidth=0.8)
+        ax.plot(*serie_minutos(influx, "dados_gib", "internas-minutos.csv"),
+                color=ESTILOS["influxdb"].cor, linewidth=0.8, linestyle="--")
+    eixo_log(ax)
+    ax.set_title("(a) Espaço dos dados (GiB, escala log)")
+    for ax, pasta, arquitetura, coluna, titulo in (
+            (eixos[1], ts, "timescaledb", "autovacuum_chunks",
+             "(b) Autovacuums nos chunks do TimescaleDB, desde o início"),
+            (eixos[2], influx, "influxdb", "compactacoes",
+             "(c) Compactações concluídas no InfluxDB, desde o início")):
+        if pasta is not None:
+            ax.plot(*serie_minutos(pasta, coluna, "internas-minutos.csv"),
+                    color=ESTILOS[arquitetura].cor, linewidth=0.8)
+        ax.set_title(titulo)
+    for ax in eixos:
+        if ax is not eixos[0]:
+            ax.set_ylim(bottom=0)
+            ax.yaxis.set_major_formatter(FuncFormatter(formato_numero))
+        eixo_horas(ax, rotulo=ax is eixos[-1])
+    extras = [Line2D([], [], color=TINTA_2, linewidth=1.0, linestyle="-",
+                     label="hipertabela ou TSM"),
+              Line2D([], [], color=TINTA_2, linewidth=1.0, linestyle="--",
+                     label="diretório inteiro")]
+    legenda(figura, ("timescaledb", "influxdb"), extras=extras)
+    figura.tight_layout(h_pad=0.8)
+    gravar(figura, "longa-internas-c", saida)
+
+
 def main() -> None:
     analisador = argparse.ArgumentParser(description=__doc__,
                                          formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -549,6 +638,8 @@ def main() -> None:
     figura_longa_b(saida)
     figura_longa_consultas(saida)
     figura_longa_ssd(saida)
+    figura_longa_internas_b(saida)
+    figura_longa_internas_c(saida)
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ import unittest
 from typing import Any, Dict, List
 
 from harness.analise.comum import Linha, numero
-from harness.analise.curtas import comparacoes, configuracoes
+from harness.analise.curtas import comparacoes, configuracoes, espaco_c
 
 
 def _linha(grupo: str, arquitetura: str, nivel: int, repeticao: int, **valores: Any) -> Linha:
@@ -126,6 +126,32 @@ class TesteConfiguracoes(unittest.TestCase):
         self.assertAlmostEqual(poliglota["busca_hibrida_por_s_max"], 255.0)
         self.assertEqual(poliglota["gerador_gargalo"], 1)
         self.assertEqual(por_arquitetura["consolidada"]["gerador_gargalo"], 0)
+
+
+class TesteEspacoC(unittest.TestCase):
+    def test_timescaledb(self) -> None:
+        resumo = {"carga_metricas": 1e9, "carga_linhas": 1e8, "compressao_s": 60.0,
+                  "analyze_s": 5.0, "espaco_antes_compressao_bytes": 40 * 2.0**30,
+                  "espaco_depois_compressao_bytes": 4 * 2.0**30}
+        r = espaco_c(resumo, 200.0, None)
+        self.assertEqual(r["espaco_gib"], 4.0)
+        self.assertEqual(r["razao_compressao"], 10.0)
+        self.assertAlmostEqual(r["bytes_por_metrica"], 4 * 2**30 / 1e9)
+        self.assertAlmostEqual(r["bytes_por_linha"], 4 * 2**30 / 1e8)
+        self.assertEqual(r["carga_mais_compressao_s"], 260.0)
+        self.assertEqual(r["analyze_s"], 5.0)
+        self.assertNotIn("espaco_diretorio_gib", r)
+
+    def test_influxdb_com_diretorio(self) -> None:
+        resumo = {"carga_metricas": 1e9, "carga_linhas": 1e8, "espera_compactacao_s": 4.0,
+                  "tsm_bytes": 2.0**30}
+        r = espaco_c(resumo, 300.0, 3 * 2.0**30)
+        self.assertEqual(r["espaco_gib"], 1.0)
+        self.assertNotIn("razao_compressao", r)
+        self.assertEqual(r["compressao_ou_compactacao_s"], 4.0)
+        self.assertEqual(r["carga_mais_compressao_s"], 304.0)
+        self.assertEqual(r["espaco_diretorio_gib"], 3.0)
+        self.assertAlmostEqual(r["bytes_por_metrica_diretorio"], 3 * 2**30 / 1e9)
 
 
 if __name__ == "__main__":

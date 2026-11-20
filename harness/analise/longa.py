@@ -20,7 +20,13 @@ Descritiva, sem teste. Duas etapas, como em harness/analise/curtas.py:
     periódico e o primeiro lote contra o último periódico;
   - longa-bateria-final.csv, no C: a média de cada tipo na bateria final e, se
     curtas-execucoes.csv existir, a razão para a mediana das médias das curtas da mesma
-    arquitetura.
+    arquitetura;
+  - em cada pasta, internas-minutos.csv: as métricas internas da ADR-069, item 6 (tuplas,
+    tamanhos, autovacuum, pgstattuple, WAL, checkpoints, idade das transações, hipertabela,
+    RabbitMQ e InfluxDB) por minuto, pelas regras de SerieInterna; e longa-internas-horas.csv,
+    com mediana, mínimo e máximo dessas séries em cada hora;
+  - longa-espaco.csv, no C: espaço e compressão no fim da ingestão, pelas mesmas regras das
+    curtas (complemento da ADR-062).
 
 Taxas por minuto saem da diferença entre a última amostra do minuto e a do minuto anterior,
 dividida pelo tempo entre as duas. O minuto -1 guarda a última amostra antes da medição, para a
@@ -39,12 +45,14 @@ import os
 import statistics
 import sys
 from array import array
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Sequence, Tuple, cast
 
 import numpy as np
 
 from harness.analise.comum import (BRUTOS, PROCESSADOS, Linha, execucoes_da_janela, gravar_csv,
                                    ler_execucoes, ler_json, numero, servico_do_container)
+from harness.analise.curtas import espaco_da_execucao
 
 JANELA: str = "20261116-0943"
 SUBPASTA: str = "longa"
@@ -376,6 +384,122 @@ def horas(minutos: Sequence[Linha], coluna: str) -> List[Dict[str, Any]]:
              "min": min(v), "max": max(v)} for h, v in sorted(por_hora.items())]
 
 
+@dataclass(frozen=True)
+class SerieInterna:
+    """Coluna de internas-minutos.csv: "valor" é o próprio valor do minuto; "desde_inicio",
+    o valor menos o do primeiro minuto (contadores); "taxa", a diferença para o minuto anterior
+    por segundo (ADR-069, complemento do item 6, item 2)."""
+    coluna: str
+    tipo: str
+    escala: float = 1.0
+
+
+# Métricas por tabela do PostgreSQL. Na fila, as tabelas de public; no TimescaleDB, a soma dos
+# chunks de _timescaledb_internal (autovacuum dos chunks, ADR-069, item 6).
+POR_TABELA: Dict[str, Tuple[str, str, float]] = {
+    "pg_tuplas_mortas": ("tuplas_mortas", "valor", 1.0),
+    "pg_tuplas_vivas": ("tuplas_vivas", "valor", 1.0),
+    "pg_tabela_bytes": ("tabela_gib", "valor", 1 / GIB),
+    "pg_indices_bytes": ("indices_gib", "valor", 1 / GIB),
+    "pg_espaco_livre_pct": ("espaco_livre_pct", "valor", 1.0),
+    "pg_tuplas_mortas_pct": ("tuplas_mortas_pct", "valor", 1.0),
+    "pg_autovacuum_total": ("autovacuum", "desde_inicio", 1.0),
+    "pg_autovacuum_ms_total": ("autovacuum_s", "desde_inicio", 1 / 1000),
+    "pg_autoanalyze_total": ("autoanalyze", "desde_inicio", 1.0),
+}
+# Métricas do servidor ou do banco de teste (fila, benchmark) e da hipertabela.
+DO_BANCO: Dict[str, Tuple[str, str, float]] = {
+    "pg_wal_bytes_total": ("wal_mib_s", "taxa", 1 / MIB),
+    "pg_checkpoints_total": ("checkpoints", "desde_inicio", 1.0),
+    "pg_commits_total": ("commits_por_s", "taxa", 1.0),
+    "pg_rollbacks_total": ("rollbacks", "desde_inicio", 1.0),
+    "pg_deadlocks_total": ("deadlocks", "desde_inicio", 1.0),
+    "pg_esperas_lock": ("esperas_lock", "valor", 1.0),
+    "pg_idade_xid": ("idade_xid", "valor", 1.0),
+    "pg_idade_mxid": ("idade_mxid", "valor", 1.0),
+    "tsdb_total_bytes": ("hipertabela_gib", "valor", 1 / GIB),
+    "tsdb_indices_bytes": ("hipertabela_indices_gib", "valor", 1 / GIB),
+    "tsdb_chunks": ("chunks", "valor", 1.0),
+}
+ROTULOS_DO_BANCO: Tuple[str, ...] = ("", "fila", "benchmark", "public.cpu")
+OUTROS: Dict[str, Dict[str, Tuple[str, str, float]]] = {
+    "rabbitmq": {
+        "rmq_memoria_bytes": ("rmq_memoria_gib", "valor", 1 / GIB),
+        "rmq_dados_bytes": ("rmq_dados_gib", "valor", 1 / GIB),
+        "rmq_mensagens_prontas": ("rmq_mensagens_prontas", "valor", 1.0),
+        "rmq_mensagens_pendentes": ("rmq_mensagens_pendentes", "valor", 1.0),
+        "rmq_alarme_memoria": ("rmq_alarme_memoria", "valor", 1.0),
+        "rmq_alarme_disco": ("rmq_alarme_disco", "valor", 1.0),
+    },
+    "influxdb": {
+        "influx_dados_bytes": ("dados_gib", "valor", 1 / GIB),
+        "influx_tsm_bytes": ("tsm_gib", "valor", 1 / GIB),
+        "influx_cache_bytes": ("cache_gib", "valor", 1 / GIB),
+        "influx_heap_bytes": ("heap_gib", "valor", 1 / GIB),
+        "influx_compactacoes_completas_total": ("compactacoes", "desde_inicio", 1.0),
+        "influx_compactacoes_ativas": ("compactacoes_ativas", "valor", 1.0),
+        "influx_erros_escrita_total": ("erros_escrita", "desde_inicio", 1.0),
+        "influx_pontos_descartados_total": ("pontos_descartados", "desde_inicio", 1.0),
+    },
+}
+
+
+def serie_interna(arquivo: str, metrica: str, rotulo: str) -> Optional[SerieInterna]:
+    """Coluna de internas-minutos.csv para uma linha de internas.csv, ou None se ela fica fora."""
+    if arquivo in ("postgres", "timescaledb"):
+        if metrica in POR_TABELA:
+            if arquivo == "postgres" and rotulo.startswith("public."):
+                tabela = rotulo[len("public."):]
+            elif arquivo == "timescaledb" and rotulo.startswith("_timescaledb_internal."):
+                if metrica.endswith("_pct"):
+                    return None  # percentuais não se somam entre chunks
+                tabela = "chunks"
+            else:
+                return None
+            coluna, tipo, escala = POR_TABELA[metrica]
+            return SerieInterna(f"{coluna}_{tabela}", tipo, escala)
+        if metrica in DO_BANCO and rotulo in ROTULOS_DO_BANCO:
+            return SerieInterna(*DO_BANCO[metrica])
+        return None
+    if metrica == "influx_series":
+        return SerieInterna("series", "valor") if rotulo == "benchmark" else None
+    regra = OUTROS.get(arquivo, {}).get(metrica)
+    return SerieInterna(*regra) if regra is not None else None
+
+
+def minutos_internos(linhas: Sequence[Linha], total_min: int) -> List[Dict[str, Any]]:
+    """Uma linha por minuto com as séries internas; linhas que caem na mesma coluna e no mesmo
+    minuto (os chunks) são somadas."""
+    valores: Dict[str, Dict[int, float]] = {}
+    instantes: Dict[str, Dict[int, int]] = {}
+    series: Dict[str, SerieInterna] = {}
+    for linha in linhas:
+        s = serie_interna(linha["arquivo"], linha["metrica"], linha["rotulo"])
+        if s is None or linha["valor"] == "":
+            continue
+        minuto = int(linha["minuto"])
+        series[s.coluna] = s
+        coluna = valores.setdefault(s.coluna, {})
+        coluna[minuto] = coluna.get(minuto, 0.0) + float(linha["valor"])
+        ts = instantes.setdefault(s.coluna, {})
+        ts[minuto] = max(ts.get(minuto, 0), int(linha["ts_ms"]))
+    saida: List[Dict[str, Any]] = [{"minuto": m} for m in range(total_min)]
+    for nome in sorted(valores):
+        s, serie, ts = series[nome], valores[nome], instantes[nome]
+        base = serie[min(serie)]
+        for minuto, valor in sorted(serie.items()):
+            if minuto >= total_min:
+                continue
+            if s.tipo == "valor":
+                saida[minuto][nome] = valor * s.escala
+            elif s.tipo == "desde_inicio":
+                saida[minuto][nome] = (valor - base) * s.escala
+            elif minuto - 1 in serie and ts[minuto] > ts[minuto - 1]:
+                segundos = (ts[minuto] - ts[minuto - 1]) / 1000
+                saida[minuto][nome] = (valor - serie[minuto - 1]) / segundos * s.escala
+    return saida
+
+
 def deriva_dos_lotes(lotes: Sequence[Linha]) -> List[Dict[str, Any]]:
     """Por tipo de consulta, a média de cada lote periódico contra a hora do lote (ADR-061: a
     média por tipo), e o primeiro lote periódico contra o último."""
@@ -419,6 +543,8 @@ def derivar(saida: str) -> None:
     todas_derivas: List[Dict[str, Any]] = []
     todos_lotes: List[Dict[str, Any]] = []
     bateria: List[Dict[str, Any]] = []
+    internas_horas: List[Dict[str, Any]] = []
+    espaco: List[Dict[str, Any]] = []
     for nome in sorted(os.listdir(raiz)):
         pasta = os.path.join(raiz, nome)
         if not os.path.exists(os.path.join(pasta, "execucao.json")):
@@ -442,6 +568,17 @@ def derivar(saida: str) -> None:
                 bateria.append({**ident, "tipo": linha["tipo"], "media_ms": media,
                                 "curtas_mediana_das_medias_ms": curta,
                                 "razao_longa_curtas": _razao(media, curta)})
+        bruto = str(info.get("diretorio", ""))
+        if info["eixo"] == "c" and os.path.exists(os.path.join(bruto, "resumo.json")):
+            espaco.append({**ident, **espaco_da_execucao(bruto, None)})
+        caminho_internas = os.path.join(pasta, "internas.csv")
+        if os.path.exists(caminho_internas):
+            internos = minutos_internos(ler_execucoes(caminho_internas), len(minutos))
+            caminho = os.path.join(pasta, "internas-minutos.csv")
+            gravar_csv(caminho, internos)
+            relidos = ler_execucoes(caminho)
+            for coluna in [c for c in relidos[0] if c != "minuto"] if relidos else []:
+                internas_horas += [{**ident, **h} for h in horas(relidos, coluna)]
         print(f"{nome}: {len(minutos)} minutos, estado {info['estado']}")
     gravar_csv(os.path.join(saida, "longa-horas.csv"), todas_horas)
     gravar_csv(os.path.join(saida, "longa-deriva.csv"), todas_derivas)
@@ -449,6 +586,10 @@ def derivar(saida: str) -> None:
         gravar_csv(os.path.join(saida, "longa-lotes.csv"), todos_lotes)
     if bateria:
         gravar_csv(os.path.join(saida, "longa-bateria-final.csv"), bateria)
+    if internas_horas:
+        gravar_csv(os.path.join(saida, "longa-internas-horas.csv"), internas_horas)
+    if espaco:
+        gravar_csv(os.path.join(saida, "longa-espaco.csv"), espaco)
 
 
 def _alvos(argumentos: Sequence[str]) -> List[str]:
