@@ -1,0 +1,67 @@
+# Preços da AWS para o custo em nuvem da QS5 (ADR-071, itens 4 e 6).
+#
+# Fonte: as tabelas públicas que as páginas de preços do EC2 e do EBS carregam, baixadas em
+# 20/11/2026 às 05:20 (horário de Brasília), depois do fim da Fase 3.
+#   EC2 sob demanda, Linux, us-east-1 (publicada em 2026-11-20T03:48:50Z):
+#     https://b0.p.awsstatic.com/pricing/2.0/meteredUnitMaps/ec2/USD/current/ec2-ondemand-without-sec-sel/US%20East%20(N.%20Virginia)/Linux/index.json
+#   EBS (publicada em 2026-11-20T00:50:43Z), linha "Storage General Purpose gp3 GB Mo":
+#     https://b0.p.awsstatic.com/pricing/2.0/meteredUnitMaps/ec2/USD/current/ebs.json
+# Conferência em agregadores (não usados no cálculo): RunsOn, DevZero, Economize e DoiT.
+#
+# O gp3 inclui 3000 IOPS e 125 MiB/s por volume; IOPS e vazão provisionadas a mais não entram.
+# A AWS cobra o EBS por GB-mês sobre o tamanho provisionado em GiB.
+
+consultado_em = "2026-11-20"
+regiao = "us-east-1"
+horas_por_mes = 730
+gp3_usd_gib_mes = 0.08
+
+# m8a (uso geral, 4 GiB por vCPU) e r8a (memória, 8 GiB por vCPU), AMD EPYC de 5ª geração.
+
+[[instancia]]
+nome = "m8a.medium"
+vcpu = 1
+memoria_gib = 4
+hora_usd = 0.06086
+
+[[instancia]]
+nome = "m8a.large"
+vcpu = 2
+memoria_gib = 8
+hora_usd = 0.12172
+
+[[instancia]]
+nome = "m8a.xlarge"
+vcpu = 4
+memoria_gib = 16
+hora_usd = 0.24344
+
+[[instancia]]
+nome = "m8a.2xlarge"
+vcpu = 8
+memoria_gib = 32
+hora_usd = 0.48688
+
+[[instancia]]
+nome = "r8a.medium"
+vcpu = 1
+memoria_gib = 8
+hora_usd = 0.07988
+
+[[instancia]]
+nome = "r8a.large"
+vcpu = 2
+memoria_gib = 16
+hora_usd = 0.15976
+
+[[instancia]]
+nome = "r8a.xlarge"
+vcpu = 4
+memoria_gib = 32
+hora_usd = 0.31952
+
+[[instancia]]
+nome = "r8a.2xlarge"
+vcpu = 8
+memoria_gib = 64
+hora_usd = 0.63904

@@ -5,7 +5,7 @@ import csv
 import json
 import os
 import sys
-from typing import Any, Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Sequence, Tuple, cast
 
 from harness.orquestracao import arquitetura
 
@@ -72,6 +72,27 @@ def disco_gravado_bytes(caminho: str) -> Optional[int]:
     return sum(ultimo - primeiro for primeiro, ultimo in series.values())
 
 
+def disco_bytes_por_s(caminho: str, inicio_ms: int, fim_ms: int,
+                      metrica: str = "disco_escrita_bytes_total") -> Optional[float]:
+    """Bytes gravados (ou lidos, com disco_leitura_bytes_total) por segundo no SSD entre
+    inicio_ms e fim_ms, pela primeira e pela última amostra de cada dispositivo dentro do
+    trecho, como em cpu_nucleos."""
+    series: Dict[str, List[Tuple[int, int]]] = {}
+    with open(caminho, encoding="utf-8") as f:
+        for linha in csv.DictReader(f):
+            if linha["metrica"] != metrica:
+                continue
+            ts = int(linha["ts_ms"])
+            if inicio_ms <= ts <= fim_ms:
+                series.setdefault(linha["rotulo"], []).append((ts, int(linha["valor"])))
+    taxas: List[float] = []
+    for serie in series.values():
+        if len(serie) >= 2 and serie[-1][0] > serie[0][0]:
+            (t0, v0), (t1, v1) = serie[0], serie[-1]
+            taxas.append((v1 - v0) / ((t1 - t0) / 1000))
+    return sum(taxas) if taxas else None
+
+
 def instante_do_volume(caminho: str, limite_bytes: float) -> Optional[int]:
     """Primeiro ts_ms em que o volume gravado no SSD, contado desde o início da coleta,
     chega a limite_bytes; None se não chegar."""
@@ -87,6 +108,44 @@ def instante_do_volume(caminho: str, limite_bytes: float) -> Optional[int]:
             if sum(ultimo[r] - inicio[r] for r in ultimo) >= limite_bytes:
                 return int(linha["ts_ms"])
     return None
+
+
+def series_por_rotulo(caminho: str, metricas: Sequence[str], inicio_ms: int,
+                      fim_ms: int) -> Dict[Tuple[str, str], List[Tuple[int, float]]]:
+    """Amostras entre inicio_ms e fim_ms de cada (métrica, rótulo) pedida, em ordem de tempo,
+    de qualquer CSV de métricas do harness (ts_ms, origem, metrica, rotulo, valor)."""
+    series: Dict[Tuple[str, str], List[Tuple[int, float]]] = {}
+    with open(caminho, encoding="utf-8") as f:
+        for linha in csv.DictReader(f):
+            if linha["metrica"] not in metricas:
+                continue
+            ts = int(linha["ts_ms"])
+            if inicio_ms <= ts <= fim_ms:
+                series.setdefault((linha["metrica"], linha["rotulo"]), []).append(
+                    (ts, float(linha["valor"])))
+    for serie in series.values():
+        serie.sort()
+    return series
+
+
+# Linha de um CSV de resumo lido de volta: tudo é texto.
+Linha = Dict[str, str]
+
+
+def ler_execucoes(caminho: str) -> List[Linha]:
+    with open(caminho, encoding="utf-8", newline="") as f:
+        return cast(List[Linha], list(csv.DictReader(f)))
+
+
+def numero(linha: Linha, coluna: str) -> Optional[float]:
+    """Valor numérico de uma coluna de CSV gravado por gravar_csv; vazio vira None e booleano
+    vira 0 ou 1."""
+    texto = linha.get(coluna) or ""
+    if texto in ("", "None"):
+        return None
+    if texto in ("True", "False"):
+        return float(texto == "True")
+    return float(texto)
 
 
 def gravar_csv(caminho: str, linhas: List[Dict[str, Any]]) -> None:
