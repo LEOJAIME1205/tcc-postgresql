@@ -18,6 +18,9 @@ dependencies = [
 ]
 
 [dependency-groups]
+analise = [
+    "matplotlib==3.11.2",
+]
 embeddings = [
     "sentence-transformers==6.1.0",
     "torch==2.14.1",
