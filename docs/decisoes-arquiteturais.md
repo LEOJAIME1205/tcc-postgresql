@@ -74,6 +74,35 @@ O Eixo C consiste precisamente em escrita sustentada por horas. Uma queda de vaz
 4. Bytes gravados em disco por métrica ingerida reportados como resultado, para cada arquitetura.
 5. Caracterização refeita com o disco no estado de ocupação da Fase 3, com `fstrim` e repouso entre a restauração dos volumes e cada execução, com duração do repouso definida pela medição do tempo de recuperação do cache. Adotado em 25/10/2026: **20 minutos**, contados depois de `sync` e `fstrim -v /`. No teste de recuperação, o cache voltou inteiro após 15 minutos de repouso e de forma parcial após 1 e 5 minutos (`ambiente/README.md`). Os 5 minutos adicionais são margem de precaução, porque houve uma única medição por valor de repouso.
 
+**Complemento do item 5 (20/11/2026): caracterização depois da Fase 3.** Aprovado pelo Léo em 20/11/2026, antes da medida.
+- **Contexto.**
+  - A caracterização com o disco no estado da Fase 3 não foi refeita durante a fase.
+  - As análises marcam como acima do cache as execuções com mais de 60 GiB gravados (ADR-067), pelo cache de ~62 GiB medido com o disco 3% ocupado. O cache é dinâmico e encolhe com a ocupação.
+  - Na abertura das janelas das execuções, o disco estava assim:
+
+    | Janela | Ocupação |
+    |---|---|
+    | Curtas do A (11/11) | 16,0% |
+    | Primeira das curtas do B (12/11) | 16,0% |
+    | Segunda das curtas do B (13/11) | 19,6% |
+    | Curtas do C (14/11) | 20,0% |
+    | Mista | 21,7% |
+    | Longa | 24,7% |
+    | Depois da Fase 3 (20/11) | 34,6% |
+  - Várias execuções curtas do B gravaram entre 39 e 47 GiB: a consolidada com 16 e 32 clientes e a *outbox* com 16.
+  - A ocupação da Fase 3 não pode ser reproduzida sem apagar dados do experimento.
+- **Decisão.**
+  1. Repetir só o teste `slc-cliff` de 24/10, com os mesmos parâmetros e agora com a linha de comando registrada: 400 GiB em escrita sequencial, blocos de 1 MiB, fila 32, `io_uring`, `O_DIRECT`, um arquivo em `/var/tmp`, vazão por segundo. Roda com a abertura da janela aplicada, depois de `sync`, `fstrim -v /` e 20 minutos de repouso, com a ocupação e o SMART registrados antes e depois. Resultados em `ambiente/caracterizacao/2026-11-20-pos-fase3/`.
+  2. O cache medido é lido como **limite inferior** do cache durante a Fase 3, porque a ocupação de agora é maior que a de todas as janelas. A leitura supõe que o cache não cresce com a ocupação, que é o comportamento de um cache dinâmico.
+  3. A marcação de 60 GiB das análises não muda. Se o cache medido for menor que 47 GiB, a leitura dos resultados lista as execuções que podem ter passado dele, sem refazer nenhuma análise.
+- **Justificativa.** Fecha a pendência do item 5 com o que ainda pode ser medido, sem trocar o critério depois de ver os dados. Um cache de 47 GiB ou mais a 34,6% basta para concluir que as execuções do B ficaram dentro dele. Um cache menor deixa a questão em aberto, e isso fica declarado.
+- **Efeito sobre a comparação.** Neutro: não muda nenhum número, só a interpretação da marcação. Se a questão ficar em aberto, a incerteza pesa sobre as execuções que gravam mais por nível, no B a consolidada com 16 e 32 clientes e a *outbox* com 16.
+- **Estado.** Aprovado em 20/11/2026 e executado no mesmo dia, das 12:44 às 13:10, com o disco 34,6% ocupado (`ambiente/README.md`).
+  - **Cache:** pelo critério de 25/10, o cache foi de 35,6 GiB. Ele chegou em duas rajadas, com ~48 GiB somando as frações de segundo, separadas por ~4 s quase parados.
+  - **Piso:** o trecho depois do cache caiu para 0,3–0,9 GiB/s, com segundos isolados de 67 MiB/s. Em 24/10 era de 0,5–1,1 GiB/s.
+  - **Marcação:** pelo item 3, como o cache ficou abaixo de 47 GiB, a questão fica em aberto. A leitura dos resultados lista as execuções com 35 a 60 GiB gravados: as curtas de vazão do B consolidado com 16 e 32 clientes, da *outbox* com 16 e a mista consolidada a 1 milhão/s. A marcação de 60 GiB não muda.
+  - **Atribuições:** nenhuma muda. As longas gravaram de 7 a 24 MiB/s na mediana de cada hora, com picos de até 81 MiB/s num minuto, muito abaixo da menor média de 10 s do piso (0,3 GiB/s). O controle não degradou.
+
 ---
 
 ## ADR-005 — Embeddings pré-computados fora do caminho de medição
@@ -2177,3 +2206,5 @@ O que já existe nos brutos:
 | 20/11/2026 | ADR-062: complemento aprovado, antes do cálculo; espaço nativo (hipertabela comprimida contra TSM) por métrica e por linha, razão de compressão do TimescaleDB, carga mais compressão ou compactação, e diretório inteiro do InfluxDB como variante |
 | 20/11/2026 | ADR-048, complemento do item 5, aprovado: qualidade por ramo medida direto nos motores com o código do serviço, com conferência da fusão consulta a consulta |
 | 20/11/2026 | ADR-048, complemento do item 5, executado: ramo léxico com nDCG@10 de 0,027 na consolidada contra 0,292 na poliglota, ramo vetorial igual (0,498), fusão conferida nas 3.452 consultas |
+| 20/11/2026 | ADR-004, complemento do item 5, aprovado: `slc-cliff` repetido depois da Fase 3, com o cache lido como limite inferior do cache durante a fase; marcação de 60 GiB mantida |
+| 20/11/2026 | ADR-004, complemento do item 5, executado: cache de 35,6 GiB pelo critério de 25/10 (~48 GiB em duas rajadas) com o disco 34,6% ocupado; execuções com 35 a 60 GiB ficam declaradas como incertas quanto ao cache |

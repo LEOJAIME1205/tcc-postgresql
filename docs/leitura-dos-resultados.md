@@ -228,6 +228,9 @@ A hipótese de trabalho era que a consolidação é competitiva até um patamar 
 
 - **Limites inferiores:** o TimescaleDB com 8 trabalhadores (gerador como gargalo), a *outbox* com 32 clientes (relay) e a ingênua em todos os níveis (não saturou).
 - **Cache pSLC:** as cargas curtas do TimescaleDB passam dele. A vazão antes desse ponto está registrada.
+  - Medido de novo em 20/11, com o disco 34,6% ocupado, mais que em todas as janelas (16% a 25%), o cache ficou em 35,6 GiB pelo critério de 25/10, ou ~48 GiB somando as rajadas. Esse valor é um limite inferior do cache durante a Fase 3 (ADR-004, complemento do item 5).
+  - Não dá para afirmar se ficaram dentro do cache as execuções com 35 a 60 GiB gravados, que não estão marcadas: as curtas de vazão do B consolidado com 16 e 32 clientes (39 a 43 GiB), da *outbox* com 16 (47 a 48 GiB) e a mista consolidada a 1 milhão/s (47 a 48 GiB).
+  - Nenhuma atribuição ao disco muda, porque as longas gravaram muito abaixo do piso e o controle não degradou.
 - **Configuração de espera:** o intervalo de 100 ms define a latência da consolidada e da *outbox*. Intervalos menores não foram testados.
 - **Ranqueamento léxico:** o resultado do Eixo A vale para as funções de texto nativas do PostgreSQL (`ts_rank_cd`). Extensões com BM25 não foram avaliadas, e isso desfavorece a consolidada no que diz respeito ao que o ecossistema do PostgreSQL oferece.
 - **Compressão na longa:** a longa do C não usou política de compressão (ADR-069). O resultado das 12 h não representa uma instalação com política.
